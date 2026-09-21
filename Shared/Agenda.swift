@@ -49,7 +49,7 @@ enum AgendaDates {
 }
 
 enum AgendaCache {
-    static let group = "group.com.schoren.calendarwidget"
+    static let group = Bundle.main.object(forInfoDictionaryKey: "AgendaAppGroup") as? String ?? "group.com.schoren.calendarwidget"
     static var defaults: UserDefaults { UserDefaults(suiteName: group) ?? .standard }
     static var hiddenIDs: Set<String> {
         get { Set(defaults.stringArray(forKey: "hiddenSources") ?? []) }

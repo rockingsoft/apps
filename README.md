@@ -9,7 +9,20 @@ Abrir `CalendarWidget.xcodeproj` en Xcode. Elegir:
 - **AgendaMac**: ventana y panel en la barra de menú (macOS 14+).
 - **AgendaiOS**: app universal para iPhone/iPad (iOS/iPadOS 17+).
 
-Los targets incluyen sus extensiones WidgetKit, con tamaños pequeño, mediano, grande y extragrande donde el sistema lo admite. En un dispositivo real, seleccionar el mismo equipo de desarrollo en la app y su extensión y configurar el App Group `group.com.schoren.calendarwidget` para ambos. Si se cambia el identificador, actualizar también `AgendaCache.group` y los entitlements. Se necesita firma y provisioning válidos para instalar en dispositivos y validar los widgets del sistema.
+### Instalar el widget en Mac
+
+Compilar sin firma y abrir desde `build/mac` no registra correctamente el widget. Para instalar la app firmada con la extensión:
+
+```sh
+DEVELOPMENT_TEAM=3SRDN9365G ./scripts/install-mac.sh
+open ~/Applications/Agenda.app
+```
+
+Con la app abierta, conceder los permisos si macOS vuelve a solicitarlos por el cambio de firma. Abrir el Centro de notificaciones (clic en la fecha/hora), elegir **Editar widgets**, buscar **Agenda** y agregar **Calendario y recordatorios**. También se puede agregar al escritorio. El widget es una extensión separada: la ventana de la app sirve para permisos, filtros y la agenda completa.
+
+macOS usa el App Group `$(DEVELOPMENT_TEAM).com.schoren.calendarwidget`, que se valida mediante la firma del equipo sin necesitar registrar un grupo iOS. `AgendaAppGroup` en el Info.plist expandido conecta el mismo identificador con la app y su extensión. Ver [documentación de Apple sobre App Groups en macOS](https://developer.apple.com/documentation/xcode/accessing-app-group-containers).
+
+Los targets incluyen sus extensiones WidgetKit, con tamaños pequeño, mediano, grande y extragrande donde el sistema lo admite. En iPhone/iPad reales, seleccionar el mismo equipo de desarrollo en la app y su extensión y configurar el App Group `group.com.schoren.calendarwidget` para ambos. Si se cambia el identificador, actualizar también `AGENDA_APP_GROUP` en la configuración del proyecto. Se necesita firma y provisioning válidos para instalar en dispositivos y validar los widgets del sistema.
 
 Al abrir, pulsar **Permitir acceso a Calendario** y **Permitir acceso a Recordatorios**. Son permisos independientes. Si fueron denegados, habilitarlos en Ajustes del sistema → Privacidad y seguridad. La app consulta las cuentas ya configuradas en Apple Calendar y Reminders; no usa OAuth ni un servidor externo. Agregar el widget desde la galería del sistema después de abrir la app y conceder acceso.
 

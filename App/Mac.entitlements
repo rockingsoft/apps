@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.schoren.calendarwidget</string>
+		<string>$(AGENDA_APP_GROUP)</string>
 	</array>
 	<key>com.apple.security.personal-information.calendars</key>
 	<true/>

@@ -20,6 +20,7 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
       settings = config.build_settings
       settings['PRODUCT_BUNDLE_IDENTIFIER'] = "com.schoren.calendarwidget#{suffix.downcase}#{is_widget ? '.widget' : ''}"
       settings['SWIFT_VERSION'] = '5.0'
+      settings['AGENDA_APP_GROUP'] = platform == :osx ? '$(DEVELOPMENT_TEAM).com.schoren.calendarwidget' : 'group.com.schoren.calendarwidget'
       settings['CODE_SIGN_STYLE'] = 'Automatic'
       settings['GENERATE_INFOPLIST_FILE'] = 'NO'
       settings['INFOPLIST_FILE'] = "#{is_widget ? 'Widget' : 'App'}/Info.plist"
@@ -32,7 +33,7 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
       settings['SKIP_INSTALL'] = 'YES' if is_widget
       settings['LD_RUNPATH_SEARCH_PATHS'] = ['$(inherited)', '@executable_path/Frameworks', '@executable_path/../../Frameworks'] if is_widget
     end
-    entitlements = {'com.apple.security.application-groups' => ['group.com.schoren.calendarwidget']}
+    entitlements = {'com.apple.security.application-groups' => ['$(AGENDA_APP_GROUP)']}
     if platform == :osx
       entitlements['com.apple.security.app-sandbox'] = true
       entitlements['com.apple.security.personal-information.calendars'] = true
@@ -49,7 +50,7 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
   scheme.save_as(project.path, "Agenda#{suffix}", true)
 end
 base = {
- 'CFBundleDevelopmentRegion' => 'es', 'CFBundleDisplayName' => 'Agenda',
+ 'AgendaAppGroup' => '$(AGENDA_APP_GROUP)', 'CFBundleDevelopmentRegion' => 'es', 'CFBundleDisplayName' => 'Agenda',
  'CFBundleExecutable' => '$(EXECUTABLE_NAME)', 'CFBundleIdentifier' => '$(PRODUCT_BUNDLE_IDENTIFIER)',
  'CFBundleInfoDictionaryVersion' => '6.0', 'CFBundleName' => '$(PRODUCT_NAME)',
  'CFBundleShortVersionString' => '$(MARKETING_VERSION)', 'CFBundleVersion' => '$(CURRENT_PROJECT_VERSION)',
