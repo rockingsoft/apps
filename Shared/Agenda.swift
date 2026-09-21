@@ -16,6 +16,18 @@ struct AgendaItem: Codable, Identifiable, Hashable {
     var meetingURL: URL? = nil
     var externalIdentifier: String? = nil
     var color: Color { Color(red: red, green: green, blue: blue) }
+    var isBirthday: Bool {
+        let name = calendarName.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        return name.contains("birthday") || name.contains("cumplean")
+    }
+    var displayTitle: String {
+        guard isBirthday else { return title }
+        let suffixes = ["’s Birthday", "'s Birthday", " Birthday", " (Cumpleaños)"]
+        let name = suffixes.reduce(title) { value, suffix in
+            value.hasSuffix(suffix) ? String(value.dropLast(suffix.count)) : value
+        }
+        return "\(name) (Cumpleaños)"
+    }
     func occurs(on day: Date, calendar: Calendar = .current) -> Bool {
         guard let start else { return false }
         let lower = calendar.startOfDay(for: day)

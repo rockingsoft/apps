@@ -39,6 +39,7 @@ struct WidgetMonthView: View {
     let date: Date
     let items: [AgendaItem]
     var small = false
+    var dark = false
     var selectionKey = "preview"
     private let calendar = Calendar.current
     private func month(_ offset: Int) -> Date {
@@ -81,7 +82,7 @@ struct WidgetMonthView: View {
                             VStack(spacing: 1) {
                                 Text(day.formatted(.dateTime.day()))
                                     .font(.system(size: small ? 10 : 12, weight: today ? .semibold : .regular))
-                                    .foregroundStyle(today ? .white : calendar.isDate(day, equalTo: date, toGranularity: .month) ? Color(white: 0.12) : .gray)
+                                    .foregroundStyle(today ? .white : calendar.isDate(day, equalTo: date, toGranularity: .month) ? (dark ? .white : Color(white: 0.12)) : .gray)
                                     .frame(width: small ? 17 : 20, height: small ? 11 : 16)
                                     .background {
                                         if today { Circle().fill(Color.blue) }
@@ -103,8 +104,9 @@ struct WidgetMonthView: View {
             .frame(height: CGFloat(days.count / 7) * (small ? 15 : 20), alignment: .top)
         }
         .padding(.horizontal, small ? 10 : 16).padding(.vertical, 7)
-        .foregroundStyle(Color(white: 0.12)).background(Color(white: 0.965))
-        .environment(\.colorScheme, .light)
+        .foregroundStyle(dark ? .white : Color(white: 0.12))
+        .background(dark ? Color(white: 0.125) : Color(white: 0.965))
+        .environment(\.colorScheme, dark ? .dark : .light)
     }
 }
 
@@ -117,7 +119,7 @@ struct AgendaWidgetView: View {
                 if family == .systemSmall || !entry.showMonth { agenda }
                 else if family == .systemMedium {
                     HStack(spacing: 0) {
-                        WidgetMonthView(date: entry.selectedDay, items: entry.snapshot.items, small: true, selectionKey: entry.selectionKey)
+                        WidgetMonthView(date: entry.selectedDay, items: entry.snapshot.items, small: true, dark: mediumMonthIsDark, selectionKey: entry.selectionKey)
                             .frame(width: geometry.size.width * 0.51)
                         agenda
                     }
@@ -138,6 +140,13 @@ struct AgendaWidgetView: View {
         }
         .containerBackground(Color(white: 0.125), for: .widget)
         .widgetURL(family == .systemSmall ? calendarURL : nil)
+    }
+    private var mediumMonthIsDark: Bool {
+        #if os(iOS)
+        true
+        #else
+        false
+        #endif
     }
     private var calendarURL: URL { deepLink(host: "calendar", values: ["timestamp": String(entry.selectedDay.timeIntervalSince1970)]) }
     private func deepLink(host: String, values: [String: String]) -> URL {
@@ -189,6 +198,10 @@ struct AgendaWidgetView: View {
                 Text("Sin eventos ni tareas este día").font(.system(size: 13)).foregroundStyle(.gray)
             }
             ForEach(Array(following.prefix(extra))) { item in eventRow(item, primary: false) }
+            if following.count > extra {
+                Label("\(following.count - extra) más", systemImage: "ellipsis")
+                    .font(.system(size: 11, weight: .semibold)).foregroundStyle(.white)
+            }
 
         }.fixedSize(horizontal: false, vertical: true)
     }
@@ -197,11 +210,15 @@ struct AgendaWidgetView: View {
             HStack(alignment: .center, spacing: 10) {
                 Link(destination: item.reminder ? calendarURL : eventURL(item)) {
                     HStack(alignment: .center, spacing: 10) {
-                        RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
+                        if item.isBirthday {
+                            Text("🎁").font(.system(size: primary ? 15 : 13))
+                        } else {
+                            RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
+                        }
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(item.title).font(.system(size: primary ? 14 : 12, weight: .semibold))
+                            Text(item.displayTitle).font(.system(size: primary ? 14 : 12, weight: .semibold))
                                 .foregroundStyle(.white).lineLimit(primary || item.allDay ? 2 : 1)
-                            HStack(spacing: 4) {
+                            if !item.isBirthday { HStack(spacing: 4) {
                                 if item.reminder { Image(systemName: "checklist") }
                                 if item.allDay { Text("Todo el día") }
                                 else if let start = item.start {
@@ -210,7 +227,7 @@ struct AgendaWidgetView: View {
                                     }
                                     Text(start, style: .time)
                                 } else { Text("Sin fecha") }
-                            }.font(.system(size: 11)).foregroundStyle(Color(white: 0.65))
+                            }.font(.system(size: 11)).foregroundStyle(Color(white: 0.65)) }
                         }
                         Spacer(minLength: 0)
                     }.contentShape(Rectangle())
