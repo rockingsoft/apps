@@ -14,23 +14,10 @@ struct AgendaProvider: AppIntentTimelineProvider {
     func snapshot(for configuration: AgendaConfiguration, in context: Context) async -> AgendaEntry {
         configured(AgendaCache.read(), configuration, at: Date())
     }
-    @MainActor
-    private func refreshedSnapshot(for selectedDay: Date) async -> AgendaSnapshot {
-        let service = EventKitService()
-        var snapshot = AgendaCache.read()
-        if service.calendarAllowed || service.remindersAllowed {
-            let days = AgendaDates.monthDays(selectedDay)
-            let loaded = await service.load(from: days[0], to: Calendar.current.date(byAdding: .day, value: 1, to: days.last!)!)
-            let events = service.calendarAllowed && snapshot.calendarAccess == true
-                ? loaded.filter { !$0.reminder } : snapshot.items.filter { !$0.reminder }
-            let reminders = service.remindersAllowed && snapshot.remindersAccess == true
-                ? loaded.filter { $0.reminder } : snapshot.items.filter { $0.reminder }
-            snapshot.items = events + reminders
-        }
-        return snapshot
-    }
     func timeline(for configuration: AgendaConfiguration, in context: Context) async -> Timeline<AgendaEntry> {
-        let snapshot = await refreshedSnapshot(for: configuration.selectedDate(now: Date()))
+        // Interactive navigation must be instant. EventKit refreshes belong to the
+        // host app; every click redraws from its shared snapshot.
+        let snapshot = AgendaCache.read()
         let now = Date()
         // Schedule known event boundaries so “next” and Join advance without
         // waiting for a fresh EventKit query. WidgetKit controls delivery timing.
@@ -60,7 +47,7 @@ struct WidgetMonthView: View {
     }
     var body: some View {
         let days = WidgetAgendaData.monthDays(date)
-        VStack(spacing: small ? 6 : 10) {
+        VStack(spacing: small ? 4 : 6) {
             HStack(spacing: 5) {
                 Text(date.formatted(.dateTime.month(.wide)).capitalized).fontWeight(.bold)
                 if !small { Text(date.formatted(.dateTime.year())).foregroundStyle(.red) }
@@ -95,7 +82,7 @@ struct WidgetMonthView: View {
                                 Text(day.formatted(.dateTime.day()))
                                     .font(.system(size: small ? 10 : 12, weight: today ? .semibold : .regular))
                                     .foregroundStyle(today ? .white : calendar.isDate(day, equalTo: date, toGranularity: .month) ? Color(white: 0.12) : .gray)
-                                    .frame(width: small ? 17 : 21, height: small ? 14 : 18)
+                                    .frame(width: small ? 17 : 20, height: small ? 11 : 16)
                                     .background {
                                         if today { Circle().fill(Color.blue) }
                                         else if calendar.isDate(day, inSameDayAs: date) { Circle().fill(Color.blue.opacity(0.18)) }
@@ -110,11 +97,12 @@ struct WidgetMonthView: View {
                                 .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
                                 .accessibilityAddTraits(calendar.isDate(day, inSameDayAs: date) ? .isSelected : [])
                         }
-                    }.frame(maxHeight: .infinity)
+                    }.frame(height: small ? 15 : 20)
                 }
             }
+            .frame(height: CGFloat(days.count / 7) * (small ? 15 : 20), alignment: .top)
         }
-        .padding(.horizontal, small ? 10 : 16).padding(.vertical, small ? 10 : 12)
+        .padding(.horizontal, small ? 10 : 16).padding(.vertical, 7)
         .foregroundStyle(Color(white: 0.12)).background(Color(white: 0.965))
         .environment(\.colorScheme, .light)
     }
@@ -151,12 +139,13 @@ struct AgendaWidgetView: View {
         .containerBackground(Color(white: 0.125), for: .widget)
         .widgetURL(family == .systemSmall ? calendarURL : nil)
     }
-    private var calendarURL: URL {
-        #if os(macOS)
-        return URL(string: "ical://")!
-        #else
-        return URL(string: "calshow:\(entry.selectedDay.timeIntervalSinceReferenceDate)")!
-        #endif
+    private var calendarURL: URL { deepLink(host: "calendar", values: ["timestamp": String(entry.selectedDay.timeIntervalSince1970)]) }
+    private func deepLink(host: String, values: [String: String]) -> URL {
+        var components = URLComponents()
+        components.scheme = "calendarwidget"
+        components.host = host
+        components.queryItems = values.map { URLQueryItem(name: $0.key, value: $0.value) }
+        return components.url!
     }
     private var dayItems: [AgendaItem] { entry.snapshot.items.filter { $0.occurs(on: entry.selectedDay) } }
     private var nextEvent: AgendaItem? {
@@ -184,11 +173,7 @@ struct AgendaWidgetView: View {
                 }
             }
             Spacer(minLength: 0)
-            if #available(macOS 15, iOS 18, *) {
-                Button(intent: OpenURLIntent(calendarURL)) { calendarLabel }.buttonStyle(.plain)
-            } else {
-                Link(destination: calendarURL) { calendarLabel }.buttonStyle(.plain)
-            }
+            Link(destination: calendarURL) { calendarLabel }.buttonStyle(.plain)
 
         }
         .padding(family == .systemSmall ? 12 : 14)
@@ -210,33 +195,40 @@ struct AgendaWidgetView: View {
     private func eventRow(_ item: AgendaItem, primary: Bool) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .center, spacing: 10) {
-                RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.title).font(.system(size: primary ? 14 : 12, weight: .semibold))
-                        .foregroundStyle(.white).lineLimit(primary || item.allDay ? 2 : 1)
-                    HStack(spacing: 4) {
-                        if item.reminder { Image(systemName: "checklist") }
-                        if item.allDay { Text("Todo el día") }
-                        else if let start = item.start {
-                            if !Calendar.current.isDate(start, inSameDayAs: entry.selectedDay) {
-                                Text(start.formatted(.dateTime.day().month(.abbreviated)))
-                            }
-                            if !item.allDay { Text(start, style: .time) }
-                        } else { Text("Sin fecha") }
-                    }.font(.system(size: 11)).foregroundStyle(Color(white: 0.65))
-                }
-                Spacer(minLength: 0)
+                Link(destination: item.reminder ? calendarURL : eventURL(item)) {
+                    HStack(alignment: .center, spacing: 10) {
+                        RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.title).font(.system(size: primary ? 14 : 12, weight: .semibold))
+                                .foregroundStyle(.white).lineLimit(primary || item.allDay ? 2 : 1)
+                            HStack(spacing: 4) {
+                                if item.reminder { Image(systemName: "checklist") }
+                                if item.allDay { Text("Todo el día") }
+                                else if let start = item.start {
+                                    if !Calendar.current.isDate(start, inSameDayAs: entry.selectedDay) {
+                                        Text(start.formatted(.dateTime.day().month(.abbreviated)))
+                                    }
+                                    Text(start, style: .time)
+                                } else { Text("Sin fecha") }
+                            }.font(.system(size: 11)).foregroundStyle(Color(white: 0.65))
+                        }
+                        Spacer(minLength: 0)
+                    }.contentShape(Rectangle())
+                }.buttonStyle(.plain).accessibilityHint("Abrir en Calendario de Apple")
                 if primary, item.id == WidgetAgendaData.nextEvent(in: entry.snapshot.items, at: entry.date)?.id, family != .systemSmall, let url = item.meetingURL, MeetingLinks.isAllowed(url) {
-                    if #available(macOS 15, iOS 18, *) {
-                        Button(intent: OpenURLIntent(url)) { joinLabel }
-                            .buttonStyle(.plain).accessibilityLabel("Unirse a \(item.title)")
-                    } else {
-                        Link(destination: url) { joinLabel }
-                            .buttonStyle(.plain).accessibilityLabel("Unirse a \(item.title)")
-                    }
+                    Link(destination: deepLink(host: "join", values: ["url": url.absoluteString])) { joinLabel }
+                        .buttonStyle(.plain).accessibilityLabel("Unirse a \(item.title)")
                 }
             }.fixedSize(horizontal: false, vertical: true)
         }
+    }
+    private func eventURL(_ item: AgendaItem) -> URL {
+        deepLink(host: "event", values: [
+            "id": item.externalIdentifier ?? "",
+            "title": item.title,
+            "calendar": item.calendarName,
+            "timestamp": String((item.start ?? entry.selectedDay).timeIntervalSince1970)
+        ])
     }
 
     private var calendarLabel: some View {

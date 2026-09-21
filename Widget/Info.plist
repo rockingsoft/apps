@@ -22,6 +22,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Agenda usa Calendario de Apple para mostrar el evento que elegiste en el widget.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Agenda necesita leer tus calendarios para mostrar tus eventos en la agenda y los widgets.</string>
 	<key>NSExtension</key>

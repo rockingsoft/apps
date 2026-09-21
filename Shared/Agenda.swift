@@ -14,6 +14,7 @@ struct AgendaItem: Codable, Identifiable, Hashable {
     var green: Double
     var blue: Double
     var meetingURL: URL? = nil
+    var externalIdentifier: String? = nil
     var color: Color { Color(red: red, green: green, blue: blue) }
     func occurs(on day: Date, calendar: Calendar = .current) -> Bool {
         guard let start else { return false }

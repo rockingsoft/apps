@@ -45,6 +45,6 @@ final class EventKitService {
     }
     private func item(_ value: EKCalendarItem, start: Date?, end: Date?, allDay: Bool, reminder: Bool) -> AgendaItem {
         let rgb = value.calendar.cgColor?.converted(to: CGColorSpace(name: CGColorSpace.sRGB)!, intent: .defaultIntent, options: nil)?.components ?? [0.4, 0.8, 0.9, 1]
-        return .init(id: reminder ? value.calendarItemIdentifier : "\(value.calendarItemIdentifier)-\(start?.timeIntervalSince1970 ?? 0)", title: value.title ?? "Sin título", start: start, end: end, allDay: allDay, reminder: reminder, calendarID: value.calendar.calendarIdentifier, calendarName: value.calendar.title, red: Double(rgb[0]), green: Double(rgb[1]), blue: Double(rgb[2]), meetingURL: reminder ? nil : MeetingLinks.extract(from: [value.url?.absoluteString, value.location, value.notes].compactMap { $0 }.joined(separator: "\n")))
+        return .init(id: reminder ? value.calendarItemIdentifier : "\(value.calendarItemIdentifier)-\(start?.timeIntervalSince1970 ?? 0)", title: value.title ?? "Sin título", start: start, end: end, allDay: allDay, reminder: reminder, calendarID: value.calendar.calendarIdentifier, calendarName: value.calendar.title, red: Double(rgb[0]), green: Double(rgb[1]), blue: Double(rgb[2]), meetingURL: reminder ? nil : MeetingLinks.extract(from: [value.url?.absoluteString, value.location, value.notes].compactMap { $0 }.joined(separator: "\n")), externalIdentifier: reminder ? nil : value.calendarItemExternalIdentifier)
     }
 }

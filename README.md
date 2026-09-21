@@ -88,3 +88,7 @@ Tocar una celda del mes ejecuta `SelectWidgetDay` en segundo plano y muestra ún
 El botón Unirse solo se muestra si el evento del día seleccionado también es el próximo evento elegible; no aparece para reuniones pasadas. Los recordatorios sin fecha se mantienen en la app completa.
 
 En macOS 15+/iOS 18+, Unirse y Abrir Calendario usan OpenURLIntent. Los widgets medianos/grandes no tienen una URL general que intercepte sus controles; en versiones anteriores usan enlaces individuales. La apertura de reuniones se mantiene bajo una acción explícita del usuario.
+
+Las acciones externas pasan por el esquema local `calendarwidget://` para evitar que la URL general del widget intercepte controles internos. Unirse valida nuevamente el host y abre Zoom/Meet. Cada fila de evento abre Calendario de Apple; en macOS busca el UID con la interfaz de automatización de Calendar y muestra el evento exacto. macOS puede pedir permiso de Automatización la primera vez. En iOS, donde Apple no publica una navegación a un evento por identificador, abre Calendar en la fecha del evento. Las tareas abren Calendar en la fecha seleccionada.
+
+La navegación mensual lee exclusivamente la instantánea del App Group. No consulta EventKit al tocar una fecha o flecha. La app principal publica la actualización y el widget la reutiliza, evitando la espera de CalendarAgent en cada interacción. Las grillas de cuatro, cinco y seis semanas usan alturas explícitas para mantener filas uniformes.

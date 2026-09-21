@@ -25,8 +25,8 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
       settings['GENERATE_INFOPLIST_FILE'] = 'NO'
       settings['INFOPLIST_FILE'] = "#{is_widget ? 'Widget' : 'App'}/Info.plist"
       settings['CODE_SIGN_ENTITLEMENTS'] = "#{is_widget ? 'Widget' : 'App'}/#{suffix}.entitlements"
-      settings['CURRENT_PROJECT_VERSION'] = '6'
-      settings['MARKETING_VERSION'] = '0.4.0'
+      settings['CURRENT_PROJECT_VERSION'] = '7'
+      settings['MARKETING_VERSION'] = '0.5.0'
       settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'YES'
       settings['TARGETED_DEVICE_FAMILY'] = '1,2' if platform == :ios
       settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES' if is_widget
@@ -37,6 +37,7 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
     if platform == :osx
       entitlements['com.apple.security.app-sandbox'] = true
       entitlements['com.apple.security.personal-information.calendars'] = true
+      entitlements['com.apple.security.temporary-exception.apple-events'] = ['com.apple.iCal'] unless is_widget
     end
     Xcodeproj::Plist.write_to_path(entitlements, "#{is_widget ? 'Widget' : 'App'}/#{suffix}.entitlements")
   end
@@ -55,7 +56,8 @@ base = {
  'CFBundleInfoDictionaryVersion' => '6.0', 'CFBundleName' => '$(PRODUCT_NAME)',
  'CFBundleShortVersionString' => '$(MARKETING_VERSION)', 'CFBundleVersion' => '$(CURRENT_PROJECT_VERSION)',
  'NSCalendarsFullAccessUsageDescription' => 'Agenda necesita leer tus calendarios para mostrar tus eventos en la agenda y los widgets.',
- 'NSRemindersFullAccessUsageDescription' => 'Agenda necesita leer tus recordatorios y guardar los que marques como completados.'
+ 'NSRemindersFullAccessUsageDescription' => 'Agenda necesita leer tus recordatorios y guardar los que marques como completados.',
+ 'NSAppleEventsUsageDescription' => 'Agenda usa Calendario de Apple para mostrar el evento que elegiste en el widget.'
 }
 Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'APPL', 'LSMinimumSystemVersion' => '$(MACOSX_DEPLOYMENT_TARGET)', 'UILaunchScreen' => {}, 'UISupportedInterfaceOrientations' => ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationLandscapeLeft', 'UIInterfaceOrientationLandscapeRight'], 'CFBundleURLTypes' => [{'CFBundleURLName' => 'Agenda', 'CFBundleURLSchemes' => ['calendarwidget']}]), 'App/Info.plist')
 Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'XPC!', 'NSExtension' => {'NSExtensionPointIdentifier' => 'com.apple.widgetkit-extension'}), 'Widget/Info.plist')

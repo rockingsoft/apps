@@ -62,6 +62,10 @@ struct AgendaDatesTests {
         future.meetingURL = nil
         precondition(WidgetAgendaData.nextEvent(in: [event, future], at: date(2026, 9, 15, 12)) == event)
         precondition(WidgetAgendaData.nextEvent(in: [event, future], at: date(2026, 9, 15, 13)) == future)
+        let oldItem = """
+        {"id":"old","title":"Old","allDay":false,"reminder":false,"calendarID":"a","calendarName":"A","red":1,"green":0,"blue":0}
+        """
+        precondition(try! JSONDecoder().decode(AgendaItem.self, from: Data(oldItem.utf8)).externalIdentifier == nil)
         print("PASS: dates, snapshots, widget filters, next event selection, Zoom/Meet links and host validation")
     }
 }
