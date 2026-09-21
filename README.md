@@ -36,7 +36,7 @@ Al abrir, pulsar **Permitir acceso a Calendario** y **Permitir acceso a Recordat
 - Recordatorios pendientes con fecha, vencidos y sin fecha.
 - Completar recordatorios desde la app (escribe en Apple Reminders).
 - Actualización al activar la app, cambiar el mes o recibir `EKEventStoreChanged`.
-- Los widgets leen EventKit cuando tienen autorización y usan una instantánea local compartida como respaldo. Solicitan actualización cada 30 minutos; Apple decide cuándo ejecutarla.
+- La app publica la instantánea compartida junto con los permisos de cada fuente. Los widgets leen EventKit cuando tienen autorización y conservan las fuentes de la instantánea para las que la extensión no tiene acceso. La extensión nunca sobrescribe la instantánea de la app. Sin permisos muestran una indicación para conectarlos, en lugar de una agenda vacía. Solicitan actualización cada 30 minutos; Apple decide cuándo ejecutarla.
 
 El acceso a calendarios es de lectura en esta implementación. EventKit requiere el permiso denominado “acceso completo” para leerlos. Los eventos no se modifican. Completar un recordatorio sí modifica el original.
 

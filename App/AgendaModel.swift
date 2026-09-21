@@ -48,7 +48,7 @@ final class AgendaModel: ObservableObject {
         publish()
     }
     private func publish() {
-        AgendaCache.save(.init(updated: Date(), items: visible))
+        AgendaCache.save(.init(updated: Date(), items: visible, calendarAccess: calendarAllowed, remindersAccess: remindersAllowed))
         WidgetCenter.shared.reloadAllTimelines()
     }
     func move(_ offset: Int) {

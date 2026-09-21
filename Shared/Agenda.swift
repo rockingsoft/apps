@@ -31,6 +31,8 @@ struct CalendarSource: Identifiable, Hashable {
 struct AgendaSnapshot: Codable {
     var updated: Date
     var items: [AgendaItem]
+    var calendarAccess: Bool? = nil
+    var remindersAccess: Bool? = nil
     static let empty = AgendaSnapshot(updated: .distantPast, items: [])
 }
 

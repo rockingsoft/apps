@@ -30,6 +30,11 @@ struct AgendaDatesTests {
         precondition(!reminder.occurs(on: date(2026, 9, 15), calendar: calendar))
         let encoded = try! JSONEncoder().encode(item)
         precondition(try! JSONDecoder().decode(AgendaItem.self, from: encoded) == item)
+        let snapshot = AgendaSnapshot(updated: Date(), items: [item], calendarAccess: true, remindersAccess: false)
+        let decoded = try! JSONDecoder().decode(AgendaSnapshot.self, from: JSONEncoder().encode(snapshot))
+        precondition(decoded.calendarAccess == true && decoded.remindersAccess == false)
+        let legacy = try! JSONDecoder().decode(AgendaSnapshot.self, from: Data("{\"updated\":0,\"items\":[]}".utf8))
+        precondition(legacy.calendarAccess == nil && legacy.remindersAccess == nil)
         print("PASS: month boundaries, leap year, multi-day exclusivity, reminders, snapshot round-trip")
     }
 }
