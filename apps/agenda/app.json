@@ -1,0 +1,6 @@
+{
+  "id": "agenda",
+  "name": "Agenda",
+  "description": "Calendario y recordatorios con widgets nativos",
+  "platforms": ["macOS", "iOS", "iPadOS"]
+}
