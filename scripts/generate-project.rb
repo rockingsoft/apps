@@ -57,6 +57,7 @@ base = {
  'CFBundleExecutable' => '$(EXECUTABLE_NAME)', 'CFBundleIdentifier' => '$(PRODUCT_BUNDLE_IDENTIFIER)',
  'CFBundleInfoDictionaryVersion' => '6.0', 'CFBundleName' => '$(PRODUCT_NAME)',
  'CFBundleShortVersionString' => '$(MARKETING_VERSION)', 'CFBundleVersion' => '$(CURRENT_PROJECT_VERSION)',
+ 'ITSAppUsesNonExemptEncryption' => false,
  'NSCalendarsFullAccessUsageDescription' => 'Agenda necesita leer tus calendarios para mostrar tus eventos en la agenda y los widgets.',
  'NSRemindersFullAccessUsageDescription' => 'Agenda necesita leer tus recordatorios y guardar los que marques como completados.',
  'NSAppleEventsUsageDescription' => 'Agenda usa Calendario de Apple para mostrar el evento que elegiste en el widget.'
