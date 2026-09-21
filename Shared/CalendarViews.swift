@@ -19,7 +19,7 @@ struct MonthView: View {
                     Button { move(1) } label: { Image(systemName: "chevron.right").font(.system(size: 14, weight: .semibold)).frame(width: 24, height: 28) }.accessibilityLabel("Mes siguiente")
                 }
             }
-            .font(.system(size: compact ? 18 : 27)).buttonStyle(.plain)
+            .font(.system(size: compact ? 18 : 27)).lineLimit(1).minimumScaleFactor(0.75).buttonStyle(.plain)
             HStack(spacing: 0) {
                 ForEach(0..<7) { offset in
                     let index = (calendar.firstWeekday - 1 + offset) % 7
@@ -27,7 +27,7 @@ struct MonthView: View {
                         .font(.system(size: 10, weight: .medium)).foregroundStyle(.secondary).frame(maxWidth: .infinity)
                 }
             }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: compact ? 2 : 4) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: compact ? 0 : 4) {
                 ForEach(AgendaDates.monthDays(month), id: \.self) { day in
                     if let select {
                         Button { select(day) } label: { cell(day) }.buttonStyle(.plain)
@@ -36,7 +36,7 @@ struct MonthView: View {
                 }
             }
         }
-        .padding(compact ? 12 : 16)
+        .padding(compact ? 8 : 16)
         .foregroundStyle(Color(white: 0.12)).background(Color(white: 0.965))
         .environment(\.colorScheme, .light)
     }
@@ -48,13 +48,13 @@ struct MonthView: View {
         return VStack(spacing: 1) {
             Text(day.formatted(.dateTime.day())).font(.system(size: compact ? 11 : 12, weight: today ? .bold : .regular))
                 .foregroundStyle(today ? .white : inMonth ? Color(white: 0.12) : .gray)
-                .frame(width: compact ? 19 : 23, height: compact ? 17 : 21)
+                .frame(width: compact ? 19 : 23, height: compact ? 13 : 21)
                 .background { if today { Circle().fill(.cyan) } }
             HStack(spacing: 2) {
                 ForEach(Array(entries.prefix(4).enumerated()), id: \.offset) { _, item in Circle().fill(item.color).frame(width: 3, height: 3) }
-            }.frame(height: 3)
+            }.frame(height: compact ? 2 : 3)
         }
-        .frame(maxWidth: .infinity).padding(.vertical, 1)
+        .frame(maxWidth: .infinity).padding(.vertical, compact ? 0 : 1)
         .background(active && !today ? Color.black.opacity(0.07) : .clear, in: RoundedRectangle(cornerRadius: 4))
     }
 }
