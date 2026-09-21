@@ -3,45 +3,26 @@ import SwiftUI
 import AppKit
 
 final class AgendaAppDelegate: NSObject, NSApplicationDelegate {
-    private var pendingURLs: [URL] = []
-    var openURL: ((URL) -> Void)? {
-        didSet { drainPendingURLs() }
-    }
+    @MainActor let model = AgendaModel()
 
     func application(_ application: NSApplication, open urls: [URL]) {
-        pendingURLs.append(contentsOf: urls)
-        drainPendingURLs()
-    }
-
-    private func drainPendingURLs() {
-        guard let openURL else { return }
-        let urls = pendingURLs
-        pendingURLs.removeAll()
-        urls.forEach(openURL)
+        Task { @MainActor in urls.forEach(model.open) }
     }
 }
 #endif
 
 @main
 struct CalendarWidgetApp: App {
-    @StateObject private var model = AgendaModel()
     #if os(macOS)
     @NSApplicationDelegateAdaptor(AgendaAppDelegate.self) private var appDelegate
+    private var model: AgendaModel { appDelegate.model }
+    #else
+    @StateObject private var model = AgendaModel()
     #endif
     var body: some Scene {
         #if os(macOS)
-        WindowGroup {
-            ContentView().environmentObject(model)
-                .onAppear { appDelegate.openURL = model.open }
-                .onOpenURL(perform: model.open)
-                .frame(minWidth: 320, idealWidth: 340, maxWidth: 500, minHeight: 540, idealHeight: 820)
-        }
-        .defaultSize(width: 340, height: 820)
-        .windowResizability(.contentSize)
-        .windowStyle(.hiddenTitleBar)
         MenuBarExtra("Agenda", systemImage: "calendar") {
             ContentView().environmentObject(model)
-                .onAppear { appDelegate.openURL = model.open }
                 .frame(width: 340, height: 820)
         }.menuBarExtraStyle(.window)
         #else

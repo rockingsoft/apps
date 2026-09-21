@@ -35,7 +35,7 @@ Al abrir, pulsar **Permitir acceso a Calendario** y **Permitir acceso a Recordat
 - Filtro de calendarios/listas en la app y configuración independiente por widget.
 - Clic derecho → Editar widget: todos los calendarios o una selección, mostrar tareas, eventos de todo el día y mes.
 - El selector incluye calendarios sin eventos, a partir de las fuentes publicadas por la app.
-- Botón Abrir Calendario: abre Calendario de Apple (ical:// en macOS; calshow con la fecha seleccionada en iOS).
+- Botón Abrir Calendario: abre Calendario de Apple en macOS y en la fecha seleccionada en iOS.
 - Unirse al próximo evento visible con enlace HTTPS reconocido de Zoom/Meet en URL, ubicación o notas (widgets medianos, grandes y extragrandes). El pequeño abre Agenda.
 - Los eventos de todo el día tienen filas propias con título, color y etiqueta Todo el día. No se fusionan ni reducen a una nota al pie.
 - Mes con las semanas necesarias (4, 5 o 6), sin una sexta fila vacía permanente.
@@ -83,12 +83,10 @@ Validación adicional: selección de calendarios/tareas, meses de cinco y seis s
 
 ## Navegación dentro del widget
 
-Tocar una celda del mes ejecuta `SelectWidgetDay` en segundo plano y muestra únicamente los eventos y las tareas con fecha de ese día, incluyendo eventos de varios días. Se puede volver con Hoy. La selección se conserva en el App Group y se separa por configuración de calendarios y opciones; dos widgets con exactamente la misma configuración comparten la fecha seleccionada. Las flechas del encabezado navegan por meses y Hoy regresa al actual. Abrir Calendario abre la app de Apple; en macOS no fuerza una fecha específica. El tamaño pequeño y el modo sin mes no muestran la grilla de selección.
+Tocar una celda del mes ejecuta `SelectWidgetDay` en segundo plano y muestra únicamente los eventos y las tareas con fecha de ese día, incluyendo eventos de varios días. Se puede volver con Hoy. La selección se conserva en el App Group y se separa por configuración de calendarios y opciones; dos widgets con exactamente la misma configuración comparten la fecha seleccionada. Las flechas del encabezado navegan por meses y Hoy regresa al actual. El tamaño pequeño y el modo sin mes no muestran la grilla de selección.
 
 El botón Unirse solo se muestra si el evento del día seleccionado también es el próximo evento elegible; no aparece para reuniones pasadas. Los recordatorios sin fecha se mantienen en la app completa.
 
-En macOS 15+/iOS 18+, Unirse y Abrir Calendario usan OpenURLIntent. Los widgets medianos/grandes no tienen una URL general que intercepte sus controles; en versiones anteriores usan enlaces individuales. La apertura de reuniones se mantiene bajo una acción explícita del usuario.
-
-Las acciones externas pasan por el esquema local `calendarwidget://` para evitar que la URL general del widget intercepte controles internos. Unirse valida nuevamente el host y abre Zoom/Meet. Cada fila de evento abre Calendario de Apple; en macOS busca el UID con la interfaz de automatización de Calendar y muestra el evento exacto. macOS puede pedir permiso de Automatización la primera vez. En iOS, donde Apple no publica una navegación a un evento por identificador, abre Calendar en la fecha del evento. Las tareas abren Calendar en la fecha seleccionada.
+Las acciones externas pasan por el esquema local `calendarwidget://` para evitar que la URL general del widget intercepte controles internos. En macOS, Agenda funciona como agente de barra de menú y procesa el enlace en segundo plano, sin mostrar su ventana. Unirse valida nuevamente el host y abre Zoom/Meet. Cada fila de evento abre Calendario de Apple; en macOS busca el UID con la interfaz de automatización de Calendar y muestra el evento exacto. macOS puede pedir permiso de Automatización la primera vez. En iOS abre Calendar en la fecha del evento. Las tareas abren Calendar en la fecha seleccionada.
 
 La navegación mensual lee exclusivamente la instantánea del App Group. No consulta EventKit al tocar una fecha o flecha. La app principal publica la actualización y el widget la reutiliza, evitando la espera de CalendarAgent en cada interacción. Las grillas de cuatro, cinco y seis semanas usan alturas explícitas para mantener filas uniformes.

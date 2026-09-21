@@ -59,6 +59,6 @@ base = {
  'NSRemindersFullAccessUsageDescription' => 'Agenda necesita leer tus recordatorios y guardar los que marques como completados.',
  'NSAppleEventsUsageDescription' => 'Agenda usa Calendario de Apple para mostrar el evento que elegiste en el widget.'
 }
-Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'APPL', 'LSMinimumSystemVersion' => '$(MACOSX_DEPLOYMENT_TARGET)', 'UILaunchScreen' => {}, 'UISupportedInterfaceOrientations' => ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationLandscapeLeft', 'UIInterfaceOrientationLandscapeRight'], 'CFBundleURLTypes' => [{'CFBundleURLName' => 'Agenda', 'CFBundleURLSchemes' => ['calendarwidget']}]), 'App/Info.plist')
+Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'APPL', 'LSUIElement' => true, 'LSMinimumSystemVersion' => '$(MACOSX_DEPLOYMENT_TARGET)', 'UILaunchScreen' => {}, 'UISupportedInterfaceOrientations' => ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationLandscapeLeft', 'UIInterfaceOrientationLandscapeRight'], 'CFBundleURLTypes' => [{'CFBundleURLName' => 'Agenda', 'CFBundleURLSchemes' => ['calendarwidget']}]), 'App/Info.plist')
 Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'XPC!', 'NSExtension' => {'NSExtensionPointIdentifier' => 'com.apple.widgetkit-extension'}), 'Widget/Info.plist')
 project.save
