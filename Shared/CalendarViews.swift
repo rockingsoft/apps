@@ -27,10 +27,14 @@ struct MonthView: View {
                         .font(.system(size: 10, weight: .medium)).foregroundStyle(.secondary).frame(maxWidth: .infinity)
                 }
             }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: compact ? 0 : 4) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 0) {
                 ForEach(AgendaDates.monthDays(month), id: \.self) { day in
                     if let select {
-                        Button { select(day) } label: { cell(day) }.buttonStyle(.plain)
+                        Button { select(day) } label: {
+                            cell(day)
+                                .padding(.vertical, compact ? 0 : 2)
+                                .contentShape(Rectangle())
+                        }.buttonStyle(.plain)
                             .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
                     } else { cell(day) }
                 }
