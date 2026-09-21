@@ -25,8 +25,8 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
       settings['GENERATE_INFOPLIST_FILE'] = 'NO'
       settings['INFOPLIST_FILE'] = "#{is_widget ? 'Widget' : 'App'}/Info.plist"
       settings['CODE_SIGN_ENTITLEMENTS'] = "#{is_widget ? 'Widget' : 'App'}/#{suffix}.entitlements"
-      settings['CURRENT_PROJECT_VERSION'] = '3'
-      settings['MARKETING_VERSION'] = '0.2.1'
+      settings['CURRENT_PROJECT_VERSION'] = '4'
+      settings['MARKETING_VERSION'] = '0.3.0'
       settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'YES'
       settings['TARGETED_DEVICE_FAMILY'] = '1,2' if platform == :ios
       settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES' if is_widget

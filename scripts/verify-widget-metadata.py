@@ -23,4 +23,9 @@ for bundle in (app, extension):
     parameters = {parameter['name'] for parameter in action['parameters']}
     if not required.issubset(parameters):
         raise SystemExit(f'Missing configuration parameters: {bundle}')
+    select = metadata.get('actions', {}).get('SelectWidgetDay')
+    if not select or select.get('openAppWhenRun'):
+        raise SystemExit(f'Missing background date selection intent: {bundle}')
+    if not {'timestamp', 'selectionKey'}.issubset({p['name'] for p in select['parameters']}):
+        raise SystemExit(f'Missing date selection parameters: {bundle}')
     print(f'PASS: {bundle.name} exposes AgendaConfiguration and all widget options')

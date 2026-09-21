@@ -55,5 +55,12 @@ final class AgendaModel: ObservableObject {
         month = Calendar.current.date(byAdding: .month, value: offset, to: month)!
         selected = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: month))!
     }
+    func open(_ url: URL) {
+        if url.host == "day", let value = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "timestamp" })?.value, let timestamp = Double(value), timestamp.isFinite {
+            let day = Date(timeIntervalSince1970: timestamp)
+            month = day
+            selected = Calendar.current.startOfDay(for: day)
+        } else { today() }
+    }
     func today() { month = Date(); selected = Calendar.current.startOfDay(for: Date()) }
 }

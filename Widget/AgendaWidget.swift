@@ -6,6 +6,8 @@ struct AgendaEntry: TimelineEntry {
     let date: Date
     let snapshot: AgendaSnapshot
     var showMonth = true
+    var selectedDay: Date = Date()
+    var selectionKey = "preview"
 }
 struct AgendaProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> AgendaEntry { .init(date: Date(), snapshot: .empty) }
@@ -13,11 +15,11 @@ struct AgendaProvider: AppIntentTimelineProvider {
         configured(AgendaCache.read(), configuration, at: Date())
     }
     @MainActor
-    private func refreshedSnapshot() async -> AgendaSnapshot {
+    private func refreshedSnapshot(for selectedDay: Date) async -> AgendaSnapshot {
         let service = EventKitService()
         var snapshot = AgendaCache.read()
         if service.calendarAllowed || service.remindersAllowed {
-            let days = AgendaDates.monthDays(Date())
+            let days = AgendaDates.monthDays(selectedDay)
             let loaded = await service.load(from: days[0], to: Calendar.current.date(byAdding: .day, value: 1, to: days.last!)!)
             let events = service.calendarAllowed && snapshot.calendarAccess == true
                 ? loaded.filter { !$0.reminder } : snapshot.items.filter { !$0.reminder }
@@ -28,7 +30,7 @@ struct AgendaProvider: AppIntentTimelineProvider {
         return snapshot
     }
     func timeline(for configuration: AgendaConfiguration, in context: Context) async -> Timeline<AgendaEntry> {
-        let snapshot = await refreshedSnapshot()
+        let snapshot = await refreshedSnapshot(for: configuration.selectedDate(now: Date()))
         let now = Date()
         // Schedule known event boundaries so “next” and Join advance without
         // waiting for a fresh EventKit query. WidgetKit controls delivery timing.
@@ -43,13 +45,14 @@ struct AgendaProvider: AppIntentTimelineProvider {
         var result = snapshot
         let ids: Set<String>? = configuration.allCalendars ? nil : Set((configuration.calendars ?? []).map(\.id))
         result.items = WidgetAgendaData.filtered(snapshot.items, calendarIDs: ids, showTasks: configuration.showTasks, showAllDay: configuration.showAllDay)
-        return .init(date: date, snapshot: result, showMonth: configuration.showMonth)
+        return .init(date: date, snapshot: result, showMonth: configuration.showMonth, selectedDay: configuration.selectedDate(now: date), selectionKey: configuration.selectionKey)
     }
 }
 struct WidgetMonthView: View {
     let date: Date
     let items: [AgendaItem]
     var small = false
+    var selectionKey = "preview"
     private let calendar = Calendar.current
     var body: some View {
         let days = WidgetAgendaData.monthDays(date)
@@ -58,6 +61,10 @@ struct WidgetMonthView: View {
                 Text(date.formatted(.dateTime.month(.wide)).capitalized).fontWeight(.bold)
                 Text(date.formatted(.dateTime.year())).foregroundStyle(.red)
                 Spacer(minLength: 0)
+                Button(intent: SelectWidgetDay(date: nil, key: selectionKey)) {
+                    Text("Hoy").font(.system(size: 10, weight: .medium)).foregroundStyle(.blue)
+                        .padding(4).contentShape(Rectangle())
+                }.buttonStyle(.plain)
             }.font(.system(size: small ? 16 : 22)).lineLimit(1).minimumScaleFactor(0.75)
             HStack(spacing: 0) {
                 ForEach(0..<7) { offset in
@@ -71,18 +78,25 @@ struct WidgetMonthView: View {
                         ForEach(0..<7) { weekday in
                             let day = days[week * 7 + weekday]
                             let today = calendar.isDateInToday(day)
+                            Button(intent: SelectWidgetDay(date: day, key: selectionKey)) {
                             VStack(spacing: 1) {
                                 Text(day.formatted(.dateTime.day()))
                                     .font(.system(size: small ? 10 : 12, weight: today ? .semibold : .regular))
                                     .foregroundStyle(today ? .white : calendar.isDate(day, equalTo: date, toGranularity: .month) ? Color(white: 0.12) : .gray)
                                     .frame(width: small ? 17 : 21, height: small ? 14 : 18)
-                                    .background { if today { Circle().fill(Color.blue) } }
+                                    .background {
+                                        if today { Circle().fill(Color.blue) }
+                                        else if calendar.isDate(day, inSameDayAs: date) { Circle().fill(Color.blue.opacity(0.18)) }
+                                    }
                                 HStack(spacing: 2) {
                                     ForEach(Array(items.filter { $0.occurs(on: day) }.prefix(4).enumerated()), id: \.offset) { _, item in
                                         Circle().fill(item.color).frame(width: 3, height: 3)
                                     }
                                 }.frame(height: 3)
-                            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                            }.frame(maxWidth: .infinity, maxHeight: .infinity).contentShape(Rectangle())
+                            }.buttonStyle(.plain)
+                                .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
+                                .accessibilityAddTraits(calendar.isDate(day, inSameDayAs: date) ? .isSelected : [])
                         }
                     }.frame(maxHeight: .infinity)
                 }
@@ -103,19 +117,19 @@ struct AgendaWidgetView: View {
                 if family == .systemSmall || !entry.showMonth { agenda }
                 else if family == .systemMedium {
                     HStack(spacing: 0) {
-                        WidgetMonthView(date: entry.date, items: entry.snapshot.items, small: true)
+                        WidgetMonthView(date: entry.selectedDay, items: entry.snapshot.items, small: true, selectionKey: entry.selectionKey)
                             .frame(width: geometry.size.width * 0.51)
                         agenda
                     }
                 } else if family == .systemExtraLarge {
                     HStack(spacing: 0) {
-                        WidgetMonthView(date: entry.date, items: entry.snapshot.items)
+                        WidgetMonthView(date: entry.selectedDay, items: entry.snapshot.items, selectionKey: entry.selectionKey)
                             .frame(width: geometry.size.width * 0.48)
                         agenda
                     }
                 } else {
                     VStack(spacing: 0) {
-                        WidgetMonthView(date: entry.date, items: entry.snapshot.items)
+                        WidgetMonthView(date: entry.selectedDay, items: entry.snapshot.items, selectionKey: entry.selectionKey)
                             .frame(height: geometry.size.height * 0.53)
                         agenda
                     }
@@ -123,19 +137,22 @@ struct AgendaWidgetView: View {
             }
         }
         .containerBackground(Color(white: 0.125), for: .widget)
-        .widgetURL(URL(string: "calendarwidget://today"))
+        .widgetURL(dayURL)
     }
-    private var nextEvent: AgendaItem? { WidgetAgendaData.nextEvent(in: entry.snapshot.items, at: entry.date) }
+    private var dayURL: URL { URL(string: "calendarwidget://day?timestamp=\(entry.selectedDay.timeIntervalSince1970)")! }
+    private var dayItems: [AgendaItem] { entry.snapshot.items.filter { $0.occurs(on: entry.selectedDay) } }
+    private var nextEvent: AgendaItem? {
+        let events = dayItems.filter { !$0.reminder && !$0.allDay }.sorted { $0.start! < $1.start! }
+        if Calendar.current.isDate(entry.selectedDay, inSameDayAs: entry.date) {
+            return WidgetAgendaData.nextEvent(in: events, at: entry.date) ?? events.first
+        }
+        return events.first
+    }
     private var following: [AgendaItem] {
-        entry.snapshot.items.filter { item in
-            guard item.id != nextEvent?.id else { return false }
-            if item.reminder { return item.start == nil || item.start! >= Calendar.current.startOfDay(for: entry.date) }
-            return !item.allDay && (item.end ?? item.start ?? .distantPast) > entry.date
-        }.sorted { ($0.start ?? .distantFuture) < ($1.start ?? .distantFuture) }
+        dayItems.filter { $0.id != nextEvent?.id && ($0.reminder || !$0.allDay) }
+            .sorted { ($0.start ?? .distantFuture) < ($1.start ?? .distantFuture) }
     }
-    private var allDayItems: [AgendaItem] {
-        entry.snapshot.items.filter { !$0.reminder && $0.allDay && $0.occurs(on: entry.date) }
-    }
+    private var allDayItems: [AgendaItem] { dayItems.filter { !$0.reminder && $0.allDay } }
     private var agenda: some View {
         VStack(alignment: .leading, spacing: 10) {
             if entry.snapshot.calendarAccess != true && entry.snapshot.remindersAccess != true {
@@ -150,9 +167,9 @@ struct AgendaWidgetView: View {
                 }
             }
             Spacer(minLength: 0)
-            Link(destination: URL(string: "calendarwidget://today")!) {
+            Link(destination: dayURL) {
                 HStack {
-                    Text("Abrir agenda")
+                    Text(dayItems.isEmpty ? "Abrir agenda" : "Ver agenda del día (\(dayItems.count))")
                     Spacer()
                     Image(systemName: "arrow.up.right")
                 }.font(.system(size: 11, weight: .medium)).foregroundStyle(Color(white: 0.72))
@@ -163,12 +180,12 @@ struct AgendaWidgetView: View {
         .background(Color(white: 0.125))
     }
     private func agendaContent(extra: Int) -> some View {
-        VStack(alignment: .leading, spacing: 11) {
+        VStack(alignment: .leading, spacing: 8) {
+            DayHeading(date: entry.selectedDay)
             if let event = nextEvent {
                 eventRow(event, primary: true)
-            } else if following.isEmpty {
-                DayHeading(date: entry.date)
-                Text("Sin próximos eventos").font(.system(size: 13)).foregroundStyle(.gray)
+            } else if dayItems.isEmpty {
+                Text("Sin eventos ni tareas este día").font(.system(size: 13)).foregroundStyle(.gray)
             }
             ForEach(Array(following.prefix(extra))) { item in eventRow(item, primary: false) }
             if !allDayItems.isEmpty && (extra > 0 || nextEvent == nil) {
@@ -181,10 +198,6 @@ struct AgendaWidgetView: View {
     }
     private func eventRow(_ item: AgendaItem, primary: Bool) -> some View {
         VStack(alignment: .leading, spacing: 5) {
-            if primary {
-                Text(item.start! <= entry.date ? "EN CURSO" : "PRÓXIMO EVENTO")
-                    .font(.system(size: 9, weight: .bold)).tracking(0.7).foregroundStyle(.cyan)
-            }
             HStack(alignment: .center, spacing: 10) {
                 RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
                 VStack(alignment: .leading, spacing: 4) {
@@ -201,7 +214,7 @@ struct AgendaWidgetView: View {
                     }.font(.system(size: 11)).foregroundStyle(Color(white: 0.65))
                 }
                 Spacer(minLength: 0)
-                if primary, family != .systemSmall, let url = item.meetingURL, MeetingLinks.isAllowed(url) {
+                if primary, item.id == WidgetAgendaData.nextEvent(in: entry.snapshot.items, at: entry.date)?.id, family != .systemSmall, let url = item.meetingURL, MeetingLinks.isAllowed(url) {
                     Link(destination: url) {
                         Label("Unirse", systemImage: "video.fill")
                             .font(.system(size: 11, weight: .semibold)).padding(.horizontal, 9).padding(.vertical, 8)

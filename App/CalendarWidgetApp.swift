@@ -7,7 +7,7 @@ struct CalendarWidgetApp: App {
         #if os(macOS)
         WindowGroup {
             ContentView().environmentObject(model)
-                .onOpenURL { _ in model.today(); NSApp.activate(ignoringOtherApps: true) }
+                .onOpenURL { url in model.open(url); NSApp.activate(ignoringOtherApps: true) }
                 .frame(minWidth: 320, idealWidth: 340, maxWidth: 500, minHeight: 540, idealHeight: 820)
         }
         .defaultSize(width: 340, height: 820)
@@ -20,7 +20,7 @@ struct CalendarWidgetApp: App {
         WindowGroup {
             ContentView().environmentObject(model)
                 .frame(maxWidth: 520).frame(maxWidth: .infinity).background(Color(white: 0.125))
-                .onOpenURL { _ in model.today() }
+                .onOpenURL { url in model.open(url) }
         }
         #endif
     }

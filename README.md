@@ -80,3 +80,9 @@ Cada instancia del widget guarda sus opciones mediante `WidgetConfigurationInten
 Unirse aparece solo si el próximo evento con horario tiene un enlace reconocido; no salta un evento sin enlace para ofrecer una reunión posterior. Se priorizan eventos futuros y, si no hay ninguno, uno en curso. El enlace se abre únicamente al pulsarlo. El reconocimiento exige HTTPS, un host Zoom/Meet permitido y una ruta de reunión; rechaza dominios que imitan esos nombres. Los enlaces no se visitaron durante las pruebas.
 
 Validación adicional: selección de calendarios/tareas, meses de cinco y seis semanas, prioridad y vencimiento del próximo evento, detección de enlaces, rechazo de dominios impostores y compatibilidad con instantáneas anteriores. Diseño renderizado a 344 × 344 con una reunión de ejemplo y botón Unirse.
+
+## Navegación dentro del widget
+
+Tocar una celda del mes ejecuta `SelectWidgetDay` en segundo plano y muestra únicamente los eventos y las tareas con fecha de ese día, incluyendo eventos de varios días. Se puede volver con Hoy. La selección se conserva en el App Group y se separa por configuración de calendarios y opciones; dos widgets con exactamente la misma configuración comparten la fecha seleccionada. Ver agenda del día abre la app en esa fecha. El tamaño pequeño y el modo sin mes no muestran la grilla de selección.
+
+El botón Unirse solo se muestra si el evento del día seleccionado también es el próximo evento elegible; no aparece para reuniones pasadas. Los recordatorios sin fecha se mantienen en la app completa.
