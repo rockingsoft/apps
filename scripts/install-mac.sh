@@ -10,6 +10,7 @@ fi
 xcodebuild -project CalendarWidget.xcodeproj -scheme AgendaMac -configuration Debug \
   -derivedDataPath build/signed-mac DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
   CODE_SIGN_IDENTITY='Apple Development' build
+python3 scripts/verify-widget-metadata.py build/signed-mac/Build/Products/Debug/AgendaMac.app
 mkdir -p "$HOME/Applications"
 ditto build/signed-mac/Build/Products/Debug/AgendaMac.app "$app_destination"
 codesign --verify --deep --strict "$app_destination"
