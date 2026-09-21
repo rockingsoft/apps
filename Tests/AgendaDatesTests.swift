@@ -35,6 +35,33 @@ struct AgendaDatesTests {
         precondition(decoded.calendarAccess == true && decoded.remindersAccess == false)
         let legacy = try! JSONDecoder().decode(AgendaSnapshot.self, from: Data("{\"updated\":0,\"items\":[]}".utf8))
         precondition(legacy.calendarAccess == nil && legacy.remindersAccess == nil)
-        print("PASS: month boundaries, leap year, multi-day exclusivity, reminders, snapshot round-trip")
+        precondition(WidgetAgendaData.monthDays(date(2026, 9, 15), calendar: calendar).count == 35)
+        precondition(WidgetAgendaData.monthDays(date(2026, 8, 15), calendar: calendar).count == 42)
+        precondition(MeetingLinks.extract(from: "Join https://us02web.zoom.us/j/123456?pwd=abc")?.host == "us02web.zoom.us")
+        precondition(MeetingLinks.extract(from: "<a href=\"https://meet.google.com/abc-defg-hij\">Meet</a>")?.host == "meet.google.com")
+        precondition(MeetingLinks.extract(from: "https://zoom.us.evil.test/j/123") == nil)
+        precondition(MeetingLinks.extract(from: "https://evilzoom.us/j/123") == nil)
+        precondition(MeetingLinks.extract(from: "http://zoom.us/j/123") == nil)
+        precondition(MeetingLinks.extract(from: "https://zoom.us/pricing") == nil)
+        var event = item
+        event.allDay = false
+        event.start = date(2026, 9, 15, 12)
+        event.end = date(2026, 9, 15, 13)
+        event.meetingURL = URL(string: "https://meet.google.com/abc-defg-hij")
+        reminder.start = date(2026, 9, 15, 11)
+        let mixed = [item, event, reminder]
+        precondition(WidgetAgendaData.filtered(mixed, calendarIDs: [], showTasks: false, showAllDay: true).isEmpty)
+        precondition(WidgetAgendaData.filtered(mixed, calendarIDs: ["a"], showTasks: false, showAllDay: false) == [event])
+        precondition(WidgetAgendaData.filtered(mixed, calendarIDs: [], showTasks: true, showAllDay: false) == [reminder])
+        precondition(WidgetAgendaData.nextEvent(in: mixed, at: date(2026, 9, 15, 10)) == event)
+        precondition(WidgetAgendaData.nextEvent(in: mixed, at: date(2026, 9, 15, 14)) == nil)
+        var future = event
+        future.id = "future"
+        future.start = date(2026, 9, 15, 14)
+        future.end = date(2026, 9, 15, 15)
+        future.meetingURL = nil
+        precondition(WidgetAgendaData.nextEvent(in: [event, future], at: date(2026, 9, 15, 12)) == event)
+        precondition(WidgetAgendaData.nextEvent(in: [event, future], at: date(2026, 9, 15, 13)) == future)
+        print("PASS: dates, snapshots, widget filters, next event selection, Zoom/Meet links and host validation")
     }
 }

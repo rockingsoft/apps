@@ -1,32 +1,102 @@
 import SwiftUI
 import WidgetKit
+import AppIntents
+
+struct WidgetCalendar: AppEntity {
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Calendario")
+    static var defaultQuery = WidgetCalendarQuery()
+    var id: String
+    var name: String
+    var displayRepresentation: DisplayRepresentation { DisplayRepresentation(title: "\(name)") }
+}
+struct WidgetCalendarQuery: EntityStringQuery {
+    func entities(for identifiers: [String]) async throws -> [WidgetCalendar] {
+        available.filter { identifiers.contains($0.id) }
+    }
+    func suggestedEntities() async throws -> [WidgetCalendar] { available }
+    func entities(matching string: String) async throws -> [WidgetCalendar] {
+        available.filter { $0.name.localizedCaseInsensitiveContains(string) }
+    }
+    private var available: [WidgetCalendar] {
+        let snapshot = AgendaCache.read()
+        if let sources = snapshot.sources {
+            return sources.filter { !$0.reminder }.map { .init(id: $0.id, name: $0.title) }
+        }
+        var seen: Set<String> = []
+        return snapshot.items.filter { !$0.reminder && seen.insert($0.calendarID).inserted }
+            .map { .init(id: $0.calendarID, name: $0.calendarName) }
+    }
+}
+struct AgendaConfiguration: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "Configurar agenda"
+    static var description = IntentDescription("Elegí los calendarios y el contenido de este widget.")
+    @Parameter(title: "Todos los calendarios", default: true) var allCalendars: Bool
+    @Parameter(title: "Calendarios") var calendars: [WidgetCalendar]?
+    @Parameter(title: "Mostrar tareas", default: true) var showTasks: Bool
+    @Parameter(title: "Mostrar eventos de todo el día", default: true) var showAllDay: Bool
+    @Parameter(title: "Mostrar mes", default: true) var showMonth: Bool
+    static var parameterSummary: some ParameterSummary {
+        When(\.$allCalendars, .equalTo, false) {
+            Summary {
+                \.$allCalendars
+                \.$calendars
+                \.$showTasks
+                \.$showAllDay
+                \.$showMonth
+            }
+        } otherwise: {
+            Summary {
+                \.$allCalendars
+                \.$showTasks
+                \.$showAllDay
+                \.$showMonth
+            }
+        }
+    }
+}
 
 struct AgendaEntry: TimelineEntry {
     let date: Date
     let snapshot: AgendaSnapshot
+    var showMonth = true
 }
-struct AgendaProvider: TimelineProvider {
+struct AgendaProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> AgendaEntry { .init(date: Date(), snapshot: .empty) }
-    func getSnapshot(in context: Context, completion: @escaping (AgendaEntry) -> Void) {
-        completion(.init(date: Date(), snapshot: AgendaCache.read()))
+    func snapshot(for configuration: AgendaConfiguration, in context: Context) async -> AgendaEntry {
+        configured(AgendaCache.read(), configuration, at: Date())
     }
-    func getTimeline(in context: Context, completion: @escaping (Timeline<AgendaEntry>) -> Void) {
-        Task { @MainActor in
-            let service = EventKitService()
-            var snapshot = AgendaCache.read()
-            // The app owns the cache. An extension with partial authorization must
-            // never replace the app's full snapshot with an empty result.
-            if service.calendarAllowed || service.remindersAllowed {
-                let days = AgendaDates.monthDays(Date())
-                let loaded = await service.load(from: days[0], to: Calendar.current.date(byAdding: .day, value: 1, to: days.last!)!)
-                let events = service.calendarAllowed && snapshot.calendarAccess == true
-                    ? loaded.filter { !$0.reminder } : snapshot.items.filter { !$0.reminder }
-                let reminders = service.remindersAllowed && snapshot.remindersAccess == true
-                    ? loaded.filter { $0.reminder } : snapshot.items.filter { $0.reminder }
-                snapshot.items = (events + reminders).filter { !AgendaCache.hiddenIDs.contains($0.calendarID) }
-            }
-            completion(Timeline(entries: [.init(date: Date(), snapshot: snapshot)], policy: .after(Date().addingTimeInterval(1800))))
+    @MainActor
+    private func refreshedSnapshot() async -> AgendaSnapshot {
+        let service = EventKitService()
+        var snapshot = AgendaCache.read()
+        if service.calendarAllowed || service.remindersAllowed {
+            let days = AgendaDates.monthDays(Date())
+            let loaded = await service.load(from: days[0], to: Calendar.current.date(byAdding: .day, value: 1, to: days.last!)!)
+            let events = service.calendarAllowed && snapshot.calendarAccess == true
+                ? loaded.filter { !$0.reminder } : snapshot.items.filter { !$0.reminder }
+            let reminders = service.remindersAllowed && snapshot.remindersAccess == true
+                ? loaded.filter { $0.reminder } : snapshot.items.filter { $0.reminder }
+            snapshot.items = events + reminders
         }
+        return snapshot
+    }
+    func timeline(for configuration: AgendaConfiguration, in context: Context) async -> Timeline<AgendaEntry> {
+        let snapshot = await refreshedSnapshot()
+        let now = Date()
+        // Schedule known event boundaries so “next” and Join advance without
+        // waiting for a fresh EventKit query. WidgetKit controls delivery timing.
+        let horizon = now.addingTimeInterval(1800)
+        let boundaries = snapshot.items.flatMap { [$0.start, $0.end].compactMap { $0 } }
+            .filter { $0 > now && $0 < horizon }
+        let dates = [now] + Array(Set(boundaries)).sorted()
+        let entries = dates.map { configured(snapshot, configuration, at: $0) }
+        return Timeline(entries: entries, policy: .after(horizon))
+    }
+    private func configured(_ snapshot: AgendaSnapshot, _ configuration: AgendaConfiguration, at date: Date) -> AgendaEntry {
+        var result = snapshot
+        let ids: Set<String>? = configuration.allCalendars ? nil : Set((configuration.calendars ?? []).map(\.id))
+        result.items = WidgetAgendaData.filtered(snapshot.items, calendarIDs: ids, showTasks: configuration.showTasks, showAllDay: configuration.showAllDay)
+        return .init(date: date, snapshot: result, showMonth: configuration.showMonth)
     }
 }
 struct WidgetMonthView: View {
@@ -35,13 +105,13 @@ struct WidgetMonthView: View {
     var small = false
     private let calendar = Calendar.current
     var body: some View {
-        let days = AgendaDates.monthDays(date)
-        VStack(spacing: small ? 5 : 8) {
+        let days = WidgetAgendaData.monthDays(date)
+        VStack(spacing: small ? 6 : 10) {
             HStack(spacing: 5) {
                 Text(date.formatted(.dateTime.month(.wide)).capitalized).fontWeight(.bold)
                 Text(date.formatted(.dateTime.year())).foregroundStyle(.red)
                 Spacer(minLength: 0)
-            }.font(.system(size: small ? 16 : 24)).lineLimit(1).minimumScaleFactor(0.75)
+            }.font(.system(size: small ? 16 : 22)).lineLimit(1).minimumScaleFactor(0.75)
             HStack(spacing: 0) {
                 ForEach(0..<7) { offset in
                     Text(calendar.shortStandaloneWeekdaySymbols[(calendar.firstWeekday - 1 + offset) % 7].uppercased())
@@ -49,7 +119,7 @@ struct WidgetMonthView: View {
                 }
             }
             VStack(spacing: 0) {
-                ForEach(0..<6) { week in
+                ForEach(0..<(days.count / 7), id: \.self) { week in
                     HStack(spacing: 0) {
                         ForEach(0..<7) { weekday in
                             let day = days[week * 7 + weekday]
@@ -83,7 +153,7 @@ struct AgendaWidgetView: View {
     var body: some View {
         GeometryReader { geometry in
             Group {
-                if family == .systemSmall { agenda }
+                if family == .systemSmall || !entry.showMonth { agenda }
                 else if family == .systemMedium {
                     HStack(spacing: 0) {
                         WidgetMonthView(date: entry.date, items: entry.snapshot.items, small: true)
@@ -99,7 +169,7 @@ struct AgendaWidgetView: View {
                 } else {
                     VStack(spacing: 0) {
                         WidgetMonthView(date: entry.date, items: entry.snapshot.items)
-                            .frame(height: geometry.size.height * 0.56)
+                            .frame(height: geometry.size.height * 0.53)
                         agenda
                     }
                 }
@@ -108,72 +178,98 @@ struct AgendaWidgetView: View {
         .containerBackground(Color(white: 0.125), for: .widget)
         .widgetURL(URL(string: "calendarwidget://today"))
     }
-    private var upcoming: [AgendaItem] {
+    private var nextEvent: AgendaItem? { WidgetAgendaData.nextEvent(in: entry.snapshot.items, at: entry.date) }
+    private var following: [AgendaItem] {
         entry.snapshot.items.filter { item in
-            guard let start = item.start else { return item.reminder }
-            if item.reminder { return start >= Calendar.current.startOfDay(for: entry.date) }
-            return (item.end ?? start) > entry.date || (item.allDay && item.occurs(on: entry.date))
+            guard item.id != nextEvent?.id else { return false }
+            if item.reminder { return item.start == nil || item.start! >= Calendar.current.startOfDay(for: entry.date) }
+            return !item.allDay && (item.end ?? item.start ?? .distantPast) > entry.date
         }.sorted { ($0.start ?? .distantFuture) < ($1.start ?? .distantFuture) }
     }
+    private var allDayItems: [AgendaItem] {
+        entry.snapshot.items.filter { !$0.reminder && $0.allDay && $0.occurs(on: entry.date) }
+    }
     private var agenda: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
             if entry.snapshot.calendarAccess != true && entry.snapshot.remindersAccess != true {
                 Text("Conectá tu agenda").font(.system(size: 14, weight: .semibold)).foregroundStyle(.white)
-                Text("Abrí Agenda y habilitá Calendario y Recordatorios.")
-                    .font(.system(size: 12)).foregroundStyle(Color(white: 0.7))
-                Text("Abrir Agenda ↗").font(.system(size: 12, weight: .semibold)).foregroundStyle(.cyan)
-            } else if upcoming.isEmpty {
-                DayHeading(date: entry.date)
-                Text("Sin próximos eventos ni recordatorios").font(.system(size: 12)).foregroundStyle(.gray)
+                Text("Habilitá Calendario y Recordatorios en Agenda.").font(.system(size: 12)).foregroundStyle(.gray)
             } else {
                 ViewThatFits(in: .vertical) {
-                    rows(limit: 6)
-                    rows(limit: 5)
-                    rows(limit: 4)
-                    rows(limit: 3)
-                    rows(limit: 2)
-                    rows(limit: 1)
+                    agendaContent(extra: 3)
+                    agendaContent(extra: 2)
+                    agendaContent(extra: 1)
+                    agendaContent(extra: 0)
                 }
             }
             Spacer(minLength: 0)
+            Link(destination: URL(string: "calendarwidget://today")!) {
+                HStack {
+                    Text("Abrir agenda")
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                }.font(.system(size: 11, weight: .medium)).foregroundStyle(Color(white: 0.72))
+            }.buttonStyle(.plain).accessibilityLabel("Abrir el calendario completo")
         }
-        .padding(12).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(family == .systemSmall ? 12 : 14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color(white: 0.125))
     }
-    private func rows(limit: Int) -> some View {
-        let items = Array(upcoming.prefix(limit))
-        return VStack(alignment: .leading, spacing: 7) {
-            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                let day = item.start.map { Calendar.current.startOfDay(for: $0) }
-                let previous = index > 0 ? items[index - 1].start.map { Calendar.current.startOfDay(for: $0) } : nil
-                if index == 0 || day != previous {
-                    if let day { DayHeading(date: day) }
-                    else { Text("SIN FECHA").font(.system(size: 10, weight: .bold)).foregroundStyle(.gray) }
-                }
-                HStack(alignment: .top, spacing: 7) {
-                    Image(systemName: item.reminder ? "circle" : "circle.fill")
-                        .font(.system(size: item.reminder ? 12 : 9)).foregroundStyle(item.color).padding(.top, 3)
-                    VStack(alignment: .leading, spacing: 1) {
-                        if !item.allDay, let start = item.start {
-                            HStack(spacing: 3) {
-                                Text(start, style: .time)
-                                if let end = item.end { Text("–"); Text(end, style: .time) }
-                            }.font(.system(size: 10, weight: .medium)).foregroundStyle(Color(white: 0.68))
-                        }
-                        Text(item.title).font(.system(size: 12, weight: .medium)).lineLimit(1)
-                            .padding(.horizontal, item.allDay && !item.reminder ? 4 : 0)
-                            .background(item.allDay && !item.reminder ? item.color.opacity(0.65) : .clear, in: RoundedRectangle(cornerRadius: 3))
-                    }
-                    Spacer(minLength: 0)
-                }.foregroundStyle(.white)
+    private func agendaContent(extra: Int) -> some View {
+        VStack(alignment: .leading, spacing: 11) {
+            if let event = nextEvent {
+                eventRow(event, primary: true)
+            } else if following.isEmpty {
+                DayHeading(date: entry.date)
+                Text("Sin próximos eventos").font(.system(size: 13)).foregroundStyle(.gray)
+            }
+            ForEach(Array(following.prefix(extra))) { item in eventRow(item, primary: false) }
+            if !allDayItems.isEmpty && (extra > 0 || nextEvent == nil) {
+                let titles = Array(Set(allDayItems.map(\.title))).sorted()
+                Text("Todo el día · " + titles.joined(separator: " · "))
+                    .font(.system(size: 10)).foregroundStyle(.gray).lineLimit(1)
+                    .accessibilityLabel("Eventos de todo el día: " + titles.joined(separator: ", "))
             }
         }.fixedSize(horizontal: false, vertical: true)
     }
+    private func eventRow(_ item: AgendaItem, primary: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            if primary {
+                Text(item.start! <= entry.date ? "EN CURSO" : "PRÓXIMO EVENTO")
+                    .font(.system(size: 9, weight: .bold)).tracking(0.7).foregroundStyle(.cyan)
+            }
+            HStack(alignment: .center, spacing: 10) {
+                RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.title).font(.system(size: primary ? 14 : 12, weight: .semibold))
+                        .foregroundStyle(.white).lineLimit(primary ? 2 : 1)
+                    HStack(spacing: 4) {
+                        if item.reminder { Image(systemName: "checklist") }
+                        if let start = item.start {
+                            if !Calendar.current.isDate(start, inSameDayAs: entry.date) {
+                                Text(start.formatted(.dateTime.day().month(.abbreviated)))
+                            }
+                            if !item.allDay { Text(start, style: .time) }
+                        } else { Text("Sin fecha") }
+                    }.font(.system(size: 11)).foregroundStyle(Color(white: 0.65))
+                }
+                Spacer(minLength: 0)
+                if primary, family != .systemSmall, let url = item.meetingURL, MeetingLinks.isAllowed(url) {
+                    Link(destination: url) {
+                        Label("Unirse", systemImage: "video.fill")
+                            .font(.system(size: 11, weight: .semibold)).padding(.horizontal, 9).padding(.vertical, 8)
+                            .background(Color.blue, in: Capsule()).foregroundStyle(.white)
+                    }.buttonStyle(.plain).accessibilityLabel("Unirse a \(item.title)")
+                }
+            }.fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
 }
 @main
 struct AgendaWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "AgendaWidget", provider: AgendaProvider()) { AgendaWidgetView(entry: $0) }
+        AppIntentConfiguration(kind: "AgendaWidget", intent: AgendaConfiguration.self, provider: AgendaProvider()) { AgendaWidgetView(entry: $0) }
             .configurationDisplayName("Calendario y recordatorios")
             .description("Tu mes y tu próxima agenda, en un solo lugar.")
             .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])

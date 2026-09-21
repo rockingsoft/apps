@@ -32,11 +32,17 @@ Al abrir, pulsar **Permitir acceso a Calendario** y **Permitir acceso a Recordat
 - Agenda de los siguientes 14 días desde la selección, eventos de varios días y de día completo.
 - Colores originales de cada calendario/lista.
 - Búsqueda por título o calendario dentro de los datos cargados.
-- Filtro de calendarios y listas compartido con los widgets.
+- Filtro de calendarios/listas en la app y configuración independiente por widget.
+- Clic derecho → Editar widget: todos los calendarios o una selección, mostrar tareas, eventos de todo el día y mes.
+- El selector incluye calendarios sin eventos, a partir de las fuentes publicadas por la app.
+- Botón Abrir agenda: abre el calendario completo de Agenda.
+- Unirse al próximo evento visible con enlace HTTPS reconocido de Zoom/Meet en URL, ubicación o notas (widgets medianos, grandes y extragrandes). El pequeño abre Agenda.
+- Prioriza el próximo evento con horario y resume los títulos de todo el día en una línea cuando hay espacio. No elimina ni fusiona eventos del calendario.
+- Mes con las semanas necesarias (4, 5 o 6), sin una sexta fila vacía permanente.
 - Recordatorios pendientes con fecha, vencidos y sin fecha.
 - Completar recordatorios desde la app (escribe en Apple Reminders).
 - Actualización al activar la app, cambiar el mes o recibir `EKEventStoreChanged`.
-- La app publica la instantánea compartida junto con los permisos de cada fuente. Los widgets leen EventKit cuando tienen autorización y conservan las fuentes de la instantánea para las que la extensión no tiene acceso. La extensión nunca sobrescribe la instantánea de la app. Sin permisos muestran una indicación para conectarlos, en lugar de una agenda vacía. Solicitan actualización cada 30 minutos; Apple decide cuándo ejecutarla.
+- La app publica la instantánea compartida junto con los permisos de cada fuente. Los widgets leen EventKit cuando tienen autorización y conservan las fuentes de la instantánea para las que la extensión no tiene acceso. La extensión nunca sobrescribe la instantánea de la app. Sin permisos muestran una indicación para conectarlos, en lugar de una agenda vacía. Solicitan actualización cada 30 minutos y preparan entradas para los horarios de inicio/fin conocidos dentro de ese período; Apple decide cuándo ejecutarlas.
 
 El acceso a calendarios es de lectura en esta implementación. EventKit requiere el permiso denominado “acceso completo” para leerlos. Los eventos no se modifican. Completar un recordatorio sí modifica el original.
 
@@ -66,3 +72,11 @@ Tests de calendario: límites de mes, año bisiesto, final exclusivo de eventos 
 - `scripts/generate-project.rb`: regeneración del proyecto (Ruby + gem `xcodeproj` 1.27). El `.xcodeproj` está incluido; no hace falta instalar Ruby para compilar.
 
 Documentación de Apple: [acceso a EventKit](https://developer.apple.com/documentation/eventkit/accessing-the-event-store) y [WidgetKit](https://developer.apple.com/documentation/widgetkit).
+
+## Configuración y reuniones
+
+Cada instancia del widget guarda sus opciones mediante `WidgetConfigurationIntent` y `AppIntentConfiguration`. Desactivar Todos los calendarios permite elegir varios; una selección vacía muestra cero eventos, aunque las tareas pueden seguir visibles si están activadas. Los filtros del widget también controlan los puntos del mes y cuál es el próximo evento. Los filtros de la ventana de Agenda no modifican otras instancias del widget.
+
+Unirse aparece solo si el próximo evento con horario tiene un enlace reconocido; no salta un evento sin enlace para ofrecer una reunión posterior. Se priorizan eventos futuros y, si no hay ninguno, uno en curso. El enlace se abre únicamente al pulsarlo. El reconocimiento exige HTTPS, un host Zoom/Meet permitido y una ruta de reunión; rechaza dominios que imitan esos nombres. Los enlaces no se visitaron durante las pruebas.
+
+Validación adicional: selección de calendarios/tareas, meses de cinco y seis semanas, prioridad y vencimiento del próximo evento, detección de enlaces, rechazo de dominios impostores y compatibilidad con instantáneas anteriores. Diseño renderizado a 344 × 344 con una reunión de ejemplo y botón Unirse.

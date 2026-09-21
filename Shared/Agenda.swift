@@ -13,6 +13,7 @@ struct AgendaItem: Codable, Identifiable, Hashable {
     var red: Double
     var green: Double
     var blue: Double
+    var meetingURL: URL? = nil
     var color: Color { Color(red: red, green: green, blue: blue) }
     func occurs(on day: Date, calendar: Calendar = .current) -> Bool {
         guard let start else { return false }
@@ -22,7 +23,7 @@ struct AgendaItem: Codable, Identifiable, Hashable {
     }
 }
 
-struct CalendarSource: Identifiable, Hashable {
+struct CalendarSource: Codable, Identifiable, Hashable {
     let id: String
     let title: String
     let reminder: Bool
@@ -33,6 +34,7 @@ struct AgendaSnapshot: Codable {
     var items: [AgendaItem]
     var calendarAccess: Bool? = nil
     var remindersAccess: Bool? = nil
+    var sources: [CalendarSource]? = nil
     static let empty = AgendaSnapshot(updated: .distantPast, items: [])
 }
 
@@ -67,5 +69,41 @@ enum AgendaCache {
     static func read() -> AgendaSnapshot {
         guard let url, let data = try? Data(contentsOf: url), let value = try? JSONDecoder().decode(AgendaSnapshot.self, from: data) else { return .empty }
         return value
+    }
+}
+
+// Only recognized HTTPS meeting destinations become actionable links.
+enum MeetingLinks {
+    static func extract(from text: String) -> URL? {
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return nil }
+        let range = NSRange(text.startIndex..., in: text)
+        return detector.matches(in: text, range: range).compactMap(\.url).first(where: isAllowed)
+    }
+    static func isAllowed(_ url: URL) -> Bool {
+        guard url.scheme?.lowercased() == "https", let host = url.host?.lowercased(), url.user == nil, url.password == nil else { return false }
+        let zoom = host == "zoom.us" || host.hasSuffix(".zoom.us") || host == "zoom.com" || host.hasSuffix(".zoom.com")
+        return (host == "meet.google.com" && url.path.count > 1) || (zoom && (url.path.hasPrefix("/j/") || url.path.hasPrefix("/my/") || url.path.hasPrefix("/wc/")))
+    }
+}
+
+enum WidgetAgendaData {
+    static func filtered(_ items: [AgendaItem], calendarIDs: Set<String>?, showTasks: Bool, showAllDay: Bool) -> [AgendaItem] {
+        items.filter { item in
+            if item.reminder { return showTasks }
+            return (calendarIDs == nil || calendarIDs!.contains(item.calendarID)) && (showAllDay || !item.allDay)
+        }
+    }
+    static func nextEvent(in items: [AgendaItem], at now: Date) -> AgendaItem? {
+        let events = items.filter { !$0.reminder && !$0.allDay && $0.start != nil && ($0.end ?? $0.start!) > now }
+            .sorted { $0.start! < $1.start! }
+        return events.first(where: { $0.start! >= now }) ?? events.first
+    }
+    static func monthDays(_ date: Date, calendar: Calendar = .current) -> [Date] {
+        let all = AgendaDates.monthDays(date, calendar: calendar)
+        let range = calendar.range(of: .day, in: .month, for: date)!
+        let first = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
+        let offset = calendar.dateComponents([.day], from: all[0], to: first).day!
+        let count = ((offset + range.count + 6) / 7) * 7
+        return Array(all.prefix(count))
     }
 }
