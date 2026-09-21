@@ -38,7 +38,7 @@ Esto crea `apps/mi-herramienta/` con un manifiesto, documentación y carpetas in
 Reglas de organización:
 
 - Una app no importa código de otra app directamente.
-- El código realmente compartido va en `packages/`, dentro de un paquete con contrato y pruebas propios.
+- Cada app puede usar tecnologías, dependencias y estructuras completamente distintas.
 - Los identificadores, entitlements, artefactos de build y configuración de firma pertenecen a cada app.
 - La raíz contiene únicamente orquestación y documentación transversal; no targets de producto.
 
