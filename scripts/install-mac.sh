@@ -14,6 +14,9 @@ mkdir -p "$HOME/Applications"
 ditto build/signed-mac/Build/Products/Debug/AgendaMac.app "$app_destination"
 codesign --verify --deep --strict "$app_destination"
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app_destination"
+# Avoid registering the build output as a second installed copy.
+pluginkit -r "$PWD/build/signed-mac/Build/Products/Debug/AgendaMac.app/Contents/PlugIns/AgendaWidgetMac.appex" || true
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -u "$PWD/build/signed-mac/Build/Products/Debug/AgendaMac.app"
 pluginkit -a "$app_destination/Contents/PlugIns/AgendaWidgetMac.appex"
 pluginkit -m -A -D -i com.schoren.calendarwidgetmac.widget
 printf '\nInstalada: %s\nAbrí la app y luego Editar widgets → Agenda.\n' "$app_destination"
