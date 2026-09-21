@@ -43,7 +43,7 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
     Xcodeproj::Plist.write_to_path(entitlements, "#{is_widget ? 'Widget' : 'App'}/#{suffix}.entitlements")
   end
   app.add_dependency(widget)
-  app.add_resources([app_assets]) if platform == :ios
+  app.add_resources([app_assets])
   embed = app.new_copy_files_build_phase('Embed App Extensions')
   embed.dst_subfolder_spec = '13'
   embed.add_file_reference(widget.product_reference).settings = {'ATTRIBUTES' => ['RemoveHeadersOnCopy']}
@@ -58,6 +58,7 @@ base = {
  'CFBundleInfoDictionaryVersion' => '6.0', 'CFBundleName' => '$(PRODUCT_NAME)',
  'CFBundleShortVersionString' => '$(MARKETING_VERSION)', 'CFBundleVersion' => '$(CURRENT_PROJECT_VERSION)',
  'ITSAppUsesNonExemptEncryption' => false,
+ 'LSApplicationCategoryType' => 'public.app-category.productivity',
  'NSCalendarsFullAccessUsageDescription' => 'Agenda necesita leer tus calendarios para mostrar tus eventos en la agenda y los widgets.',
  'NSRemindersFullAccessUsageDescription' => 'Agenda necesita leer tus recordatorios y guardar los que marques como completados.',
  'NSAppleEventsUsageDescription' => 'Agenda usa Calendario de Apple para mostrar el evento que elegiste en el widget.'
