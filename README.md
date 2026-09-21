@@ -1,0 +1,55 @@
+# Agenda — macOS, iPhone y iPad
+
+App nativa SwiftUI + extensiones WidgetKit, inspirada en la referencia: calendario mensual claro, año rojo, día actual azul, indicadores de color y agenda oscura agrupada por fecha.
+
+## Abrir
+
+Abrir `CalendarWidget.xcodeproj` en Xcode. Elegir:
+
+- **AgendaMac**: ventana y panel en la barra de menú (macOS 14+).
+- **AgendaiOS**: app universal para iPhone/iPad (iOS/iPadOS 17+).
+
+Los targets incluyen sus extensiones WidgetKit, con tamaños pequeño, mediano, grande y extragrande donde el sistema lo admite. En un dispositivo real, seleccionar el mismo equipo de desarrollo en la app y su extensión y configurar el App Group `group.com.schoren.calendarwidget` para ambos. Si se cambia el identificador, actualizar también `AgendaCache.group` y los entitlements. Se necesita firma y provisioning válidos para instalar en dispositivos y validar los widgets del sistema.
+
+Al abrir, pulsar **Permitir acceso a Calendario** y **Permitir acceso a Recordatorios**. Son permisos independientes. Si fueron denegados, habilitarlos en Ajustes del sistema → Privacidad y seguridad. La app consulta las cuentas ya configuradas en Apple Calendar y Reminders; no usa OAuth ni un servidor externo. Agregar el widget desde la galería del sistema después de abrir la app y conceder acceso.
+
+## Funciones
+
+- Navegación por meses, selección de día y regreso a hoy.
+- Agenda de los siguientes 14 días desde la selección, eventos de varios días y de día completo.
+- Colores originales de cada calendario/lista.
+- Búsqueda por título o calendario dentro de los datos cargados.
+- Filtro de calendarios y listas compartido con los widgets.
+- Recordatorios pendientes con fecha, vencidos y sin fecha.
+- Completar recordatorios desde la app (escribe en Apple Reminders).
+- Actualización al activar la app, cambiar el mes o recibir `EKEventStoreChanged`.
+- Los widgets leen EventKit cuando tienen autorización y usan una instantánea local compartida como respaldo. Solicitan actualización cada 30 minutos; Apple decide cuándo ejecutarla.
+
+El acceso a calendarios es de lectura en esta implementación. EventKit requiere el permiso denominado “acceso completo” para leerlos. Los eventos no se modifican. Completar un recordatorio sí modifica el original.
+
+## Límites de esta versión
+
+- No incluye el clima: requiere una integración meteorológica independiente.
+- Los widgets muestran una cantidad limitada de entradas; abrir la app permite desplazarse y completar recordatorios.
+- No crea/edita eventos ni crea recordatorios.
+- Los datos del App Group permanecen en el dispositivo. El sistema puede mostrar datos de la última actualización si aún no ejecutó la próxima. La app vuelve a publicar la instantánea al actualizar permisos y filtros.
+- Compilar sin firma verifica código y empaquetado, pero no valida permisos, provisioning, integración del App Group ni instalación del widget en un dispositivo real.
+
+## Validación
+
+```sh
+./scripts/test.sh
+xcodebuild -project CalendarWidget.xcodeproj -scheme AgendaMac -configuration Debug -derivedDataPath build/mac CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project CalendarWidget.xcodeproj -scheme AgendaiOS -configuration Debug -sdk iphonesimulator -derivedDataPath build/ios CODE_SIGNING_ALLOWED=NO build
+```
+
+Tests de calendario: límites de mes, año bisiesto, final exclusivo de eventos de varios días, recordatorios con/sin fecha y serialización de instantáneas. App iniciada en simuladores iPhone 17 Pro Max e iPad Pro 13; revisión visual del estado sin permisos. La lectura de eventos y recordatorios reales también fue verificada en macOS con permisos concedidos. No se completaron recordatorios reales durante las pruebas. Los widgets instalados requieren validación con firma y App Group en el dispositivo de destino.
+
+## Proyecto
+
+- `App/`: app y modelo observable.
+- `Shared/`: tipos, fechas, acceso EventKit, caché y vistas compartidas.
+- `Widget/`: proveedor de timelines y vistas WidgetKit.
+- `scripts/generate-project.rb`: regeneración del proyecto (Ruby + gem `xcodeproj` 1.27). El `.xcodeproj` está incluido; no hace falta instalar Ruby para compilar.
+
+Documentación de Apple: [acceso a EventKit](https://developer.apple.com/documentation/eventkit/accessing-the-event-store) y [WidgetKit](https://developer.apple.com/documentation/widgetkit).
