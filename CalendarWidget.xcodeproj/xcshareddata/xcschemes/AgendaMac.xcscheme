@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E512F9A0FD7A1DA6CBEC5FEF"
+               BlueprintIdentifier = "46243982DF4CB319C604E1B7"
                BuildableName = "AgendaMac.app"
                BlueprintName = "AgendaMac"
                ReferencedContainer = "container:CalendarWidget.xcodeproj">
@@ -30,7 +30,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E512F9A0FD7A1DA6CBEC5FEF"
+            BlueprintIdentifier = "46243982DF4CB319C604E1B7"
             BuildableName = "AgendaMac.app"
             BlueprintName = "AgendaMac"
             ReferencedContainer = "container:CalendarWidget.xcodeproj">
@@ -53,7 +53,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E512F9A0FD7A1DA6CBEC5FEF"
+            BlueprintIdentifier = "46243982DF4CB319C604E1B7"
             BuildableName = "AgendaMac.app"
             BlueprintName = "AgendaMac"
             ReferencedContainer = "container:CalendarWidget.xcodeproj">
@@ -70,7 +70,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E512F9A0FD7A1DA6CBEC5FEF"
+            BlueprintIdentifier = "46243982DF4CB319C604E1B7"
             BuildableName = "AgendaMac.app"
             BlueprintName = "AgendaMac"
             ReferencedContainer = "container:CalendarWidget.xcodeproj">

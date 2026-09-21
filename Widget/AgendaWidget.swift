@@ -46,22 +46,8 @@ struct WidgetMonthView: View {
         let first = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
         return calendar.date(byAdding: .month, value: offset, to: first)!
     }
-    private func selectionURL(_ date: Date?) -> URL {
-        var components = URLComponents()
-        components.scheme = "calendarwidget"
-        components.host = "select"
-        components.queryItems = [
-            URLQueryItem(name: "timestamp", value: String(date?.timeIntervalSince1970 ?? 0)),
-            URLQueryItem(name: "key", value: selectionKey)
-        ]
-        return components.url!
-    }
     @ViewBuilder private func selectionControl<Label: View>(date: Date?, @ViewBuilder label: () -> Label) -> some View {
-        #if os(macOS)
-        Link(destination: selectionURL(date), label: label).buttonStyle(.plain)
-        #else
         Button(intent: SelectWidgetDay(date: date, key: selectionKey), label: label).buttonStyle(.plain)
-        #endif
     }
     var body: some View {
         let days = WidgetAgendaData.monthDays(date)
@@ -154,7 +140,7 @@ struct AgendaWidgetView: View {
                 }
             }
         }
-        .containerBackground(Color(white: 0.125), for: .widget)
+        .containerBackground(family == .systemLarge && entry.showMonth ? Color(white: 0.965) : Color(white: 0.125), for: .widget)
         .widgetURL(family == .systemSmall ? calendarURL : nil)
     }
     private var mediumMonthIsDark: Bool {
