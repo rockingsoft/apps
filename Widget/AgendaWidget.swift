@@ -54,17 +54,29 @@ struct WidgetMonthView: View {
     var small = false
     var selectionKey = "preview"
     private let calendar = Calendar.current
+    private func month(_ offset: Int) -> Date {
+        let first = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
+        return calendar.date(byAdding: .month, value: offset, to: first)!
+    }
     var body: some View {
         let days = WidgetAgendaData.monthDays(date)
         VStack(spacing: small ? 6 : 10) {
             HStack(spacing: 5) {
                 Text(date.formatted(.dateTime.month(.wide)).capitalized).fontWeight(.bold)
-                Text(date.formatted(.dateTime.year())).foregroundStyle(.red)
+                if !small { Text(date.formatted(.dateTime.year())).foregroundStyle(.red) }
                 Spacer(minLength: 0)
+                Button(intent: SelectWidgetDay(date: month(-1), key: selectionKey)) {
+                    Image(systemName: "chevron.left").font(.system(size: 11, weight: .semibold))
+                        .frame(width: small ? 16 : 22, height: 24).contentShape(Rectangle())
+                }.buttonStyle(.plain).accessibilityLabel("Mes anterior")
                 Button(intent: SelectWidgetDay(date: nil, key: selectionKey)) {
                     Text("Hoy").font(.system(size: 10, weight: .medium)).foregroundStyle(.blue)
                         .padding(4).contentShape(Rectangle())
                 }.buttonStyle(.plain)
+                Button(intent: SelectWidgetDay(date: month(1), key: selectionKey)) {
+                    Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold))
+                        .frame(width: small ? 16 : 22, height: 24).contentShape(Rectangle())
+                }.buttonStyle(.plain).accessibilityLabel("Mes siguiente")
             }.font(.system(size: small ? 16 : 22)).lineLimit(1).minimumScaleFactor(0.75)
             HStack(spacing: 0) {
                 ForEach(0..<7) { offset in
@@ -137,9 +149,15 @@ struct AgendaWidgetView: View {
             }
         }
         .containerBackground(Color(white: 0.125), for: .widget)
-        .widgetURL(dayURL)
+        .widgetURL(family == .systemSmall ? calendarURL : nil)
     }
-    private var dayURL: URL { URL(string: "calendarwidget://day?timestamp=\(entry.selectedDay.timeIntervalSince1970)")! }
+    private var calendarURL: URL {
+        #if os(macOS)
+        return URL(string: "ical://")!
+        #else
+        return URL(string: "calshow:\(entry.selectedDay.timeIntervalSinceReferenceDate)")!
+        #endif
+    }
     private var dayItems: [AgendaItem] { entry.snapshot.items.filter { $0.occurs(on: entry.selectedDay) } }
     private var nextEvent: AgendaItem? {
         let events = dayItems.filter { !$0.reminder && !$0.allDay }.sorted { $0.start! < $1.start! }
@@ -149,10 +167,9 @@ struct AgendaWidgetView: View {
         return events.first
     }
     private var following: [AgendaItem] {
-        dayItems.filter { $0.id != nextEvent?.id && ($0.reminder || !$0.allDay) }
+        dayItems.filter { $0.id != nextEvent?.id }
             .sorted { ($0.start ?? .distantFuture) < ($1.start ?? .distantFuture) }
     }
-    private var allDayItems: [AgendaItem] { dayItems.filter { !$0.reminder && $0.allDay } }
     private var agenda: some View {
         VStack(alignment: .leading, spacing: 10) {
             if entry.snapshot.calendarAccess != true && entry.snapshot.remindersAccess != true {
@@ -167,13 +184,12 @@ struct AgendaWidgetView: View {
                 }
             }
             Spacer(minLength: 0)
-            Link(destination: dayURL) {
-                HStack {
-                    Text(dayItems.isEmpty ? "Abrir agenda" : "Ver agenda del día (\(dayItems.count))")
-                    Spacer()
-                    Image(systemName: "arrow.up.right")
-                }.font(.system(size: 11, weight: .medium)).foregroundStyle(Color(white: 0.72))
-            }.buttonStyle(.plain).accessibilityLabel("Abrir el calendario completo")
+            if #available(macOS 15, iOS 18, *) {
+                Button(intent: OpenURLIntent(calendarURL)) { calendarLabel }.buttonStyle(.plain)
+            } else {
+                Link(destination: calendarURL) { calendarLabel }.buttonStyle(.plain)
+            }
+
         }
         .padding(family == .systemSmall ? 12 : 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -188,12 +204,7 @@ struct AgendaWidgetView: View {
                 Text("Sin eventos ni tareas este día").font(.system(size: 13)).foregroundStyle(.gray)
             }
             ForEach(Array(following.prefix(extra))) { item in eventRow(item, primary: false) }
-            if !allDayItems.isEmpty && (extra > 0 || nextEvent == nil) {
-                let titles = Array(Set(allDayItems.map(\.title))).sorted()
-                Text("Todo el día · " + titles.joined(separator: " · "))
-                    .font(.system(size: 10)).foregroundStyle(.gray).lineLimit(1)
-                    .accessibilityLabel("Eventos de todo el día: " + titles.joined(separator: ", "))
-            }
+
         }.fixedSize(horizontal: false, vertical: true)
     }
     private func eventRow(_ item: AgendaItem, primary: Bool) -> some View {
@@ -202,11 +213,12 @@ struct AgendaWidgetView: View {
                 RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title).font(.system(size: primary ? 14 : 12, weight: .semibold))
-                        .foregroundStyle(.white).lineLimit(primary ? 2 : 1)
+                        .foregroundStyle(.white).lineLimit(primary || item.allDay ? 2 : 1)
                     HStack(spacing: 4) {
                         if item.reminder { Image(systemName: "checklist") }
-                        if let start = item.start {
-                            if !Calendar.current.isDate(start, inSameDayAs: entry.date) {
+                        if item.allDay { Text("Todo el día") }
+                        else if let start = item.start {
+                            if !Calendar.current.isDate(start, inSameDayAs: entry.selectedDay) {
                                 Text(start.formatted(.dateTime.day().month(.abbreviated)))
                             }
                             if !item.allDay { Text(start, style: .time) }
@@ -215,16 +227,32 @@ struct AgendaWidgetView: View {
                 }
                 Spacer(minLength: 0)
                 if primary, item.id == WidgetAgendaData.nextEvent(in: entry.snapshot.items, at: entry.date)?.id, family != .systemSmall, let url = item.meetingURL, MeetingLinks.isAllowed(url) {
-                    Link(destination: url) {
-                        Label("Unirse", systemImage: "video.fill")
-                            .font(.system(size: 11, weight: .semibold)).padding(.horizontal, 9).padding(.vertical, 8)
-                            .background(Color.blue, in: Capsule()).foregroundStyle(.white)
-                    }.buttonStyle(.plain).accessibilityLabel("Unirse a \(item.title)")
+                    if #available(macOS 15, iOS 18, *) {
+                        Button(intent: OpenURLIntent(url)) { joinLabel }
+                            .buttonStyle(.plain).accessibilityLabel("Unirse a \(item.title)")
+                    } else {
+                        Link(destination: url) { joinLabel }
+                            .buttonStyle(.plain).accessibilityLabel("Unirse a \(item.title)")
+                    }
                 }
             }.fixedSize(horizontal: false, vertical: true)
         }
     }
 
+    private var calendarLabel: some View {
+        HStack {
+            Text("Abrir Calendario")
+            Spacer()
+            Image(systemName: "arrow.up.right")
+        }.font(.system(size: 11, weight: .medium)).foregroundStyle(Color(white: 0.72))
+            .contentShape(Rectangle()).accessibilityLabel("Abrir Calendario de Apple")
+    }
+    private var joinLabel: some View {
+        Label("Unirse", systemImage: "video.fill")
+            .font(.system(size: 11, weight: .semibold)).padding(.horizontal, 9).padding(.vertical, 8)
+            .background(Color.blue, in: Capsule()).foregroundStyle(.white)
+            .contentShape(Capsule())
+    }
 }
 @main
 struct AgendaWidget: Widget {

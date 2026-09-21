@@ -35,9 +35,9 @@ Al abrir, pulsar **Permitir acceso a Calendario** y **Permitir acceso a Recordat
 - Filtro de calendarios/listas en la app y configuración independiente por widget.
 - Clic derecho → Editar widget: todos los calendarios o una selección, mostrar tareas, eventos de todo el día y mes.
 - El selector incluye calendarios sin eventos, a partir de las fuentes publicadas por la app.
-- Botón Abrir agenda: abre el calendario completo de Agenda.
+- Botón Abrir Calendario: abre Calendario de Apple (ical:// en macOS; calshow con la fecha seleccionada en iOS).
 - Unirse al próximo evento visible con enlace HTTPS reconocido de Zoom/Meet en URL, ubicación o notas (widgets medianos, grandes y extragrandes). El pequeño abre Agenda.
-- Prioriza el próximo evento con horario y resume los títulos de todo el día en una línea cuando hay espacio. No elimina ni fusiona eventos del calendario.
+- Los eventos de todo el día tienen filas propias con título, color y etiqueta Todo el día. No se fusionan ni reducen a una nota al pie.
 - Mes con las semanas necesarias (4, 5 o 6), sin una sexta fila vacía permanente.
 - Recordatorios pendientes con fecha, vencidos y sin fecha.
 - Completar recordatorios desde la app (escribe en Apple Reminders).
@@ -83,6 +83,8 @@ Validación adicional: selección de calendarios/tareas, meses de cinco y seis s
 
 ## Navegación dentro del widget
 
-Tocar una celda del mes ejecuta `SelectWidgetDay` en segundo plano y muestra únicamente los eventos y las tareas con fecha de ese día, incluyendo eventos de varios días. Se puede volver con Hoy. La selección se conserva en el App Group y se separa por configuración de calendarios y opciones; dos widgets con exactamente la misma configuración comparten la fecha seleccionada. Ver agenda del día abre la app en esa fecha. El tamaño pequeño y el modo sin mes no muestran la grilla de selección.
+Tocar una celda del mes ejecuta `SelectWidgetDay` en segundo plano y muestra únicamente los eventos y las tareas con fecha de ese día, incluyendo eventos de varios días. Se puede volver con Hoy. La selección se conserva en el App Group y se separa por configuración de calendarios y opciones; dos widgets con exactamente la misma configuración comparten la fecha seleccionada. Las flechas del encabezado navegan por meses y Hoy regresa al actual. Abrir Calendario abre la app de Apple; en macOS no fuerza una fecha específica. El tamaño pequeño y el modo sin mes no muestran la grilla de selección.
 
 El botón Unirse solo se muestra si el evento del día seleccionado también es el próximo evento elegible; no aparece para reuniones pasadas. Los recordatorios sin fecha se mantienen en la app completa.
+
+En macOS 15+/iOS 18+, Unirse y Abrir Calendario usan OpenURLIntent. Los widgets medianos/grandes no tienen una URL general que intercepte sus controles; en versiones anteriores usan enlaces individuales. La apertura de reuniones se mantiene bajo una acción explícita del usuario.
