@@ -8,6 +8,7 @@ app_group = project.main_group.new_group('App', 'App')
 widget_group = project.main_group.new_group('Widget', 'Widget')
 shared_files = Dir['Shared/*.swift'].map { |path| shared.new_file(File.basename(path)) }
 app_files = Dir['App/*.swift'].map { |path| app_group.new_file(File.basename(path)) }
+app_assets = app_group.new_file('Assets.xcassets')
 widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.basename(path)) }
 [['Mac', :osx, '14.0'], ['iOS', :ios, '17.0']].each do |suffix, platform, deployment|
   app = project.new_target(:application, "Agenda#{suffix}", platform, deployment)
@@ -25,7 +26,7 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
       settings['GENERATE_INFOPLIST_FILE'] = 'NO'
       settings['INFOPLIST_FILE'] = "#{is_widget ? 'Widget' : 'App'}/Info.plist"
       settings['CODE_SIGN_ENTITLEMENTS'] = "#{is_widget ? 'Widget' : 'App'}/#{suffix}.entitlements"
-      settings['CURRENT_PROJECT_VERSION'] = '10'
+      settings['CURRENT_PROJECT_VERSION'] = '11'
       settings['MARKETING_VERSION'] = '0.5.3'
       settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'YES'
       settings['TARGETED_DEVICE_FAMILY'] = '1,2' if platform == :ios
@@ -42,6 +43,7 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
     Xcodeproj::Plist.write_to_path(entitlements, "#{is_widget ? 'Widget' : 'App'}/#{suffix}.entitlements")
   end
   app.add_dependency(widget)
+  app.add_resources([app_assets]) if platform == :ios
   embed = app.new_copy_files_build_phase('Embed App Extensions')
   embed.dst_subfolder_spec = '13'
   embed.add_file_reference(widget.product_reference).settings = {'ATTRIBUTES' => ['RemoveHeadersOnCopy']}
@@ -59,6 +61,6 @@ base = {
  'NSRemindersFullAccessUsageDescription' => 'Agenda necesita leer tus recordatorios y guardar los que marques como completados.',
  'NSAppleEventsUsageDescription' => 'Agenda usa Calendario de Apple para mostrar el evento que elegiste en el widget.'
 }
-Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'APPL', 'LSUIElement' => true, 'LSMinimumSystemVersion' => '$(MACOSX_DEPLOYMENT_TARGET)', 'UILaunchScreen' => {}, 'UISupportedInterfaceOrientations' => ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationLandscapeLeft', 'UIInterfaceOrientationLandscapeRight'], 'CFBundleURLTypes' => [{'CFBundleURLName' => 'Agenda', 'CFBundleURLSchemes' => ['calendarwidget']}]), 'App/Info.plist')
+Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'APPL', 'LSUIElement' => true, 'LSMinimumSystemVersion' => '$(MACOSX_DEPLOYMENT_TARGET)', 'UILaunchScreen' => {}, 'UISupportedInterfaceOrientations' => ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationPortraitUpsideDown', 'UIInterfaceOrientationLandscapeLeft', 'UIInterfaceOrientationLandscapeRight'], 'CFBundleURLTypes' => [{'CFBundleURLName' => 'Agenda', 'CFBundleURLSchemes' => ['calendarwidget']}]), 'App/Info.plist')
 Xcodeproj::Plist.write_to_path(base.merge('CFBundlePackageType' => 'XPC!', 'NSExtension' => {'NSExtensionPointIdentifier' => 'com.apple.widgetkit-extension'}), 'Widget/Info.plist')
 project.save
