@@ -19,9 +19,9 @@ widget_files = Dir['Widget/*.swift'].map { |path| widget_group.new_file(File.bas
     is_widget = target == widget
     target.build_configurations.each do |config|
       settings = config.build_settings
-      settings['PRODUCT_BUNDLE_IDENTIFIER'] = "com.schoren.calendarwidget#{suffix.downcase}#{is_widget ? '.widget' : ''}"
+      settings['PRODUCT_BUNDLE_IDENTIFIER'] = "com.schoren.calendarwidgetios#{is_widget ? '.widget' : ''}"
       settings['SWIFT_VERSION'] = '5.0'
-      settings['AGENDA_APP_GROUP'] = platform == :osx ? '$(DEVELOPMENT_TEAM).com.schoren.calendarwidget' : 'group.com.schoren.calendarwidget'
+      settings['AGENDA_APP_GROUP'] = platform == :osx ? '$(TeamIdentifierPrefix)group.com.schoren.calendarwidget' : 'group.com.schoren.calendarwidget'
       settings['CODE_SIGN_STYLE'] = 'Automatic'
       settings['GENERATE_INFOPLIST_FILE'] = 'NO'
       settings['INFOPLIST_FILE'] = "#{is_widget ? 'Widget' : 'App'}/Info.plist"

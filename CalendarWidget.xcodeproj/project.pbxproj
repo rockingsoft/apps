@@ -7,75 +7,75 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0D12703350950EA8992C81DB /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114862AAC354A3C37DB13EA /* Agenda.swift */; };
-		109B906A8C933A2E82A6675B /* CalendarWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4A2157B637D2176A67145 /* CalendarWidgetApp.swift */; };
-		127550EAEF520C6FED05530B /* CalendarWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4A2157B637D2176A67145 /* CalendarWidgetApp.swift */; };
-		1324A23E734541DC51C64304 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B8AFF5536F90588C7BA5B57 /* Cocoa.framework */; };
-		2194E32D2A895A97316459AB /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114862AAC354A3C37DB13EA /* Agenda.swift */; };
-		2E58CC7F1F84B349A597D508 /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E608589FF9F825777145EF /* CalendarViews.swift */; };
-		3A6C8D49CBDC5777F125CC7F /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4325C18CC3C18B954C59D8 /* EventKitService.swift */; };
-		4C389AE15FEA65FDD26596B1 /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E608589FF9F825777145EF /* CalendarViews.swift */; };
-		507068B2F3D43903719B5CC1 /* AgendaModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4A69ED39C32B06B07DED18 /* AgendaModel.swift */; };
-		50CC6F34B566F0779D52D893 /* AgendaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D2E3A857579D45396D63E6A /* AgendaWidget.swift */; };
-		5565C39CF0B284C72AA686EC /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5867759AF47C2768881BF2B5 /* AgendaConfiguration.swift */; };
-		55B00CE2FC0F17AABFA961B9 /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5867759AF47C2768881BF2B5 /* AgendaConfiguration.swift */; };
-		5F3849486E7A257A1D31DF73 /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4325C18CC3C18B954C59D8 /* EventKitService.swift */; };
-		61CF0CFEC453271DD40588E5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646FAA23E4DB80D0462B862E /* ContentView.swift */; };
-		849AF333E5940609E2026351 /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E608589FF9F825777145EF /* CalendarViews.swift */; };
-		9057426CEDBE0DD7E46EF3A1 /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5867759AF47C2768881BF2B5 /* AgendaConfiguration.swift */; };
-		912BC3EB3736AACBA6184B7C /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114862AAC354A3C37DB13EA /* Agenda.swift */; };
-		9AE1CDA2F0E99C124118F06A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5FE05656ABAB1CF860D60B4C /* Assets.xcassets */; };
-		9D103FB3D389A46F70887C47 /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114862AAC354A3C37DB13EA /* Agenda.swift */; };
-		A922BB434E3DEBEACCB78FBF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF3C4ECEFB17D1C175A73B31 /* Foundation.framework */; };
-		AA360465DD30299A08EE2CF4 /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E608589FF9F825777145EF /* CalendarViews.swift */; };
-		AC822D7D3EDC3FE9A7E9A01F /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4325C18CC3C18B954C59D8 /* EventKitService.swift */; };
-		B6C6F8A73183B50B9746A880 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646FAA23E4DB80D0462B862E /* ContentView.swift */; };
-		BA44DB4CB419ACBBCAD2563E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF3C4ECEFB17D1C175A73B31 /* Foundation.framework */; };
-		CD63E8A14DE0C18193CD12AE /* AgendaWidgetMac.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 58C84DAA61205AB7F18AF6B0 /* AgendaWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		CF6F28C9E9ED1E2E0A9C95AE /* AgendaModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4A69ED39C32B06B07DED18 /* AgendaModel.swift */; };
-		D2FDF257E2022D8EE7557631 /* AgendaWidgetiOS.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 0D563AD60B6AF392CD226E4E /* AgendaWidgetiOS.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		E1E28F6D30A04D9929DD305F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B8AFF5536F90588C7BA5B57 /* Cocoa.framework */; };
-		E2CFAEB19768BFB7AA1693A4 /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5867759AF47C2768881BF2B5 /* AgendaConfiguration.swift */; };
-		E8ED75088FAFBB85E039388D /* AgendaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D2E3A857579D45396D63E6A /* AgendaWidget.swift */; };
-		EDE7538C053524DE0F93E5A3 /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4325C18CC3C18B954C59D8 /* EventKitService.swift */; };
+		098FFAF29D3D53F4E7A450F5 /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91F144C3AE60C7D2A06A81F /* CalendarViews.swift */; };
+		0B9B940DAA45477573A0D764 /* AgendaModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2EF39A98698927EAAFA153 /* AgendaModel.swift */; };
+		1F5432D8CAFF81A63C8EF6A8 /* AgendaWidgetMac.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = FE8DD8D2ABAB4665781EFD24 /* AgendaWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		230DD354EFA74234D83B5EEE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB0335F66E6E1CEAEC87C26 /* ContentView.swift */; };
+		251CF5EE405CFFB2A8BE924A /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630295B7AE18C712A2C29F96 /* Agenda.swift */; };
+		284E4C8E7101DE77B9B178A2 /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45493974D374C156CE119481 /* AgendaConfiguration.swift */; };
+		2F7A379C49BC041EC5A74713 /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729AA6CCB0A8CE5A7C542ADA /* EventKitService.swift */; };
+		3D8C05E3166CD32E373E53B8 /* AgendaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318A16BE60C5F39E4015B5DB /* AgendaWidget.swift */; };
+		42F2903DC1E1C73A4F890327 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F82F22BDAA6B9D6E163910DF /* Foundation.framework */; };
+		4323A8088523F1F23C2E2CC0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D57C7FA32760211131BC0D8 /* Cocoa.framework */; };
+		4F1C2661AF5B15DCC0882802 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 989CF589D62D15E0B46F7A49 /* Assets.xcassets */; };
+		5574019F908D9BEEC3629BEF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F82F22BDAA6B9D6E163910DF /* Foundation.framework */; };
+		570B0C60C53738769DFAE49A /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45493974D374C156CE119481 /* AgendaConfiguration.swift */; };
+		5AE44528A840520712A3512B /* CalendarWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A81584613288AA61E5C5FF /* CalendarWidgetApp.swift */; };
+		9078C41E05AF13414747828D /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729AA6CCB0A8CE5A7C542ADA /* EventKitService.swift */; };
+		92E0576A311F7D8A418BC03E /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729AA6CCB0A8CE5A7C542ADA /* EventKitService.swift */; };
+		942A91D974819465B87C578F /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91F144C3AE60C7D2A06A81F /* CalendarViews.swift */; };
+		9805A486C5AAB81FE7EAF3D2 /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91F144C3AE60C7D2A06A81F /* CalendarViews.swift */; };
+		A0BAF7189735EAC54A82C5C4 /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45493974D374C156CE119481 /* AgendaConfiguration.swift */; };
+		A213F0D896E3E5174D419384 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB0335F66E6E1CEAEC87C26 /* ContentView.swift */; };
+		BD28D48C4A650FED5EF842CB /* CalendarWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A81584613288AA61E5C5FF /* CalendarWidgetApp.swift */; };
+		C28B3EEE69477BF7D3CDD7EC /* AgendaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45493974D374C156CE119481 /* AgendaConfiguration.swift */; };
+		CAC7C0BCAB4E4A7772009FA3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D57C7FA32760211131BC0D8 /* Cocoa.framework */; };
+		CE7C987FFC5B0DA0F4EE16B6 /* EventKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729AA6CCB0A8CE5A7C542ADA /* EventKitService.swift */; };
+		D0555AA7E098440995DD2B95 /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630295B7AE18C712A2C29F96 /* Agenda.swift */; };
+		D7DFE4C034C25D4D9B27C9FB /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630295B7AE18C712A2C29F96 /* Agenda.swift */; };
+		DE155C1D9D4DECD32EF63A47 /* CalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91F144C3AE60C7D2A06A81F /* CalendarViews.swift */; };
+		DE20CA6E67D503EE70BD470B /* AgendaWidgetiOS.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2C90130F3D6ADED801DF10A0 /* AgendaWidgetiOS.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EB3A02FE75A9F3DEA0CFD0D3 /* Agenda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630295B7AE18C712A2C29F96 /* Agenda.swift */; };
+		EB7C758432EF97CE33290BD8 /* AgendaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318A16BE60C5F39E4015B5DB /* AgendaWidget.swift */; };
+		F46224D8F467E4370948FB8A /* AgendaModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2EF39A98698927EAAFA153 /* AgendaModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		ED04FF14143FA8A913FCBCFD /* PBXContainerItemProxy */ = {
+		7E7E7910EF9A798D36D92439 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = D71F22D482E43651A8FC0D6C /* Project object */;
+			containerPortal = DA1D454493FF77C3E8EA9E82 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 1E981B4B9D7DD4CBCCFD5816;
-			remoteInfo = AgendaWidgetMac;
-		};
-		ED67E9A237D50D648229D586 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D71F22D482E43651A8FC0D6C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9BCBED08CDF587F4CF67D10A;
+			remoteGlobalIDString = 7F87420EBA0B11DFAE02C862;
 			remoteInfo = AgendaWidgetiOS;
+		};
+		C20502B23615B2C4DA299DE9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DA1D454493FF77C3E8EA9E82 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2823CCDBD2C10CCC31EDF6D1;
+			remoteInfo = AgendaWidgetMac;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		56CEF611EB4120D037C8418F /* Embed App Extensions */ = {
+		5FA222B119219CB27E08B2F7 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				CD63E8A14DE0C18193CD12AE /* AgendaWidgetMac.appex in Embed App Extensions */,
+				DE20CA6E67D503EE70BD470B /* AgendaWidgetiOS.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9186307A579A7E1DD015BDB7 /* Embed App Extensions */ = {
+		8644B89C660FCA9CFBB4F8A0 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				D2FDF257E2022D8EE7557631 /* AgendaWidgetiOS.appex in Embed App Extensions */,
+				1F5432D8CAFF81A63C8EF6A8 /* AgendaWidgetMac.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -83,149 +83,168 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0D563AD60B6AF392CD226E4E /* AgendaWidgetiOS.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AgendaWidgetiOS.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		3A4A69ED39C32B06B07DED18 /* AgendaModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgendaModel.swift; sourceTree = "<group>"; };
-		3D2E3A857579D45396D63E6A /* AgendaWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgendaWidget.swift; sourceTree = "<group>"; };
-		4114862AAC354A3C37DB13EA /* Agenda.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Agenda.swift; sourceTree = "<group>"; };
-		4FF4A2157B637D2176A67145 /* CalendarWidgetApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarWidgetApp.swift; sourceTree = "<group>"; };
-		5867759AF47C2768881BF2B5 /* AgendaConfiguration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgendaConfiguration.swift; sourceTree = "<group>"; };
-		58C84DAA61205AB7F18AF6B0 /* AgendaWidgetMac.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AgendaWidgetMac.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		5FE05656ABAB1CF860D60B4C /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		646FAA23E4DB80D0462B862E /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		9B8AFF5536F90588C7BA5B57 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
-		9D4325C18CC3C18B954C59D8 /* EventKitService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventKitService.swift; sourceTree = "<group>"; };
-		A5E608589FF9F825777145EF /* CalendarViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarViews.swift; sourceTree = "<group>"; };
-		A87CC8A130B42DCEDF71D51E /* AgendaMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgendaMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DF1462D74BCFF65356F9732D /* AgendaiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgendaiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DF3C4ECEFB17D1C175A73B31 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		2C90130F3D6ADED801DF10A0 /* AgendaWidgetiOS.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AgendaWidgetiOS.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		318A16BE60C5F39E4015B5DB /* AgendaWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgendaWidget.swift; sourceTree = "<group>"; };
+		3A2EF39A98698927EAAFA153 /* AgendaModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgendaModel.swift; sourceTree = "<group>"; };
+		3EB0335F66E6E1CEAEC87C26 /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		45493974D374C156CE119481 /* AgendaConfiguration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgendaConfiguration.swift; sourceTree = "<group>"; };
+		630295B7AE18C712A2C29F96 /* Agenda.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Agenda.swift; sourceTree = "<group>"; };
+		729AA6CCB0A8CE5A7C542ADA /* EventKitService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventKitService.swift; sourceTree = "<group>"; };
+		81A81584613288AA61E5C5FF /* CalendarWidgetApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarWidgetApp.swift; sourceTree = "<group>"; };
+		8653A482912D7F1AD0208F70 /* AgendaiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgendaiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		989CF589D62D15E0B46F7A49 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9D57C7FA32760211131BC0D8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		9EDAB3A0EDD26D34F137C8B9 /* AgendaMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgendaMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D91F144C3AE60C7D2A06A81F /* CalendarViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarViews.swift; sourceTree = "<group>"; };
+		F82F22BDAA6B9D6E163910DF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		FE8DD8D2ABAB4665781EFD24 /* AgendaWidgetMac.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AgendaWidgetMac.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0FFC7E2ABE228AAB782B0679 /* Frameworks */ = {
+		0E6929B6C1833230C91CD075 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BA44DB4CB419ACBBCAD2563E /* Foundation.framework in Frameworks */,
+				5574019F908D9BEEC3629BEF /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		5B5AD3A07CC9F05CB8FDD824 /* Frameworks */ = {
+		1DED2D67E443F0BB25B69732 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1324A23E734541DC51C64304 /* Cocoa.framework in Frameworks */,
+				42F2903DC1E1C73A4F890327 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6615329E6012E02CE672BFFF /* Frameworks */ = {
+		7C8C5FB33ED9CFA479374704 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1E28F6D30A04D9929DD305F /* Cocoa.framework in Frameworks */,
+				4323A8088523F1F23C2E2CC0 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		899917878FAD2987F877D6D8 /* Frameworks */ = {
+		D4E5F08DD720682D769CA4D7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A922BB434E3DEBEACCB78FBF /* Foundation.framework in Frameworks */,
+				CAC7C0BCAB4E4A7772009FA3 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0D437D05247984462D4B9230 = {
+		00AF9C4C54F7A1EA72B45541 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A365804F33531B995DD60E13 /* Products */,
-				BDB130A1034E16A5E0C3B44B /* Frameworks */,
-				2F66A7A719819583FAB94D90 /* Shared */,
-				4ED34C20F363A70C45E19D28 /* App */,
-				6D9F3E6AE3A1EF628F1E8C53 /* Widget */,
+				9EDAB3A0EDD26D34F137C8B9 /* AgendaMac.app */,
+				FE8DD8D2ABAB4665781EFD24 /* AgendaWidgetMac.appex */,
+				8653A482912D7F1AD0208F70 /* AgendaiOS.app */,
+				2C90130F3D6ADED801DF10A0 /* AgendaWidgetiOS.appex */,
 			);
+			name = Products;
 			sourceTree = "<group>";
 		};
-		1D302F74A1D14BD2D84D563E /* iOS */ = {
+		4E4083335030EC75CD278FD5 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				DF3C4ECEFB17D1C175A73B31 /* Foundation.framework */,
+				F82F22BDAA6B9D6E163910DF /* Foundation.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		2F66A7A719819583FAB94D90 /* Shared */ = {
+		543C881E612D7B81F865636F /* Widget */ = {
 			isa = PBXGroup;
 			children = (
-				4114862AAC354A3C37DB13EA /* Agenda.swift */,
-				5867759AF47C2768881BF2B5 /* AgendaConfiguration.swift */,
-				A5E608589FF9F825777145EF /* CalendarViews.swift */,
-				9D4325C18CC3C18B954C59D8 /* EventKitService.swift */,
-			);
-			name = Shared;
-			path = Shared;
-			sourceTree = "<group>";
-		};
-		4ED34C20F363A70C45E19D28 /* App */ = {
-			isa = PBXGroup;
-			children = (
-				3A4A69ED39C32B06B07DED18 /* AgendaModel.swift */,
-				4FF4A2157B637D2176A67145 /* CalendarWidgetApp.swift */,
-				646FAA23E4DB80D0462B862E /* ContentView.swift */,
-				5FE05656ABAB1CF860D60B4C /* Assets.xcassets */,
-			);
-			name = App;
-			path = App;
-			sourceTree = "<group>";
-		};
-		6D9F3E6AE3A1EF628F1E8C53 /* Widget */ = {
-			isa = PBXGroup;
-			children = (
-				3D2E3A857579D45396D63E6A /* AgendaWidget.swift */,
+				318A16BE60C5F39E4015B5DB /* AgendaWidget.swift */,
 			);
 			name = Widget;
 			path = Widget;
 			sourceTree = "<group>";
 		};
-		A365804F33531B995DD60E13 /* Products */ = {
+		6C10F146E991604B3CFE2178 /* OS X */ = {
 			isa = PBXGroup;
 			children = (
-				A87CC8A130B42DCEDF71D51E /* AgendaMac.app */,
-				58C84DAA61205AB7F18AF6B0 /* AgendaWidgetMac.appex */,
-				DF1462D74BCFF65356F9732D /* AgendaiOS.app */,
-				0D563AD60B6AF392CD226E4E /* AgendaWidgetiOS.appex */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		BDB130A1034E16A5E0C3B44B /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				FA77EAC265FC642EF2719DD2 /* OS X */,
-				1D302F74A1D14BD2D84D563E /* iOS */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		FA77EAC265FC642EF2719DD2 /* OS X */ = {
-			isa = PBXGroup;
-			children = (
-				9B8AFF5536F90588C7BA5B57 /* Cocoa.framework */,
+				9D57C7FA32760211131BC0D8 /* Cocoa.framework */,
 			);
 			name = "OS X";
+			sourceTree = "<group>";
+		};
+		B7B9CEE0750438844B7F79E3 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3A2EF39A98698927EAAFA153 /* AgendaModel.swift */,
+				81A81584613288AA61E5C5FF /* CalendarWidgetApp.swift */,
+				3EB0335F66E6E1CEAEC87C26 /* ContentView.swift */,
+				989CF589D62D15E0B46F7A49 /* Assets.xcassets */,
+			);
+			name = App;
+			path = App;
+			sourceTree = "<group>";
+		};
+		E102C2831B8EFC816C60286C /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				630295B7AE18C712A2C29F96 /* Agenda.swift */,
+				45493974D374C156CE119481 /* AgendaConfiguration.swift */,
+				D91F144C3AE60C7D2A06A81F /* CalendarViews.swift */,
+				729AA6CCB0A8CE5A7C542ADA /* EventKitService.swift */,
+			);
+			name = Shared;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		EB41F253D6C9E4EEF559B531 = {
+			isa = PBXGroup;
+			children = (
+				00AF9C4C54F7A1EA72B45541 /* Products */,
+				F68056668333510F74750E53 /* Frameworks */,
+				E102C2831B8EFC816C60286C /* Shared */,
+				B7B9CEE0750438844B7F79E3 /* App */,
+				543C881E612D7B81F865636F /* Widget */,
+			);
+			sourceTree = "<group>";
+		};
+		F68056668333510F74750E53 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6C10F146E991604B3CFE2178 /* OS X */,
+				4E4083335030EC75CD278FD5 /* iOS */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1E981B4B9D7DD4CBCCFD5816 /* AgendaWidgetMac */ = {
+		174EB04768EDCD08092B1247 /* AgendaiOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D3EFA5109E654513F06543E0 /* Build configuration list for PBXNativeTarget "AgendaWidgetMac" */;
+			buildConfigurationList = 89206256CC00BEB3D5C05E6A /* Build configuration list for PBXNativeTarget "AgendaiOS" */;
 			buildPhases = (
-				C509822FD92DAE5B606CD5E9 /* Sources */,
-				5B5AD3A07CC9F05CB8FDD824 /* Frameworks */,
-				9DE3FD7E4E3CB8B3528BD82D /* Resources */,
+				D91B90E43BF71424768390F8 /* Sources */,
+				1DED2D67E443F0BB25B69732 /* Frameworks */,
+				BF81A325631AE936873B887D /* Resources */,
+				5FA222B119219CB27E08B2F7 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1945A9514AB67BC43EA507E0 /* PBXTargetDependency */,
+			);
+			name = AgendaiOS;
+			productName = AgendaiOS;
+			productReference = 8653A482912D7F1AD0208F70 /* AgendaiOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2823CCDBD2C10CCC31EDF6D1 /* AgendaWidgetMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 63C40459305F7B4F4FB0A2CA /* Build configuration list for PBXNativeTarget "AgendaWidgetMac" */;
+			buildPhases = (
+				6E9A2F10E3AEE744297F8B85 /* Sources */,
+				D4E5F08DD720682D769CA4D7 /* Frameworks */,
+				BE3E568F13465799CF6762D8 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -233,35 +252,16 @@
 			);
 			name = AgendaWidgetMac;
 			productName = AgendaWidgetMac;
-			productReference = 58C84DAA61205AB7F18AF6B0 /* AgendaWidgetMac.appex */;
+			productReference = FE8DD8D2ABAB4665781EFD24 /* AgendaWidgetMac.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		58D93530127E876E197D3E99 /* AgendaMac */ = {
+		7F87420EBA0B11DFAE02C862 /* AgendaWidgetiOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1C70C1313440B3CDBE63B9A4 /* Build configuration list for PBXNativeTarget "AgendaMac" */;
+			buildConfigurationList = DF641FA885591C60CAAEE3F9 /* Build configuration list for PBXNativeTarget "AgendaWidgetiOS" */;
 			buildPhases = (
-				40B18901F83949122F7A0538 /* Sources */,
-				6615329E6012E02CE672BFFF /* Frameworks */,
-				7FF0782DC35BBFC0D95A1F57 /* Resources */,
-				56CEF611EB4120D037C8418F /* Embed App Extensions */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				08CC89425B8E57DF1E31DC83 /* PBXTargetDependency */,
-			);
-			name = AgendaMac;
-			productName = AgendaMac;
-			productReference = A87CC8A130B42DCEDF71D51E /* AgendaMac.app */;
-			productType = "com.apple.product-type.application";
-		};
-		9BCBED08CDF587F4CF67D10A /* AgendaWidgetiOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 0AB5F3EB2779B18461539AC1 /* Build configuration list for PBXNativeTarget "AgendaWidgetiOS" */;
-			buildPhases = (
-				D3F3EC7B1DF807FBC7356D35 /* Sources */,
-				0FFC7E2ABE228AAB782B0679 /* Frameworks */,
-				113052B5B85BCAFF3C4809C3 /* Resources */,
+				3A2AA06FCE73B582D740FC1B /* Sources */,
+				0E6929B6C1833230C91CD075 /* Frameworks */,
+				E45AEBB1C8C886023AEA46B3 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -269,38 +269,38 @@
 			);
 			name = AgendaWidgetiOS;
 			productName = AgendaWidgetiOS;
-			productReference = 0D563AD60B6AF392CD226E4E /* AgendaWidgetiOS.appex */;
+			productReference = 2C90130F3D6ADED801DF10A0 /* AgendaWidgetiOS.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		A9E7BBC6C186074FB19EB4C1 /* AgendaiOS */ = {
+		C6799A044CFD327A73540A03 /* AgendaMac */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5399BF584D001BBC6FC90025 /* Build configuration list for PBXNativeTarget "AgendaiOS" */;
+			buildConfigurationList = F102A294F853D92BD87644B3 /* Build configuration list for PBXNativeTarget "AgendaMac" */;
 			buildPhases = (
-				67FF23F202DDC789EC9DD1A9 /* Sources */,
-				899917878FAD2987F877D6D8 /* Frameworks */,
-				B8CCEF0E89CE9B122755CEA8 /* Resources */,
-				9186307A579A7E1DD015BDB7 /* Embed App Extensions */,
+				134BA388600B9FFBC36AAD2E /* Sources */,
+				7C8C5FB33ED9CFA479374704 /* Frameworks */,
+				2DF57AEC5624DC801DD2FEE4 /* Resources */,
+				8644B89C660FCA9CFBB4F8A0 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				464834E69E855D9B84D06C3C /* PBXTargetDependency */,
+				B75E5066D2D32186FDCE12DA /* PBXTargetDependency */,
 			);
-			name = AgendaiOS;
-			productName = AgendaiOS;
-			productReference = DF1462D74BCFF65356F9732D /* AgendaiOS.app */;
+			name = AgendaMac;
+			productName = AgendaMac;
+			productReference = 9EDAB3A0EDD26D34F137C8B9 /* AgendaMac.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		D71F22D482E43651A8FC0D6C /* Project object */ = {
+		DA1D454493FF77C3E8EA9E82 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 			};
-			buildConfigurationList = AE02702B03E3DC6AD06E72D6 /* Build configuration list for PBXProject "CalendarWidget" */;
+			buildConfigurationList = FF65C199A00BDCBE84B20F1D /* Build configuration list for PBXProject "CalendarWidget" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -308,125 +308,125 @@
 				en,
 				Base,
 			);
-			mainGroup = 0D437D05247984462D4B9230;
+			mainGroup = EB41F253D6C9E4EEF559B531;
 			minimizedProjectReferenceProxies = 0;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = A365804F33531B995DD60E13 /* Products */;
+			productRefGroup = 00AF9C4C54F7A1EA72B45541 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58D93530127E876E197D3E99 /* AgendaMac */,
-				1E981B4B9D7DD4CBCCFD5816 /* AgendaWidgetMac */,
-				A9E7BBC6C186074FB19EB4C1 /* AgendaiOS */,
-				9BCBED08CDF587F4CF67D10A /* AgendaWidgetiOS */,
+				C6799A044CFD327A73540A03 /* AgendaMac */,
+				2823CCDBD2C10CCC31EDF6D1 /* AgendaWidgetMac */,
+				174EB04768EDCD08092B1247 /* AgendaiOS */,
+				7F87420EBA0B11DFAE02C862 /* AgendaWidgetiOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		113052B5B85BCAFF3C4809C3 /* Resources */ = {
+		2DF57AEC5624DC801DD2FEE4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7FF0782DC35BBFC0D95A1F57 /* Resources */ = {
+		BE3E568F13465799CF6762D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9DE3FD7E4E3CB8B3528BD82D /* Resources */ = {
+		BF81A325631AE936873B887D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F1C2661AF5B15DCC0882802 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B8CCEF0E89CE9B122755CEA8 /* Resources */ = {
+		E45AEBB1C8C886023AEA46B3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9AE1CDA2F0E99C124118F06A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		40B18901F83949122F7A0538 /* Sources */ = {
+		134BA388600B9FFBC36AAD2E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9D103FB3D389A46F70887C47 /* Agenda.swift in Sources */,
-				5565C39CF0B284C72AA686EC /* AgendaConfiguration.swift in Sources */,
-				AA360465DD30299A08EE2CF4 /* CalendarViews.swift in Sources */,
-				EDE7538C053524DE0F93E5A3 /* EventKitService.swift in Sources */,
-				CF6F28C9E9ED1E2E0A9C95AE /* AgendaModel.swift in Sources */,
-				127550EAEF520C6FED05530B /* CalendarWidgetApp.swift in Sources */,
-				61CF0CFEC453271DD40588E5 /* ContentView.swift in Sources */,
+				D7DFE4C034C25D4D9B27C9FB /* Agenda.swift in Sources */,
+				570B0C60C53738769DFAE49A /* AgendaConfiguration.swift in Sources */,
+				098FFAF29D3D53F4E7A450F5 /* CalendarViews.swift in Sources */,
+				2F7A379C49BC041EC5A74713 /* EventKitService.swift in Sources */,
+				0B9B940DAA45477573A0D764 /* AgendaModel.swift in Sources */,
+				BD28D48C4A650FED5EF842CB /* CalendarWidgetApp.swift in Sources */,
+				A213F0D896E3E5174D419384 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		67FF23F202DDC789EC9DD1A9 /* Sources */ = {
+		3A2AA06FCE73B582D740FC1B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2194E32D2A895A97316459AB /* Agenda.swift in Sources */,
-				E2CFAEB19768BFB7AA1693A4 /* AgendaConfiguration.swift in Sources */,
-				849AF333E5940609E2026351 /* CalendarViews.swift in Sources */,
-				AC822D7D3EDC3FE9A7E9A01F /* EventKitService.swift in Sources */,
-				507068B2F3D43903719B5CC1 /* AgendaModel.swift in Sources */,
-				109B906A8C933A2E82A6675B /* CalendarWidgetApp.swift in Sources */,
-				B6C6F8A73183B50B9746A880 /* ContentView.swift in Sources */,
+				EB3A02FE75A9F3DEA0CFD0D3 /* Agenda.swift in Sources */,
+				284E4C8E7101DE77B9B178A2 /* AgendaConfiguration.swift in Sources */,
+				942A91D974819465B87C578F /* CalendarViews.swift in Sources */,
+				CE7C987FFC5B0DA0F4EE16B6 /* EventKitService.swift in Sources */,
+				3D8C05E3166CD32E373E53B8 /* AgendaWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C509822FD92DAE5B606CD5E9 /* Sources */ = {
+		6E9A2F10E3AEE744297F8B85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0D12703350950EA8992C81DB /* Agenda.swift in Sources */,
-				9057426CEDBE0DD7E46EF3A1 /* AgendaConfiguration.swift in Sources */,
-				4C389AE15FEA65FDD26596B1 /* CalendarViews.swift in Sources */,
-				5F3849486E7A257A1D31DF73 /* EventKitService.swift in Sources */,
-				E8ED75088FAFBB85E039388D /* AgendaWidget.swift in Sources */,
+				D0555AA7E098440995DD2B95 /* Agenda.swift in Sources */,
+				C28B3EEE69477BF7D3CDD7EC /* AgendaConfiguration.swift in Sources */,
+				DE155C1D9D4DECD32EF63A47 /* CalendarViews.swift in Sources */,
+				92E0576A311F7D8A418BC03E /* EventKitService.swift in Sources */,
+				EB7C758432EF97CE33290BD8 /* AgendaWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D3F3EC7B1DF807FBC7356D35 /* Sources */ = {
+		D91B90E43BF71424768390F8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				912BC3EB3736AACBA6184B7C /* Agenda.swift in Sources */,
-				55B00CE2FC0F17AABFA961B9 /* AgendaConfiguration.swift in Sources */,
-				2E58CC7F1F84B349A597D508 /* CalendarViews.swift in Sources */,
-				3A6C8D49CBDC5777F125CC7F /* EventKitService.swift in Sources */,
-				50CC6F34B566F0779D52D893 /* AgendaWidget.swift in Sources */,
+				251CF5EE405CFFB2A8BE924A /* Agenda.swift in Sources */,
+				A0BAF7189735EAC54A82C5C4 /* AgendaConfiguration.swift in Sources */,
+				9805A486C5AAB81FE7EAF3D2 /* CalendarViews.swift in Sources */,
+				9078C41E05AF13414747828D /* EventKitService.swift in Sources */,
+				F46224D8F467E4370948FB8A /* AgendaModel.swift in Sources */,
+				5AE44528A840520712A3512B /* CalendarWidgetApp.swift in Sources */,
+				230DD354EFA74234D83B5EEE /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		08CC89425B8E57DF1E31DC83 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = AgendaWidgetMac;
-			target = 1E981B4B9D7DD4CBCCFD5816 /* AgendaWidgetMac */;
-			targetProxy = ED04FF14143FA8A913FCBCFD /* PBXContainerItemProxy */;
-		};
-		464834E69E855D9B84D06C3C /* PBXTargetDependency */ = {
+		1945A9514AB67BC43EA507E0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = AgendaWidgetiOS;
-			target = 9BCBED08CDF587F4CF67D10A /* AgendaWidgetiOS */;
-			targetProxy = ED67E9A237D50D648229D586 /* PBXContainerItemProxy */;
+			target = 7F87420EBA0B11DFAE02C862 /* AgendaWidgetiOS */;
+			targetProxy = 7E7E7910EF9A798D36D92439 /* PBXContainerItemProxy */;
+		};
+		B75E5066D2D32186FDCE12DA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = AgendaWidgetMac;
+			target = 2823CCDBD2C10CCC31EDF6D1 /* AgendaWidgetMac */;
+			targetProxy = C20502B23615B2C4DA299DE9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		17E2C6DD8224268BA1F2AF37 /* Release */ = {
+		1B97049A23547FF2A7DA20D4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				AGENDA_APP_GROUP = group.com.schoren.calendarwidget;
@@ -450,51 +450,85 @@
 			};
 			name = Release;
 		};
-		1F1A74FF2B41F12C160DF3A0 /* Release */ = {
+		4F95B2BD3B856AF0BA93EBD0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AGENDA_APP_GROUP = "$(DEVELOPMENT_TEAM).com.schoren.calendarwidget";
+				AGENDA_APP_GROUP = group.com.schoren.calendarwidget;
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_ENTITLEMENTS = Widget/Mac.entitlements;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Widget/iOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 11;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.5.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetmac.widget;
-				SDKROOT = macosx;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetios.widget;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		64349363474359E72DC215D5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
-		2464BDB725551696B6075E7F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				AGENDA_APP_GROUP = group.com.schoren.calendarwidget;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = App/iOS.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.5.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetios;
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		2868498188F6C9F29E3A5344 /* Debug */ = {
+		7EEFC72F72BDB653861CB8E5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -555,10 +589,10 @@
 			};
 			name = Debug;
 		};
-		3E42BCE661C1B768085A3CD4 /* Debug */ = {
+		97CEDA1C54BAD9C1C3AB547E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AGENDA_APP_GROUP = "$(DEVELOPMENT_TEAM).com.schoren.calendarwidget";
+				AGENDA_APP_GROUP = "$(TeamIdentifierPrefix)group.com.schoren.calendarwidget";
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = Widget/Mac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -569,41 +603,17 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.5.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetmac.widget;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		4102303914052F5A2DEDCB15 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				AGENDA_APP_GROUP = group.com.schoren.calendarwidget;
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = Widget/iOS.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Widget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 0.5.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetios.widget;
-				SDKROOT = iphoneos;
+				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		69AAAD343DA9BE44FE23BE28 /* Debug */ = {
+		9A75D26163C31C195F12C1C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AGENDA_APP_GROUP = "$(DEVELOPMENT_TEAM).com.schoren.calendarwidget";
+				AGENDA_APP_GROUP = "$(TeamIdentifierPrefix)group.com.schoren.calendarwidget";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Mac.entitlements;
@@ -616,35 +626,13 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.5.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetmac;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetios;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		778BBF8D4BE2FA8D0620C00B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				AGENDA_APP_GROUP = "$(DEVELOPMENT_TEAM).com.schoren.calendarwidget";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = App/Mac.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 11;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = App/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.5.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetmac;
-				SDKROOT = macosx;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
-		7A9A006FACFCE62FA9062F02 /* Debug */ = {
+		9E674CED0DE30B9A7A691C9D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				AGENDA_APP_GROUP = group.com.schoren.calendarwidget;
@@ -667,109 +655,121 @@
 			};
 			name = Debug;
 		};
-		BD8788C75DCDB68315D83B07 /* Release */ = {
+		B8B43F48F56E9A5A41C40E89 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				AGENDA_APP_GROUP = "$(TeamIdentifierPrefix)group.com.schoren.calendarwidget";
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = Widget/Mac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Widget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.5.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetios.widget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C21EA44ACDF4BCEC43ED0739 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				AGENDA_APP_GROUP = "$(TeamIdentifierPrefix)group.com.schoren.calendarwidget";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Mac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 11;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.5.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetios;
+				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
+		};
+		DD753A99AE2C05F04B9DE8E4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				AGENDA_APP_GROUP = group.com.schoren.calendarwidget;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = App/iOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.5.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.calendarwidgetios;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0AB5F3EB2779B18461539AC1 /* Build configuration list for PBXNativeTarget "AgendaWidgetiOS" */ = {
+		63C40459305F7B4F4FB0A2CA /* Build configuration list for PBXNativeTarget "AgendaWidgetMac" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4102303914052F5A2DEDCB15 /* Release */,
-				7A9A006FACFCE62FA9062F02 /* Debug */,
+				97CEDA1C54BAD9C1C3AB547E /* Release */,
+				B8B43F48F56E9A5A41C40E89 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1C70C1313440B3CDBE63B9A4 /* Build configuration list for PBXNativeTarget "AgendaMac" */ = {
+		89206256CC00BEB3D5C05E6A /* Build configuration list for PBXNativeTarget "AgendaiOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				778BBF8D4BE2FA8D0620C00B /* Release */,
-				69AAAD343DA9BE44FE23BE28 /* Debug */,
+				1B97049A23547FF2A7DA20D4 /* Release */,
+				DD753A99AE2C05F04B9DE8E4 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5399BF584D001BBC6FC90025 /* Build configuration list for PBXNativeTarget "AgendaiOS" */ = {
+		DF641FA885591C60CAAEE3F9 /* Build configuration list for PBXNativeTarget "AgendaWidgetiOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				17E2C6DD8224268BA1F2AF37 /* Release */,
-				2464BDB725551696B6075E7F /* Debug */,
+				4F95B2BD3B856AF0BA93EBD0 /* Release */,
+				9E674CED0DE30B9A7A691C9D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AE02702B03E3DC6AD06E72D6 /* Build configuration list for PBXProject "CalendarWidget" */ = {
+		F102A294F853D92BD87644B3 /* Build configuration list for PBXNativeTarget "AgendaMac" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2868498188F6C9F29E3A5344 /* Debug */,
-				BD8788C75DCDB68315D83B07 /* Release */,
+				C21EA44ACDF4BCEC43ED0739 /* Release */,
+				9A75D26163C31C195F12C1C4 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D3EFA5109E654513F06543E0 /* Build configuration list for PBXNativeTarget "AgendaWidgetMac" */ = {
+		FF65C199A00BDCBE84B20F1D /* Build configuration list for PBXProject "CalendarWidget" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				1F1A74FF2B41F12C160DF3A0 /* Release */,
-				3E42BCE661C1B768085A3CD4 /* Debug */,
+				7EEFC72F72BDB653861CB8E5 /* Debug */,
+				64349363474359E72DC215D5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = D71F22D482E43651A8FC0D6C /* Project object */;
+	rootObject = DA1D454493FF77C3E8EA9E82 /* Project object */;
 }
