@@ -20,6 +20,7 @@ struct AgendaDatesTests {
         precondition(birthday.isBirthday)
         precondition(birthday.displayTitle == "Nora Soriano (Cumpleaños)")
         precondition(item.occurs(on: date(2026, 9, 14), calendar: calendar))
+        precondition(item.calendarOpenIdentifier == "1")
         precondition(item.occurs(on: date(2026, 9, 16), calendar: calendar))
         precondition(!item.occurs(on: date(2026, 9, 17), calendar: calendar))
         precondition(!item.occurs(on: date(2026, 9, 13), calendar: calendar))
@@ -68,7 +69,8 @@ struct AgendaDatesTests {
         let oldItem = """
         {"id":"old","title":"Old","allDay":false,"reminder":false,"calendarID":"a","calendarName":"A","red":1,"green":0,"blue":0}
         """
-        precondition(try! JSONDecoder().decode(AgendaItem.self, from: Data(oldItem.utf8)).externalIdentifier == nil)
+        let decodedOldItem = try! JSONDecoder().decode(AgendaItem.self, from: Data(oldItem.utf8))
+        precondition(decodedOldItem.externalIdentifier == nil && decodedOldItem.calendarItemIdentifier == nil)
         print("PASS: dates, snapshots, widget filters, next event selection, Zoom/Meet links and host validation")
     }
 }

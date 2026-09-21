@@ -15,7 +15,14 @@ struct AgendaItem: Codable, Identifiable, Hashable {
     var blue: Double
     var meetingURL: URL? = nil
     var externalIdentifier: String? = nil
+    var calendarItemIdentifier: String? = nil
     var color: Color { Color(red: red, green: green, blue: blue) }
+    var calendarOpenIdentifier: String {
+        if let calendarItemIdentifier { return calendarItemIdentifier }
+        guard let start else { return id }
+        let suffix = "-\(start.timeIntervalSince1970)"
+        return id.hasSuffix(suffix) ? String(id.dropLast(suffix.count)) : id
+    }
     var isBirthday: Bool {
         let name = calendarName.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
         return name.contains("birthday") || name.contains("cumplean")

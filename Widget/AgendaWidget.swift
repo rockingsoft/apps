@@ -46,6 +46,23 @@ struct WidgetMonthView: View {
         let first = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
         return calendar.date(byAdding: .month, value: offset, to: first)!
     }
+    private func selectionURL(_ date: Date?) -> URL {
+        var components = URLComponents()
+        components.scheme = "calendarwidget"
+        components.host = "select"
+        components.queryItems = [
+            URLQueryItem(name: "timestamp", value: String(date?.timeIntervalSince1970 ?? 0)),
+            URLQueryItem(name: "key", value: selectionKey)
+        ]
+        return components.url!
+    }
+    @ViewBuilder private func selectionControl<Label: View>(date: Date?, @ViewBuilder label: () -> Label) -> some View {
+        #if os(macOS)
+        Link(destination: selectionURL(date), label: label).buttonStyle(.plain)
+        #else
+        Button(intent: SelectWidgetDay(date: date, key: selectionKey), label: label).buttonStyle(.plain)
+        #endif
+    }
     var body: some View {
         let days = WidgetAgendaData.monthDays(date)
         VStack(spacing: small ? 4 : 6) {
@@ -53,18 +70,18 @@ struct WidgetMonthView: View {
                 Text(date.formatted(.dateTime.month(.wide)).capitalized).fontWeight(.bold)
                 if !small { Text(date.formatted(.dateTime.year())).foregroundStyle(.red) }
                 Spacer(minLength: 0)
-                Button(intent: SelectWidgetDay(date: month(-1), key: selectionKey)) {
+                selectionControl(date: month(-1)) {
                     Image(systemName: "chevron.left").font(.system(size: 11, weight: .semibold))
                         .frame(width: small ? 16 : 22, height: 24).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityLabel("Mes anterior")
-                Button(intent: SelectWidgetDay(date: nil, key: selectionKey)) {
+                }.accessibilityLabel("Mes anterior")
+                selectionControl(date: nil) {
                     Text("Hoy").font(.system(size: 10, weight: .medium)).foregroundStyle(.blue)
                         .padding(4).contentShape(Rectangle())
-                }.buttonStyle(.plain)
-                Button(intent: SelectWidgetDay(date: month(1), key: selectionKey)) {
+                }
+                selectionControl(date: month(1)) {
                     Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold))
                         .frame(width: small ? 16 : 22, height: 24).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityLabel("Mes siguiente")
+                }.accessibilityLabel("Mes siguiente")
             }.font(.system(size: small ? 16 : 22)).lineLimit(1).minimumScaleFactor(0.75)
             HStack(spacing: 0) {
                 ForEach(0..<7) { offset in
@@ -78,7 +95,7 @@ struct WidgetMonthView: View {
                         ForEach(0..<7) { weekday in
                             let day = days[week * 7 + weekday]
                             let today = calendar.isDateInToday(day)
-                            Button(intent: SelectWidgetDay(date: day, key: selectionKey)) {
+                            selectionControl(date: day) {
                             VStack(spacing: 1) {
                                 Text(day.formatted(.dateTime.day()))
                                     .font(.system(size: small ? 10 : 12, weight: today ? .semibold : .regular))
@@ -94,8 +111,7 @@ struct WidgetMonthView: View {
                                     }
                                 }.frame(height: 3)
                             }.frame(maxWidth: .infinity, maxHeight: .infinity).contentShape(Rectangle())
-                            }.buttonStyle(.plain)
-                                .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
+                            }.accessibilityLabel(day.formatted(date: .complete, time: .omitted))
                                 .accessibilityAddTraits(calendar.isDate(day, inSameDayAs: date) ? .isSelected : [])
                         }
                     }.frame(height: small ? 15 : 20)
@@ -169,7 +185,7 @@ struct AgendaWidgetView: View {
             .sorted { ($0.start ?? .distantFuture) < ($1.start ?? .distantFuture) }
     }
     private var agenda: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 6) {
             if entry.snapshot.calendarAccess != true && entry.snapshot.remindersAccess != true {
                 Text("Conectá tu agenda").font(.system(size: 14, weight: .semibold)).foregroundStyle(.white)
                 Text("Habilitá Calendario y Recordatorios en Agenda.").font(.system(size: 12)).foregroundStyle(.gray)
@@ -185,12 +201,13 @@ struct AgendaWidgetView: View {
             Link(destination: calendarURL) { calendarLabel }.buttonStyle(.plain)
 
         }
-        .padding(family == .systemSmall ? 12 : 14)
+        .padding(.horizontal, family == .systemSmall ? 12 : 14)
+        .padding(.vertical, family == .systemSmall ? 12 : 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color(white: 0.125))
     }
     private func agendaContent(extra: Int) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             DayHeading(date: entry.selectedDay)
             if let event = nextEvent {
                 eventRow(event, primary: true)
@@ -199,14 +216,23 @@ struct AgendaWidgetView: View {
             }
             ForEach(Array(following.prefix(extra))) { item in eventRow(item, primary: false) }
             if following.count > extra {
-                Label("\(following.count - extra) más", systemImage: "ellipsis")
-                    .font(.system(size: 11, weight: .semibold)).foregroundStyle(.white)
+                Link(destination: calendarURL) {
+                    HStack(spacing: 10) {
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(LinearGradient(colors: [.cyan, .purple, .pink], startPoint: .top, endPoint: .bottom))
+                            .frame(width: 3, height: 24)
+                        Text("\(following.count - extra) eventos más")
+                            .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white)
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right").font(.system(size: 9, weight: .bold)).foregroundStyle(.gray)
+                    }.contentShape(Rectangle())
+                }.buttonStyle(.plain)
             }
 
         }.fixedSize(horizontal: false, vertical: true)
     }
     private func eventRow(_ item: AgendaItem, primary: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 3) {
             HStack(alignment: .center, spacing: 10) {
                 Link(destination: item.reminder ? calendarURL : eventURL(item)) {
                     HStack(alignment: .center, spacing: 10) {
@@ -215,7 +241,7 @@ struct AgendaWidgetView: View {
                         } else {
                             RoundedRectangle(cornerRadius: 2).fill(item.color).frame(width: 3)
                         }
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(item.displayTitle).font(.system(size: primary ? 14 : 12, weight: .semibold))
                                 .foregroundStyle(.white).lineLimit(primary || item.allDay ? 2 : 1)
                             if !item.isBirthday { HStack(spacing: 4) {
@@ -241,10 +267,11 @@ struct AgendaWidgetView: View {
     }
     private func eventURL(_ item: AgendaItem) -> URL {
         deepLink(host: "event", values: [
-            "id": item.externalIdentifier ?? "",
+            "id": item.calendarOpenIdentifier,
             "title": item.title,
             "calendar": item.calendarName,
-            "timestamp": String((item.start ?? entry.selectedDay).timeIntervalSince1970)
+            "timestamp": String((item.start ?? entry.selectedDay).timeIntervalSince1970),
+            "allDay": String(item.allDay)
         ])
     }
 
@@ -258,7 +285,7 @@ struct AgendaWidgetView: View {
     }
     private var joinLabel: some View {
         Label("Unirse", systemImage: "video.fill")
-            .font(.system(size: 11, weight: .semibold)).padding(.horizontal, 9).padding(.vertical, 8)
+            .font(.system(size: 10, weight: .semibold)).padding(.horizontal, 8).padding(.vertical, 6)
             .background(Color.blue, in: Capsule()).foregroundStyle(.white)
             .contentShape(Capsule())
     }

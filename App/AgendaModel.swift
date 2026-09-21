@@ -73,10 +73,16 @@ final class AgendaModel: ObservableObject {
                 identifier: identifier,
                 title: parameters["title"] ?? "",
                 calendarName: parameters["calendar"] ?? "",
-                timestamp: Double(parameters["timestamp"] ?? "")
+                timestamp: Double(parameters["timestamp"] ?? ""),
+                allDay: parameters["allDay"] == "true"
             )
         } else if url.host == "calendar" {
             openCalendar(timestamp: Double(parameters["timestamp"] ?? ""))
+        } else if url.host == "select", let key = parameters["key"] {
+            let timestamp = Double(parameters["timestamp"] ?? "") ?? 0
+            if timestamp == 0 { AgendaCache.defaults.removeObject(forKey: key) }
+            else { AgendaCache.defaults.set(timestamp, forKey: key) }
+            WidgetCenter.shared.reloadTimelines(ofKind: "AgendaWidget")
         } else if url.host == "day", let value = parameters["timestamp"], let timestamp = Double(value), timestamp.isFinite {
             let day = Date(timeIntervalSince1970: timestamp)
             month = day
@@ -104,10 +110,20 @@ final class AgendaModel: ObservableObject {
     private func appleScriptLiteral(_ value: String) -> String {
         value.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
     }
-    private func openCalendarEvent(identifier: String, title: String, calendarName: String, timestamp: Double?) {
+    private func openCalendarEvent(identifier: String, title: String, calendarName: String, timestamp: Double?, allDay: Bool) {
         #if os(macOS)
         guard let timestamp, timestamp.isFinite else { openCalendar(timestamp: timestamp); return }
         let date = Date(timeIntervalSince1970: timestamp)
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
+        formatter.timeZone = allDay ? .current : TimeZone(secondsFromGMT: 0)
+        let encodedIdentifier = identifier.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? identifier
+        if let url = URL(string: "ical://ekevent/\(formatter.string(from: date))/\(encodedIdentifier)?method=show&options=more"),
+           NSWorkspace.shared.open(url) {
+            NSApp.hide(nil)
+            return
+        }
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
         let escapedIdentifier = appleScriptLiteral(identifier)
         let escapedTitle = appleScriptLiteral(title)
