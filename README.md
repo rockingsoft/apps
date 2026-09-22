@@ -7,6 +7,7 @@ Workspace para mantener varias aplicaciones y herramientas pequeñas en un solo 
 | App | Plataformas | Descripción |
 | --- | --- | --- |
 | [Agenda](apps/agenda/README.md) | macOS, iOS, iPadOS | Calendario y recordatorios con widgets nativos. |
+| [Paleta](apps/paleta/README.md) | macOS | Paleta global para buscar y ejecutar comandos de la app activa. |
 
 La lista se puede consultar sin abrir ningún proyecto:
 

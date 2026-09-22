@@ -1,0 +1,6 @@
+{
+  "id": "paleta",
+  "name": "Paleta",
+  "description": "Paleta global para buscar y ejecutar comandos de la app activa",
+  "platforms": ["macOS"]
+}
