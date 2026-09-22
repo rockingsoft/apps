@@ -31,4 +31,4 @@ Los releases públicos se firman con Developer ID, se notarizan con Apple y se p
 brew install --cask rockingsoft/tap/paleta
 ```
 
-El workflow de release requiere los secretos `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`, `APPLE_APP_PASSWORD`, `APPLE_TEAM_ID` y `KEYCHAIN_PASSWORD`. La publicación se activa con un tag semántico, por ejemplo `v0.1.0`.
+El workflow de release requiere los secretos `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`, `APPLE_APP_PASSWORD`, `APPLE_TEAM_ID` y `KEYCHAIN_PASSWORD`. La publicación se activa con un tag semántico con namespace, por ejemplo `paleta-v0.1.0`.
