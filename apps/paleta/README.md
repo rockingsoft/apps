@@ -22,3 +22,13 @@ La primera vez, macOS solicita habilitar **Paleta** en Configuración del Sistem
 - Historial persistente por aplicación: los comandos ejecutados recientemente aparecen primero y reciben prioridad en la búsqueda.
 
 El nombre, el diseño y el código son propios; Paletro se usa únicamente como referencia funcional.
+
+## Distribución
+
+Los releases públicos se firman con Developer ID, se notarizan con Apple y se publican en GitHub. El canal Homebrew oficial de RockingSoft es:
+
+```sh
+brew install --cask rockingsoft/tap/paleta
+```
+
+El workflow de release requiere los secretos `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`, `APPLE_APP_PASSWORD`, `APPLE_TEAM_ID` y `KEYCHAIN_PASSWORD`. La publicación se activa con un tag semántico, por ejemplo `v0.1.0`.
