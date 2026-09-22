@@ -51,7 +51,7 @@ struct WidgetMonthView: View {
     }
     var body: some View {
         let days = WidgetAgendaData.monthDays(date)
-        VStack(spacing: small ? 3 : 6) {
+        VStack(spacing: small ? 4 : 6) {
             HStack(spacing: 5) {
                 Text(date.formatted(.dateTime.month(.wide)).capitalized).fontWeight(.bold)
                 if !small { Text(date.formatted(.dateTime.year())).foregroundStyle(.red) }
@@ -68,46 +68,42 @@ struct WidgetMonthView: View {
                     Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold))
                         .frame(width: small ? 16 : 22, height: 24).contentShape(Rectangle())
                 }.accessibilityLabel("Mes siguiente")
-            }.font(.system(size: small ? 14 : 22)).lineLimit(1).minimumScaleFactor(0.75)
+            }.font(.system(size: small ? 16 : 22)).lineLimit(1).minimumScaleFactor(0.75)
             HStack(spacing: 0) {
                 ForEach(0..<7) { offset in
                     Text(calendar.shortStandaloneWeekdaySymbols[(calendar.firstWeekday - 1 + offset) % 7].uppercased())
                         .font(.system(size: 9, weight: .medium)).foregroundStyle(.gray).frame(maxWidth: .infinity)
                 }
             }
-            GeometryReader { geometry in
-                let weekCount = days.count / 7
-                let rowHeight = geometry.size.height / CGFloat(weekCount)
-                VStack(spacing: 0) {
-                    ForEach(0..<weekCount, id: \.self) { week in
-                        HStack(spacing: 0) {
-                            ForEach(0..<7) { weekday in
-                                let day = days[week * 7 + weekday]
-                                let today = calendar.isDateInToday(day)
-                                selectionControl(date: day) {
-                                VStack(spacing: 1) {
-                                    Text(day.formatted(.dateTime.day()))
-                                        .font(.system(size: small ? 10 : 12, weight: today ? .semibold : .regular))
-                                        .foregroundStyle(today ? .white : calendar.isDate(day, equalTo: date, toGranularity: .month) ? (dark ? .white : Color(white: 0.12)) : .gray)
-                                        .frame(width: small ? 17 : 20, height: small ? 12 : 16)
-                                        .background {
-                                            if today { Circle().fill(Color.blue) }
-                                            else if calendar.isDate(day, inSameDayAs: date) { Circle().fill(Color.blue.opacity(0.18)) }
-                                        }
-                                    HStack(spacing: 2) {
-                                        ForEach(Array(items.filter { $0.occurs(on: day) }.prefix(4).enumerated()), id: \.offset) { _, item in
-                                            Circle().fill(item.color).frame(width: 3, height: 3)
-                                        }
-                                    }.frame(height: 3)
-                                }.frame(maxWidth: .infinity, maxHeight: .infinity).contentShape(Rectangle())
-                                }.accessibilityLabel(day.formatted(date: .complete, time: .omitted))
-                                    .accessibilityAddTraits(calendar.isDate(day, inSameDayAs: date) ? .isSelected : [])
-                            }
+            VStack(spacing: 0) {
+                ForEach(0..<(days.count / 7), id: \.self) { week in
+                    HStack(spacing: 0) {
+                        ForEach(0..<7) { weekday in
+                            let day = days[week * 7 + weekday]
+                            let today = calendar.isDateInToday(day)
+                            selectionControl(date: day) {
+                            VStack(spacing: 1) {
+                                Text(day.formatted(.dateTime.day()))
+                                    .font(.system(size: small ? 10 : 12, weight: today ? .semibold : .regular))
+                                    .foregroundStyle(today ? .white : calendar.isDate(day, equalTo: date, toGranularity: .month) ? (dark ? .white : Color(white: 0.12)) : .gray)
+                                    .frame(width: small ? 17 : 20, height: small ? 11 : 16)
+                                    .background {
+                                        if today { Circle().fill(Color.blue) }
+                                        else if calendar.isDate(day, inSameDayAs: date) { Circle().fill(Color.blue.opacity(0.18)) }
+                                    }
+                                HStack(spacing: 2) {
+                                    ForEach(Array(items.filter { $0.occurs(on: day) }.prefix(4).enumerated()), id: \.offset) { _, item in
+                                        Circle().fill(item.color).frame(width: 3, height: 3)
+                                    }
+                                }.frame(height: 3)
+                            }.frame(maxWidth: .infinity, maxHeight: .infinity).contentShape(Rectangle())
+                            }.accessibilityLabel(day.formatted(date: .complete, time: .omitted))
+                                .accessibilityAddTraits(calendar.isDate(day, inSameDayAs: date) ? .isSelected : [])
                         }
-                        .frame(height: rowHeight)
-                    }
+                    }.frame(height: small ? 15 : 20)
                 }
             }
+            .frame(height: CGFloat(days.count / 7) * (small ? 15 : 20), alignment: .top)
         }
         .padding(.horizontal, small ? 10 : 16).padding(.vertical, 7)
         .foregroundStyle(dark ? .white : Color(white: 0.12))
