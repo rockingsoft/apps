@@ -4,6 +4,7 @@ import PaletaCore
 @MainActor
 final class PalettePanelController: NSWindowController, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate {
     private let service: AccessibilityMenuService
+    private let history: CommandHistory
     private let searchField = NSSearchField()
     private let tableView = NSTableView()
     private let statusLabel = NSTextField(labelWithString: "")
@@ -11,8 +12,9 @@ final class PalettePanelController: NSWindowController, NSTableViewDataSource, N
     private var filtered: [AccessibleCommand] = []
     private var sourceApplication: NSRunningApplication?
 
-    init(service: AccessibilityMenuService) {
+    init(service: AccessibilityMenuService, history: CommandHistory) {
         self.service = service
+        self.history = history
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 680, height: 430),
             styleMask: [.titled, .fullSizeContentView, .nonactivatingPanel],
@@ -43,7 +45,7 @@ final class PalettePanelController: NSWindowController, NSTableViewDataSource, N
         sourceApplication = NSWorkspace.shared.frontmostApplication
         guard let sourceApplication, sourceApplication.bundleIdentifier != Bundle.main.bundleIdentifier else { return }
         commands = service.commands(for: sourceApplication)
-        filtered = commands
+        filtered = rankedCommands(query: "")
         searchField.stringValue = ""
         statusLabel.stringValue = commands.isEmpty ? "No se encontraron comandos" : sourceApplication.localizedName ?? ""
         tableView.reloadData()
@@ -86,7 +88,7 @@ final class PalettePanelController: NSWindowController, NSTableViewDataSource, N
     func tableViewSelectionDidChange(_ notification: Notification) {}
 
     func controlTextDidChange(_ obj: Notification) {
-        filtered = FuzzyMatcher.ranked(commands, query: searchField.stringValue) { $0.command.searchableText }
+        filtered = rankedCommands(query: searchField.stringValue)
         tableView.reloadData()
         selectFirst()
     }
@@ -171,6 +173,7 @@ final class PalettePanelController: NSWindowController, NSTableViewDataSource, N
     @objc private func executeSelection() {
         guard filtered.indices.contains(tableView.selectedRow) else { return }
         let selected = filtered[tableView.selectedRow]
+        history.record(historyKey(for: selected))
         dismiss()
         sourceApplication?.activate(options: [])
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [service] in service.perform(selected) }
@@ -178,5 +181,20 @@ final class PalettePanelController: NSWindowController, NSTableViewDataSource, N
 
     private func dismiss() {
         window?.orderOut(nil)
+    }
+
+    private func rankedCommands(query: String) -> [AccessibleCommand] {
+        CommandRanker.ranked(
+            commands,
+            query: query,
+            usage: history.usage,
+            id: historyKey(for:),
+            text: { $0.command.searchableText }
+        )
+    }
+
+    private func historyKey(for command: AccessibleCommand) -> String {
+        let applicationID = sourceApplication?.bundleIdentifier ?? sourceApplication?.localizedName ?? "unknown"
+        return applicationID + "\u{1E}" + command.command.id
     }
 }

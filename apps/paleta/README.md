@@ -19,5 +19,6 @@ La primera vez, macOS solicita habilitar **Paleta** en Configuración del Sistem
 - Búsqueda difusa por nombre y ruta del menú.
 - Visualización del atajo original.
 - Navegación con flechas, ejecución con `Return` y cierre con `Escape`.
+- Historial persistente por aplicación: los comandos ejecutados recientemente aparecen primero y reciben prioridad en la búsqueda.
 
 El nombre, el diseño y el código son propios; Paletro se usa únicamente como referencia funcional.

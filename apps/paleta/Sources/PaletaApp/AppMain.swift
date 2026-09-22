@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         installMainMenu()
-        let palette = PalettePanelController(service: AccessibilityMenuService())
+        let palette = PalettePanelController(service: AccessibilityMenuService(), history: CommandHistory())
         self.palette = palette
         hotKey = GlobalHotKey { DispatchQueue.main.async { palette.toggle() } }
     }
