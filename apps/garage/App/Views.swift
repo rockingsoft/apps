@@ -49,6 +49,7 @@ struct AddCarView: View {
     @State private var loadingBrands = false
     @State private var loadingModels = false
     @State private var loadingYears = false
+    @State private var saving = false
 
     private var selectedName: String {
         guard let brand = brands.first(where: { $0.id == brandID }),
@@ -109,14 +110,25 @@ struct AddCarView: View {
                     TextField("Kilometraje actual", text: $odometerText).keyboardType(.numberPad)
                 }
             }
+            .disabled(saving)
             .navigationTitle("Nuevo auto")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Guardar") {
-                    guard let odometer = Int(odometerText), odometer >= 0 else { return }
-                    Task { await store.addCar(name: selectedName, plate: plate, odometer: odometer); dismiss() }
-                }.disabled(selectedName.isEmpty || Int(odometerText).map { $0 < 0 } ?? true) }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        guard !saving, let odometer = Int(odometerText), odometer >= 0 else { return }
+                        let name = selectedName
+                        guard !name.isEmpty else { return }
+                        saving = true
+                        Task { await store.addCar(name: name, plate: plate, odometer: odometer); dismiss() }
+                    } label: {
+                        if saving { ProgressView().accessibilityLabel("Guardando auto") }
+                        else { Text("Guardar") }
+                    }
+                    .disabled(saving || selectedName.isEmpty || Int(odometerText).map { $0 < 0 } ?? true)
+                }
             }
+            .interactiveDismissDisabled(saving)
             .task { await loadBrands() }
             .onChange(of: brandID) { _, id in Task { await loadModels(brandID: id) } }
             .onChange(of: modelID) { _, id in Task { await loadVersions(modelID: id) } }
@@ -247,6 +259,7 @@ struct AddPlanView: View {
     @State private var lastKM = 0
     @State private var noticeDays = 14
     @State private var noticeKM = 500
+    @State private var saving = false
     var body: some View {
         NavigationStack {
             Form {
@@ -268,11 +281,23 @@ struct AddPlanView: View {
                     TextField("Kilómetros", value: $noticeKM, format: .number).keyboardType(.numberPad)
                 }
             }
+            .disabled(saving)
             .navigationTitle("Nuevo servicio")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Guardar") { Task { await store.addPlan(car: car, title: title, details: details, months: months, kilometers: intervalKM, lastDate: lastDate, lastKilometers: lastKM, noticeDays: noticeDays, noticeKilometers: noticeKM); dismiss() } }.disabled(title.isEmpty || (months == 0 && intervalKM == 0)) }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        guard !saving, !title.isEmpty, months != 0 || intervalKM != 0 else { return }
+                        saving = true
+                        Task { await store.addPlan(car: car, title: title, details: details, months: months, kilometers: intervalKM, lastDate: lastDate, lastKilometers: lastKM, noticeDays: noticeDays, noticeKilometers: noticeKM); dismiss() }
+                    } label: {
+                        if saving { ProgressView().accessibilityLabel("Guardando servicio") }
+                        else { Text("Guardar") }
+                    }
+                    .disabled(saving || title.isEmpty || (months == 0 && intervalKM == 0))
+                }
             }
+            .interactiveDismissDisabled(saving)
         }
         .onAppear { lastKM = car.odometer }
     }
@@ -314,6 +339,7 @@ struct CompleteServiceView: View {
     @State private var date = Date()
     @State private var kilometers = 0
     @State private var notes = ""
+    @State private var saving = false
     var body: some View {
         NavigationStack {
             Form {
@@ -321,11 +347,23 @@ struct CompleteServiceView: View {
                 TextField("Kilometraje", value: $kilometers, format: .number).keyboardType(.numberPad)
                 TextField("Notas, repuestos, taller…", text: $notes, axis: .vertical)
             }
+            .disabled(saving)
             .navigationTitle("Registrar service")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Guardar") { Task { await store.complete(plan, car: car, date: date, kilometers: kilometers, notes: notes); dismiss() } } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        guard !saving else { return }
+                        saving = true
+                        Task { await store.complete(plan, car: car, date: date, kilometers: kilometers, notes: notes); dismiss() }
+                    } label: {
+                        if saving { ProgressView().accessibilityLabel("Guardando service") }
+                        else { Text("Guardar") }
+                    }
+                    .disabled(saving)
+                }
             }
+            .interactiveDismissDisabled(saving)
         }
         .onAppear { kilometers = car.odometer }
     }
