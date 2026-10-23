@@ -20,7 +20,7 @@ Desde la raíz:
 ./scripts/workspace.sh build garage
 ```
 
-El build sin firma comprueba el código, pero CloudKit y las notificaciones se deben probar en iPhone firmado con un Apple Developer Team. En Xcode, asignar el equipo a `Garage`, habilitar **iCloud > CloudKit**, asociar `iCloud.com.schoren.garage` (o cambiar identificadores para el equipo propio), y activar **Background Modes > Remote notifications** si se agregan suscripciones de cambios. El contenedor debe existir en CloudKit Dashboard y el esquema debe desplegarse a producción antes de distribuir la app. Ambos participantes necesitan iCloud activo.
+El script de build firma el simulador con el equipo por defecto `3SRDN9365G` (se puede reemplazar con `DEVELOPMENT_TEAM=...`). CloudKit y las notificaciones se deben probar además en iPhone firmado con un Apple Developer Team. En Xcode, asignar el equipo a `Garage`, habilitar **iCloud > CloudKit**, asociar `iCloud.com.schoren.garage` (o cambiar identificadores para el equipo propio), y activar **Background Modes > Remote notifications** si se agregan suscripciones de cambios. El contenedor debe existir en CloudKit Dashboard y el esquema debe desplegarse a producción antes de distribuir la app. Ambos participantes necesitan iCloud activo.
 
 ## Alcances actuales
 
