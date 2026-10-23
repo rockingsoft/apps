@@ -1,5 +1,6 @@
 import CloudKit
 import Foundation
+import Network
 
 @MainActor final class CloudStore: ObservableObject {
     @Published var cars: [Car] = []
@@ -10,6 +11,7 @@ import Foundation
     @Published var shareError: String?
     @Published var loading = false
     private var reloadRequested = false
+    private let networkMonitor = NWPathMonitor()
 
     let container = CKContainer.default()
     private var privateDB: CKDatabase { container.privateCloudDatabase }
@@ -23,6 +25,20 @@ import Foundation
         plans = saved.plans.map(\.plan)
         entries = saved.entries.map(\.entry)
         fuelEntries = (saved.fuelEntries ?? []).map(\.entry)
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            guard path.status == .satisfied else { return }
+            Task { @MainActor [weak self] in
+                guard let self, self.hasPendingChanges else { return }
+                await self.reload()
+            }
+        }
+        networkMonitor.start(queue: DispatchQueue(label: "garage.network"))
+    }
+
+    private var hasPendingChanges: Bool {
+        !snapshot.pendingCars.isEmpty || !snapshot.pendingPlans.isEmpty || !snapshot.pendingEntries.isEmpty ||
+        !(snapshot.pendingDeletions ?? []).isEmpty || !(snapshot.pendingFuelEntries ?? []).isEmpty ||
+        !(snapshot.pendingFuelDeletions ?? []).isEmpty
     }
 
     func database(for car: Car) -> CKDatabase { car.isSharedWithMe ? sharedDB : privateDB }
@@ -84,13 +100,24 @@ import Foundation
                 }
             }
             let deletedZones = Set((snapshot.pendingDeletions ?? []).map { $0.car.id.zoneID })
-            cars = remoteCars.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.name < $1.name }
-            plans = remotePlans.filter { !deletedZones.contains($0.id.zoneID) }
-            entries = remoteEntries.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.date > $1.date }
+            let pendingCarIDs = Set(snapshot.pendingCars.map(\.id))
+            let pendingPlanIDs = Set(snapshot.pendingPlans.map(\.id))
+            let pendingEntryIDs = Set(snapshot.pendingEntries.map(\.id))
+            let pendingFuelIDs = Set((snapshot.pendingFuelEntries ?? []).map(\.id))
+            cars = (remoteCars.filter { !deletedZones.contains($0.id.zoneID) && !pendingCarIDs.contains($0.id) } +
+                    cars.filter { pendingCarIDs.contains($0.id) && !deletedZones.contains($0.id.zoneID) })
+                .sorted { $0.name < $1.name }
+            plans = remotePlans.filter { !deletedZones.contains($0.id.zoneID) && !pendingPlanIDs.contains($0.id) } +
+                    plans.filter { pendingPlanIDs.contains($0.id) && !deletedZones.contains($0.id.zoneID) }
+            entries = (remoteEntries.filter { !deletedZones.contains($0.id.zoneID) && !pendingEntryIDs.contains($0.id) } +
+                       entries.filter { pendingEntryIDs.contains($0.id) && !deletedZones.contains($0.id.zoneID) })
+                .sorted { $0.date > $1.date }
             let pendingFuelDeletionIDs = Set((snapshot.pendingFuelDeletions ?? []).map { $0.entry.id })
-            fuelEntries = remoteFuelEntries.filter {
-                !deletedZones.contains($0.id.zoneID) && !pendingFuelDeletionIDs.contains($0.id)
-            }.sorted { $0.date > $1.date }
+            fuelEntries = (remoteFuelEntries.filter {
+                !deletedZones.contains($0.id.zoneID) && !pendingFuelDeletionIDs.contains($0.id) && !pendingFuelIDs.contains($0.id)
+            } + fuelEntries.filter {
+                pendingFuelIDs.contains($0.id) && !deletedZones.contains($0.id.zoneID) && !pendingFuelDeletionIDs.contains($0.id)
+            }).sorted { $0.date > $1.date }
             persist()
             syncMessage = nil
         } catch {
