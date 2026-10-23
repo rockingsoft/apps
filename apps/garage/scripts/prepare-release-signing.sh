@@ -22,7 +22,7 @@ security set-key-partition-list -S apple-tool:,apple: -s -k "$GARAGE_KEYCHAIN_PA
 profile_plist="$RUNNER_TEMP/garage-profile.plist"
 security cms -D -i "$profile" > "$profile_plist"
 certificate_der="$RUNNER_TEMP/garage-certificate.der"
-openssl pkcs12 -in "$certificate" -clcerts -nokeys -passin env:GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD |
+openssl pkcs12 -legacy -in "$certificate" -clcerts -nokeys -passin env:GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD |
   openssl x509 -outform DER > "$certificate_der"
 python3 - "$profile_plist" "$certificate_der" <<'PY'
 import plistlib
