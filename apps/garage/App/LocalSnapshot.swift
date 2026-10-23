@@ -14,6 +14,10 @@ struct RecordKey: Codable, Hashable {
 }
 
 struct LocalSnapshot: Codable {
+    struct PendingDeletion: Codable, Hashable {
+        let car: RecordKey
+        let sharedWithMe: Bool
+    }
     struct CarData: Codable {
         let id: RecordKey
         var name: String
@@ -58,6 +62,8 @@ struct LocalSnapshot: Codable {
     var pendingCars: Set<RecordKey> = []
     var pendingPlans: Set<RecordKey> = []
     var pendingEntries: Set<RecordKey> = []
+    // Optional so snapshots saved before deletion support was added still decode.
+    var pendingDeletions: Set<PendingDeletion>? = nil
 
     static func load() -> LocalSnapshot {
         guard let data = UserDefaults.standard.data(forKey: "garage.localSnapshot"),

@@ -3,6 +3,7 @@ import SwiftUI
 struct CarsView: View {
     @EnvironmentObject private var store: CloudStore
     @State private var addCar = false
+    @State private var carToDelete: Car?
     var body: some View {
         NavigationStack {
             List {
@@ -18,12 +19,38 @@ struct CarsView: View {
                             if due > 0 { Text("\(due) servicios pendientes").foregroundStyle(.orange).font(.caption) }
                         }
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button {
+                            carToDelete = car
+                        } label: {
+                            Label(car.isSharedWithMe ? "Quitar" : "Eliminar", systemImage: "trash")
+                        }
+                        .tint(.red)
+                    }
                 }
             }
             .navigationTitle("Mis autos")
             .navigationDestination(for: Car.self) { CarView(car: $0) }
             .toolbar { Button("Agregar", systemImage: "plus") { addCar = true } }
             .sheet(isPresented: $addCar) { AddCarView() }
+            .alert("¿Eliminar este auto?", isPresented: Binding(
+                get: { carToDelete != nil },
+                set: { if !$0 { carToDelete = nil } }
+            )) {
+                if let car = carToDelete {
+                    Button(car.isSharedWithMe ? "Quitar" : "Eliminar", role: .destructive) {
+                        carToDelete = nil
+                        Task { await store.deleteCar(car) }
+                    }
+                }
+                Button("Cancelar", role: .cancel) { carToDelete = nil }
+            } message: {
+                if let car = carToDelete {
+                    Text(car.isSharedWithMe
+                         ? "Este auto dejará de aparecer en tu cuenta. El dueño conservará sus datos."
+                         : "Se eliminarán el auto, su plan de servicios y su historial para todos los que lo comparten.")
+                }
+            }
             .overlay { if store.cars.isEmpty && !store.loading { ContentUnavailableView("Agregá tu primer auto", systemImage: "car", description: Text("Guardá sus services y recibí avisos cuando se acerquen.")) } }
             .refreshable { await store.reload() }
         }

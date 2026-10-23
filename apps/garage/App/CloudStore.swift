@@ -60,9 +60,10 @@ import Foundation
                     }
                 }
             }
-            cars = remoteCars.sorted { $0.name < $1.name }
-            plans = remotePlans
-            entries = remoteEntries.sorted { $0.date > $1.date }
+            let deletedZones = Set((snapshot.pendingDeletions ?? []).map { $0.car.id.zoneID })
+            cars = remoteCars.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.name < $1.name }
+            plans = remotePlans.filter { !deletedZones.contains($0.id.zoneID) }
+            entries = remoteEntries.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.date > $1.date }
             persist()
             syncMessage = nil
         } catch {
@@ -99,6 +100,20 @@ import Foundation
     }
 
     private func uploadPending() async throws {
+        for deletion in (snapshot.pendingDeletions ?? []).sorted(by: { $0.car.zone < $1.car.zone }) {
+            do {
+                if deletion.sharedWithMe {
+                    let shareID = CKRecord.ID(recordName: CKRecordNameZoneWideShare, zoneID: deletion.car.id.zoneID)
+                    _ = try await sharedDB.deleteRecord(withID: shareID)
+                } else {
+                    _ = try await privateDB.deleteRecordZone(withID: deletion.car.id.zoneID)
+                }
+            } catch let error as CKError where error.code == .zoneNotFound || error.code == .unknownItem {
+                // The car only existed locally, or was already deleted in iCloud.
+            }
+            snapshot.pendingDeletions?.remove(deletion)
+            persist()
+        }
         for key in snapshot.pendingCars.sorted(by: { $0.name < $1.name }) {
             guard let car = cars.first(where: { $0.id == key.id }) else { continue }
             let db = database(for: car)
@@ -159,6 +174,22 @@ import Foundation
         let id = CKRecord.ID(recordName: "car", zoneID: zoneID)
         cars.append(Car(id: id, name: name, plate: plate.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), odometer: odometer, updatedAt: .now, isSharedWithMe: false))
         snapshot.pendingCars.insert(RecordKey(id))
+        await saveLocallyAndSync()
+    }
+
+    func deleteCar(_ car: Car) async {
+        guard cars.contains(where: { $0.id == car.id }) else { return }
+        let planIDs = Set(plans.filter { $0.carID == car.id }.map(\.id))
+        let entryIDs = entries.filter { planIDs.contains($0.planID) }.map(\.id)
+        cars.removeAll { $0.id == car.id }
+        plans.removeAll { planIDs.contains($0.id) }
+        entries.removeAll { entryIDs.contains($0.id) }
+        snapshot.pendingCars.remove(RecordKey(car.id))
+        snapshot.pendingPlans.subtract(planIDs.map(RecordKey.init))
+        snapshot.pendingEntries.subtract(entryIDs.map(RecordKey.init))
+        snapshot.pendingDeletions = (snapshot.pendingDeletions ?? []).union([
+            LocalSnapshot.PendingDeletion(car: RecordKey(car.id), sharedWithMe: car.isSharedWithMe)
+        ])
         await saveLocallyAndSync()
     }
 
