@@ -44,9 +44,10 @@ import Foundation
             var remoteEntries: [ServiceEntry] = []
             for (database, shared) in [(privateDB, false), (sharedDB, true)] {
                 for zone in try await database.allRecordZones() where zone.zoneID.zoneName.hasPrefix("garage-") {
-                    let carRecords = try await records(type: "Car", zone: zone.zoneID, database: database)
-                    let planRecords = try await records(type: "ServicePlan", zone: zone.zoneID, database: database)
-                    let entryRecords = try await records(type: "ServiceEntry", zone: zone.zoneID, database: database)
+                    let allRecords = try await records(in: zone.zoneID, database: database)
+                    let carRecords = allRecords.filter { $0.recordType == "Car" }
+                    let planRecords = allRecords.filter { $0.recordType == "ServicePlan" }
+                    let entryRecords = allRecords.filter { $0.recordType == "ServiceEntry" }
                     let zoneCars = carRecords.map { Car(id: $0.recordID, name: $0["name"] as? String ?? "Auto", plate: $0["plate"] as? String ?? "", odometer: $0["odometer"] as? Int ?? 0, updatedAt: $0["updatedAt"] as? Date ?? .distantPast, isSharedWithMe: shared) }
                     remoteCars += zoneCars
                     remotePlans += planRecords.compactMap { record in
@@ -70,17 +71,20 @@ import Foundation
         await NotificationPlanner.schedule(cars: cars, plans: plans)
     }
 
-    private func records(type: String, zone: CKRecordZone.ID, database: CKDatabase) async throws -> [CKRecord] {
-        var result: [CKRecord] = []
-        var cursor: CKQueryOperation.Cursor?
+    private func records(in zone: CKRecordZone.ID, database: CKDatabase) async throws -> [CKRecord] {
+        var result: [CKRecord.ID: CKRecord] = [:]
+        var token: CKServerChangeToken?
+        var moreComing: Bool
         repeat {
-            let page: (matchResults: [(CKRecord.ID, Result<CKRecord, Error>)], queryCursor: CKQueryOperation.Cursor?)
-            if let cursor { page = try await database.records(continuingMatchFrom: cursor, resultsLimit: 200) }
-            else { page = try await database.records(matching: CKQuery(recordType: type, predicate: NSPredicate(value: true)), inZoneWith: zone, resultsLimit: 200) }
-            for (_, record) in page.matchResults { result.append(try record.get()) }
-            cursor = page.queryCursor
-        } while cursor != nil
-        return result
+            let batch = try await database.recordZoneChanges(inZoneWith: zone, since: token)
+            for (id, modification) in batch.modificationResultsByID {
+                result[id] = try modification.get().record
+            }
+            for deletion in batch.deletions { result.removeValue(forKey: deletion.recordID) }
+            token = batch.changeToken
+            moreComing = batch.moreComing
+        } while moreComing
+        return Array(result.values)
     }
 
     private func syncDescription(_ error: Error) -> String {
