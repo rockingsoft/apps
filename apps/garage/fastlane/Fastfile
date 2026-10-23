@@ -25,6 +25,7 @@ platform :ios do
       export_team_id: "3SRDN9365G",
       export_options: {
         signingStyle: "manual",
+        signingCertificate: "Apple Distribution",
         provisioningProfiles: { "com.schoren.garage" => ENV.fetch("GARAGE_PROFILE_UUID") }
       },
       xcargs: [
