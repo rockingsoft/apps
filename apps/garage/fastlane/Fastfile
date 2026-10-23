@@ -1,0 +1,49 @@
+opt_out_usage
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Archive Garage and upload the processed build to TestFlight"
+  lane :testflight do
+    %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_API_ISSUER_ID APP_STORE_CONNECT_API_KEY_P8].each do |name|
+      UI.user_error!("#{name} is required") if ENV[name].to_s.empty?
+    end
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_ISSUER_ID"),
+      key_content: ENV.fetch("APP_STORE_CONNECT_API_KEY_P8"),
+      is_key_content_base64: true
+    )
+
+    build_app(
+      project: "Garage.xcodeproj",
+      scheme: "Garage",
+      configuration: "Release",
+      clean: true,
+      export_method: "app-store",
+      export_team_id: "3SRDN9365G",
+      export_options: {
+        signingStyle: "manual",
+        provisioningProfiles: { "com.schoren.garage" => ENV.fetch("GARAGE_PROFILE_UUID") }
+      },
+      xcargs: [
+        "DEVELOPMENT_TEAM=3SRDN9365G",
+        "CODE_SIGN_STYLE=Manual",
+        "PROVISIONING_PROFILE_SPECIFIER=#{ENV.fetch('GARAGE_PROFILE_UUID')}",
+        "MARKETING_VERSION=#{ENV.fetch('GARAGE_VERSION')}",
+        "CURRENT_PROJECT_VERSION=#{ENV.fetch('GARAGE_BUILD_NUMBER')}"
+      ].join(" "),
+      output_directory: "build/testflight",
+      output_name: "Garage.ipa"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: "build/testflight/Garage.ipa",
+      skip_waiting_for_build_processing: false,
+      distribute_external: false,
+      changelog: "Garage #{ENV.fetch('GARAGE_VERSION')}"
+    )
+  end
+end
