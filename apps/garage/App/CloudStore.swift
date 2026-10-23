@@ -78,7 +78,10 @@ import Foundation
             cars = remoteCars.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.name < $1.name }
             plans = remotePlans.filter { !deletedZones.contains($0.id.zoneID) }
             entries = remoteEntries.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.date > $1.date }
-            fuelEntries = remoteFuelEntries.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.date > $1.date }
+            let pendingFuelDeletionIDs = Set((snapshot.pendingFuelDeletions ?? []).map { $0.entry.id })
+            fuelEntries = remoteFuelEntries.filter {
+                !deletedZones.contains($0.id.zoneID) && !pendingFuelDeletionIDs.contains($0.id)
+            }.sorted { $0.date > $1.date }
             persist()
             syncMessage = nil
         } catch {
@@ -127,6 +130,16 @@ import Foundation
                 // The car only existed locally, or was already deleted in iCloud.
             }
             snapshot.pendingDeletions?.remove(deletion)
+            persist()
+        }
+        for deletion in (snapshot.pendingFuelDeletions ?? []).sorted(by: { $0.entry.name < $1.entry.name }) {
+            do {
+                let database = deletion.sharedWithMe ? sharedDB : privateDB
+                _ = try await database.deleteRecord(withID: deletion.entry.id)
+            } catch let error as CKError where error.code == .unknownItem || error.code == .zoneNotFound {
+                // The entry only existed locally, or was already removed.
+            }
+            snapshot.pendingFuelDeletions?.remove(deletion)
             persist()
         }
         for key in snapshot.pendingCars.sorted(by: { $0.name < $1.name }) {
@@ -226,6 +239,7 @@ import Foundation
         snapshot.pendingPlans.subtract(planIDs.map(RecordKey.init))
         snapshot.pendingEntries.subtract(entryIDs.map(RecordKey.init))
         snapshot.pendingFuelEntries?.subtract(fuelIDs.map(RecordKey.init))
+        snapshot.pendingFuelDeletions = (snapshot.pendingFuelDeletions ?? []).filter { $0.entry.id.zoneID != car.id.zoneID }
         snapshot.pendingDeletions = (snapshot.pendingDeletions ?? []).union([
             LocalSnapshot.PendingDeletion(car: RecordKey(car.id), sharedWithMe: car.isSharedWithMe)
         ])
@@ -253,6 +267,17 @@ import Foundation
             cars[index].updatedAt = .now
             snapshot.pendingCars.insert(RecordKey(car.id))
         }
+        await saveLocallyAndSync()
+    }
+
+    func deleteFuelEntry(_ entry: FuelEntry) async {
+        guard fuelEntries.contains(where: { $0.id == entry.id }),
+              let car = cars.first(where: { $0.id == entry.carID }) else { return }
+        fuelEntries.removeAll { $0.id == entry.id }
+        snapshot.pendingFuelEntries?.remove(RecordKey(entry.id))
+        snapshot.pendingFuelDeletions = (snapshot.pendingFuelDeletions ?? []).union([
+            LocalSnapshot.PendingFuelDeletion(entry: RecordKey(entry.id), sharedWithMe: car.isSharedWithMe)
+        ])
         await saveLocallyAndSync()
     }
 

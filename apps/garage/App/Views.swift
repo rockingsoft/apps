@@ -288,6 +288,7 @@ struct CarView: View {
     let car: Car
     @State private var addPlan = false
     @State private var addFuel = false
+    @State private var fuelEntryToDelete: FuelEntry?
     @State private var templateToReview: MaintenanceTemplate?
     @State private var share = false
     @State private var editOdometer = false
@@ -309,7 +310,12 @@ struct CarView: View {
                 Button("Kilometraje: \(current.odometer) km") { kilometers = current.odometer; editOdometer = true }
             }
             Section("Cargas de nafta") {
-                ForEach(recentFuelEntries.prefix(3)) { entry in FuelEntryRow(entry: entry) }
+                ForEach(recentFuelEntries.prefix(3)) { entry in
+                    FuelEntryRow(entry: entry)
+                        .swipeActions {
+                            Button("Eliminar", systemImage: "trash", role: .destructive) { fuelEntryToDelete = entry }
+                        }
+                }
                 if recentFuelEntries.count > 3 {
                     NavigationLink("Ver más") { FuelHistoryView(car: current) }
                 }
@@ -337,6 +343,7 @@ struct CarView: View {
         .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
         .sheet(isPresented: $addFuel) { FuelEntryView(car: current) }
+        .fuelDeletionAlert(entry: $fuelEntryToDelete, store: store)
         .sheet(item: $templateToReview) { template in MaintenanceTemplateView(car: current, template: template) }
         .sheet(isPresented: $share) { CarSharingSheet(car: current, store: store) }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {
@@ -365,13 +372,36 @@ private struct FuelEntryRow: View {
 private struct FuelHistoryView: View {
     @EnvironmentObject private var store: CloudStore
     let car: Car
+    @State private var fuelEntryToDelete: FuelEntry?
     var body: some View {
         List {
             ForEach(store.fuelEntries.filter { $0.carID == car.id }.sorted { $0.date > $1.date }) { entry in
                 FuelEntryRow(entry: entry)
+                    .swipeActions {
+                        Button("Eliminar", systemImage: "trash", role: .destructive) { fuelEntryToDelete = entry }
+                    }
             }
         }
         .navigationTitle("Cargas de nafta")
+        .fuelDeletionAlert(entry: $fuelEntryToDelete, store: store)
+    }
+}
+
+private extension View {
+    func fuelDeletionAlert(entry: Binding<FuelEntry?>, store: CloudStore) -> some View {
+        alert("¿Eliminar esta carga?", isPresented: Binding(
+            get: { entry.wrappedValue != nil },
+            set: { if !$0 { entry.wrappedValue = nil } }
+        )) {
+            Button("Eliminar", role: .destructive) {
+                guard let selected = entry.wrappedValue else { return }
+                entry.wrappedValue = nil
+                Task { await store.deleteFuelEntry(selected) }
+            }
+            Button("Cancelar", role: .cancel) { entry.wrappedValue = nil }
+        } message: {
+            Text("La carga se eliminará del historial y de los autos compartidos.")
+        }
     }
 }
 

@@ -18,6 +18,10 @@ struct LocalSnapshot: Codable {
         let car: RecordKey
         let sharedWithMe: Bool
     }
+    struct PendingFuelDeletion: Codable, Hashable {
+        let entry: RecordKey
+        let sharedWithMe: Bool
+    }
     struct CarData: Codable {
         let id: RecordKey
         var name: String
@@ -92,6 +96,7 @@ struct LocalSnapshot: Codable {
     // Optional so snapshots written before fuel logging still decode.
     var fuelEntries: [FuelData]? = nil
     var pendingFuelEntries: Set<RecordKey>? = nil
+    var pendingFuelDeletions: Set<PendingFuelDeletion>? = nil
 
     static func load() -> LocalSnapshot {
         guard let data = UserDefaults.standard.data(forKey: "garage.localSnapshot"),
