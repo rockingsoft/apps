@@ -14,7 +14,8 @@ struct MaintenanceSelection {
     let lastKilometers: Int
 }
 
-struct MaintenanceTemplate {
+struct MaintenanceTemplate: Identifiable {
+    var id: String { sourceURL.absoluteString + ":" + rules.map(\.id).joined(separator: ",") }
     let title: String
     let applicability: String
     let sourceName: String

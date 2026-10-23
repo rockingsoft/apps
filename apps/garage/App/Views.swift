@@ -62,6 +62,12 @@ struct CarsView: View {
 }
 
 struct AddCarView: View {
+    private struct SuggestedPlan: Identifiable {
+        let car: Car
+        let template: MaintenanceTemplate
+        var id: String { car.id.zoneID.zoneName }
+    }
+
     @EnvironmentObject private var store: CloudStore
     @Environment(\.dismiss) private var dismiss
     @State private var plate = ""
@@ -81,7 +87,7 @@ struct AddCarView: View {
     @State private var loadingModels = false
     @State private var loadingYears = false
     @State private var saving = false
-    @State private var savedCar: Car?
+    @State private var suggestedPlan: SuggestedPlan?
 
     private var selectedName: String {
         guard let brand = brands.first(where: { $0.id == brandID }),
@@ -92,9 +98,6 @@ struct AddCarView: View {
     }
 
     var body: some View {
-        if let savedCar, let template = MaintenanceCatalog.template(for: savedCar) {
-            MaintenanceTemplateView(car: savedCar, template: template)
-        } else {
         NavigationStack {
             Form {
                 if let catalogMessage {
@@ -157,7 +160,9 @@ struct AddCarView: View {
                         saving = true
                         Task {
                             let car = await store.addCar(name: name, plate: plate, odometer: odometer)
-                            if MaintenanceCatalog.template(for: car) != nil { savedCar = car }
+                            if let template = MaintenanceCatalog.template(for: car) {
+                                suggestedPlan = SuggestedPlan(car: car, template: template)
+                            }
                             else { dismiss() }
                         }
                     } label: {
@@ -172,7 +177,9 @@ struct AddCarView: View {
             .onChange(of: brandID) { _, id in Task { await loadModels(brandID: id) } }
             .onChange(of: modelID) { _, id in Task { await loadVersions(modelID: id) } }
             .onChange(of: versionID) { _, id in Task { await loadYears(versionID: id) } }
-        }
+            .sheet(item: $suggestedPlan, onDismiss: { dismiss() }) { suggested in
+                MaintenanceTemplateView(car: suggested.car, template: suggested.template)
+            }
         }
     }
 
@@ -252,7 +259,6 @@ struct CarView: View {
     @EnvironmentObject private var store: CloudStore
     let car: Car
     @State private var addPlan = false
-    @State private var showTemplate = false
     @State private var templateToReview: MaintenanceTemplate?
     @State private var share = false
     @State private var editOdometer = false
@@ -274,7 +280,6 @@ struct CarView: View {
                 if availableTemplate != nil {
                     Button("Revisar plan oficial sugerido", systemImage: "checklist") {
                         templateToReview = availableTemplate
-                        showTemplate = true
                     }
                 }
                 ForEach(store.plans.filter { $0.carID == car.id }.sorted { $0.status(odometer: current.odometer).rawValue < $1.status(odometer: current.odometer).rawValue }) { plan in
@@ -292,9 +297,7 @@ struct CarView: View {
         .navigationTitle(current.name)
         .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
-        .sheet(isPresented: $showTemplate, onDismiss: { templateToReview = nil }) {
-            if let template = templateToReview { MaintenanceTemplateView(car: current, template: template) }
-        }
+        .sheet(item: $templateToReview) { template in MaintenanceTemplateView(car: current, template: template) }
         .sheet(isPresented: $share) { CarSharingSheet(car: current, store: store) }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {
             TextField("Kilómetros", value: $kilometers, format: .number).keyboardType(.numberPad)
