@@ -8,6 +8,7 @@ end
 target.build_configurations.each do |config|
   config.build_settings['SWIFT_VERSION'] = '5.0'
   config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
+  config.build_settings['DEVELOPMENT_TEAM'] = '3SRDN9365G'
   config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.schoren.garage'
   config.build_settings['PRODUCT_NAME'] = 'Garage'
   config.build_settings['GENERATE_INFOPLIST_FILE'] = 'YES'
@@ -24,4 +25,5 @@ end
     target.source_build_phase.add_file_reference(ref)
   end
 end
+project.root_object.attributes['TargetAttributes'] = { target.uuid => { 'DevelopmentTeam' => '3SRDN9365G', 'SystemCapabilities' => { 'com.apple.iCloud' => { 'enabled' => 1 } } } }
 project.save

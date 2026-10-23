@@ -123,6 +123,16 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					168F49CEB206DD988F2D9E8D = {
+						DevelopmentTeam = 3SRDN9365G;
+						SystemCapabilities = {
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
+					};
+				};
 			};
 			buildConfigurationList = 46C56754901651AFDDE0989C /* Build configuration list for PBXProject "Garage" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -178,6 +188,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = App/Garage.entitlements;
+				DEVELOPMENT_TEAM = 3SRDN9365G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CKSharingSupported = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -199,6 +210,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = App/Garage.entitlements;
+				DEVELOPMENT_TEAM = 3SRDN9365G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CKSharingSupported = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
