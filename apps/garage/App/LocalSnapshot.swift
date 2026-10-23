@@ -39,13 +39,16 @@ struct LocalSnapshot: Codable {
         var lastKilometers: Int
         var noticeDays: Int
         var noticeKilometers: Int
+        var sourceURL: String?
+        var templateRuleID: String?
         init(_ plan: ServicePlan) {
             id = RecordKey(plan.id); carID = RecordKey(plan.carID); title = plan.title; details = plan.details
             intervalMonths = plan.intervalMonths; intervalKilometers = plan.intervalKilometers
             lastDate = plan.lastDate; lastKilometers = plan.lastKilometers
             noticeDays = plan.noticeDays; noticeKilometers = plan.noticeKilometers
+            sourceURL = plan.sourceURL; templateRuleID = plan.templateRuleID
         }
-        var plan: ServicePlan { ServicePlan(id: id.id, carID: carID.id, title: title, details: details, intervalMonths: intervalMonths, intervalKilometers: intervalKilometers, lastDate: lastDate, lastKilometers: lastKilometers, noticeDays: noticeDays, noticeKilometers: noticeKilometers) }
+        var plan: ServicePlan { ServicePlan(id: id.id, carID: carID.id, title: title, details: details, intervalMonths: intervalMonths, intervalKilometers: intervalKilometers, lastDate: lastDate, lastKilometers: lastKilometers, noticeDays: noticeDays, noticeKilometers: noticeKilometers, sourceURL: sourceURL, templateRuleID: templateRuleID) }
     }
     struct EntryData: Codable {
         let id: RecordKey

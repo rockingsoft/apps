@@ -52,7 +52,7 @@ import Foundation
                     remoteCars += zoneCars
                     remotePlans += planRecords.compactMap { record in
                         guard let car = zoneCars.first else { return nil }
-                        return ServicePlan(id: record.recordID, carID: car.id, title: record["title"] as? String ?? "Servicio", details: record["details"] as? String ?? "", intervalMonths: record["intervalMonths"] as? Int ?? 0, intervalKilometers: record["intervalKilometers"] as? Int ?? 0, lastDate: record["lastDate"] as? Date ?? .now, lastKilometers: record["lastKilometers"] as? Int ?? 0, noticeDays: record["noticeDays"] as? Int ?? 14, noticeKilometers: record["noticeKilometers"] as? Int ?? 500)
+                        return ServicePlan(id: record.recordID, carID: car.id, title: record["title"] as? String ?? "Servicio", details: record["details"] as? String ?? "", intervalMonths: record["intervalMonths"] as? Int ?? 0, intervalKilometers: record["intervalKilometers"] as? Int ?? 0, lastDate: record["lastDate"] as? Date ?? .now, lastKilometers: record["lastKilometers"] as? Int ?? 0, noticeDays: record["noticeDays"] as? Int ?? 14, noticeKilometers: record["noticeKilometers"] as? Int ?? 500, sourceURL: record["sourceURL"] as? String, templateRuleID: record["templateRuleID"] as? String)
                     }
                     remoteEntries += entryRecords.compactMap { record in
                         guard let reference = record["plan"] as? CKRecord.Reference else { return nil }
@@ -143,6 +143,8 @@ import Foundation
             record["lastKilometers"] = plan.lastKilometers as CKRecordValue
             record["noticeDays"] = plan.noticeDays as CKRecordValue
             record["noticeKilometers"] = plan.noticeKilometers as CKRecordValue
+            if let sourceURL = plan.sourceURL { record["sourceURL"] = sourceURL as CKRecordValue }
+            if let templateRuleID = plan.templateRuleID { record["templateRuleID"] = templateRuleID as CKRecordValue }
             _ = try await db.save(record)
             snapshot.pendingPlans.remove(key)
             persist()
@@ -169,12 +171,14 @@ import Foundation
         await reload()
     }
 
-    func addCar(name: String, plate: String, odometer: Int) async {
+    func addCar(name: String, plate: String, odometer: Int) async -> Car {
         let zoneID = CKRecordZone.ID(zoneName: "garage-\(UUID().uuidString)", ownerName: CKCurrentUserDefaultName)
         let id = CKRecord.ID(recordName: "car", zoneID: zoneID)
-        cars.append(Car(id: id, name: name, plate: plate.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), odometer: odometer, updatedAt: .now, isSharedWithMe: false))
+        let car = Car(id: id, name: name, plate: plate.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), odometer: odometer, updatedAt: .now, isSharedWithMe: false)
+        cars.append(car)
         snapshot.pendingCars.insert(RecordKey(id))
         await saveLocallyAndSync()
+        return car
     }
 
     func deleteCar(_ car: Car) async {
@@ -206,6 +210,24 @@ import Foundation
         plans.append(ServicePlan(id: id, carID: car.id, title: title, details: details, intervalMonths: months, intervalKilometers: kilometers, lastDate: lastDate, lastKilometers: lastKilometers, noticeDays: noticeDays, noticeKilometers: noticeKilometers))
         snapshot.pendingPlans.insert(RecordKey(id))
         await saveLocallyAndSync()
+    }
+
+    func addMaintenanceSelections(_ selections: [MaintenanceSelection], sourceURL: URL, to car: Car) async {
+        guard cars.contains(where: { $0.id == car.id }), !car.isSharedWithMe else { return }
+        var existing = Set(plans.filter { $0.carID == car.id }.compactMap(\.templateRuleID))
+        var added = false
+        for selection in selections where existing.insert(selection.rule.id).inserted {
+            let id = CKRecord.ID(recordName: UUID().uuidString, zoneID: car.id.zoneID)
+            let rule = selection.rule
+            plans.append(ServicePlan(id: id, carID: car.id, title: rule.title, details: rule.details,
+                                     intervalMonths: rule.intervalMonths, intervalKilometers: rule.intervalKilometers,
+                                     lastDate: selection.lastDate, lastKilometers: selection.lastKilometers,
+                                     noticeDays: 14, noticeKilometers: 500,
+                                     sourceURL: sourceURL.absoluteString, templateRuleID: rule.id))
+            snapshot.pendingPlans.insert(RecordKey(id))
+            added = true
+        }
+        if added { await saveLocallyAndSync() }
     }
 
     func complete(_ plan: ServicePlan, car: Car, date: Date, kilometers: Int, notes: String) async {

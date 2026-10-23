@@ -21,6 +21,8 @@ struct ServicePlan: Identifiable, Hashable {
     var lastKilometers: Int
     var noticeDays: Int
     var noticeKilometers: Int
+    var sourceURL: String? = nil
+    var templateRuleID: String? = nil
 
     func status(odometer: Int, now: Date = .now) -> ServiceStatus {
         let dueDate = intervalMonths > 0 ? Calendar.current.date(byAdding: .month, value: intervalMonths, to: lastDate) : nil

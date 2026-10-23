@@ -17,6 +17,10 @@ struct CarsView: View {
                             Text("\(car.plate.uppercased()) · \(car.odometer) km").foregroundStyle(.secondary)
                             let due = store.plans.filter { $0.carID == car.id && $0.status(odometer: car.odometer) != .ok }.count
                             if due > 0 { Text("\(due) servicios pendientes").foregroundStyle(.orange).font(.caption) }
+                            if !car.isSharedWithMe, let template = MaintenanceCatalog.template(for: car),
+                               template.rules.contains(where: { rule in !store.plans.contains(where: { $0.carID == car.id && $0.templateRuleID == rule.id }) }) {
+                                Text("Plan oficial sugerido disponible").foregroundStyle(.blue).font(.caption)
+                            }
                         }
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -77,6 +81,7 @@ struct AddCarView: View {
     @State private var loadingModels = false
     @State private var loadingYears = false
     @State private var saving = false
+    @State private var savedCar: Car?
 
     private var selectedName: String {
         guard let brand = brands.first(where: { $0.id == brandID }),
@@ -87,6 +92,9 @@ struct AddCarView: View {
     }
 
     var body: some View {
+        if let savedCar, let template = MaintenanceCatalog.template(for: savedCar) {
+            MaintenanceTemplateView(car: savedCar, template: template)
+        } else {
         NavigationStack {
             Form {
                 if let catalogMessage {
@@ -147,7 +155,11 @@ struct AddCarView: View {
                         let name = selectedName
                         guard !name.isEmpty else { return }
                         saving = true
-                        Task { await store.addCar(name: name, plate: plate, odometer: odometer); dismiss() }
+                        Task {
+                            let car = await store.addCar(name: name, plate: plate, odometer: odometer)
+                            if MaintenanceCatalog.template(for: car) != nil { savedCar = car }
+                            else { dismiss() }
+                        }
                     } label: {
                         if saving { ProgressView().accessibilityLabel("Guardando auto") }
                         else { Text("Guardar") }
@@ -160,6 +172,7 @@ struct AddCarView: View {
             .onChange(of: brandID) { _, id in Task { await loadModels(brandID: id) } }
             .onChange(of: modelID) { _, id in Task { await loadVersions(modelID: id) } }
             .onChange(of: versionID) { _, id in Task { await loadYears(versionID: id) } }
+        }
         }
     }
 
@@ -239,10 +252,18 @@ struct CarView: View {
     @EnvironmentObject private var store: CloudStore
     let car: Car
     @State private var addPlan = false
+    @State private var showTemplate = false
+    @State private var templateToReview: MaintenanceTemplate?
     @State private var share = false
     @State private var editOdometer = false
     @State private var kilometers = 0
     private var current: Car { store.cars.first(where: { $0.id == car.id }) ?? car }
+    private var availableTemplate: MaintenanceTemplate? {
+        guard !current.isSharedWithMe, let template = MaintenanceCatalog.template(for: current) else { return nil }
+        let existing = Set(store.plans.filter { $0.carID == current.id }.compactMap(\.templateRuleID))
+        let available = template.excluding(existing)
+        return available.rules.isEmpty ? nil : available
+    }
     var body: some View {
         List {
             Section {
@@ -250,6 +271,12 @@ struct CarView: View {
                 Button("Kilometraje: \(current.odometer) km") { kilometers = current.odometer; editOdometer = true }
             }
             Section("Plan de servicios") {
+                if availableTemplate != nil {
+                    Button("Revisar plan oficial sugerido", systemImage: "checklist") {
+                        templateToReview = availableTemplate
+                        showTemplate = true
+                    }
+                }
                 ForEach(store.plans.filter { $0.carID == car.id }.sorted { $0.status(odometer: current.odometer).rawValue < $1.status(odometer: current.odometer).rawValue }) { plan in
                     NavigationLink { PlanView(plan: plan, car: current) } label: {
                         VStack(alignment: .leading, spacing: 4) {
@@ -265,6 +292,9 @@ struct CarView: View {
         .navigationTitle(current.name)
         .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
+        .sheet(isPresented: $showTemplate, onDismiss: { templateToReview = nil }) {
+            if let template = templateToReview { MaintenanceTemplateView(car: current, template: template) }
+        }
         .sheet(isPresented: $share) { CarSharingSheet(car: current, store: store) }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {
             TextField("Kilómetros", value: $kilometers, format: .number).keyboardType(.numberPad)
@@ -338,6 +368,9 @@ struct PlanView: View {
     var body: some View {
         List {
             Section("Qué hacer") { Text(plan.details.isEmpty ? "Sin detalles cargados" : plan.details) }
+            if let sourceURL = plan.sourceURL.flatMap(URL.init(string:)) {
+                Section("Fuente") { Link("Ver plan oficial", destination: sourceURL) }
+            }
             Section("Próximo vencimiento") {
                 if let date = plan.nextDate { LabeledContent("Fecha", value: date.formatted(date: .abbreviated, time: .omitted)) }
                 if let km = plan.nextKilometers { LabeledContent("Kilometraje", value: "\(km) km") }
