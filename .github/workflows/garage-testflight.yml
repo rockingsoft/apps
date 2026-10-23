@@ -24,7 +24,7 @@ jobs:
   upload:
     runs-on: macos-15
     env:
-      BUNDLE_PATH: ${{ runner.temp }}/garage-bundle
+      BUNDLE_PATH: vendor/bundle
     defaults:
       run:
         working-directory: apps/garage
