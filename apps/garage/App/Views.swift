@@ -33,40 +33,39 @@ struct CarsView: View {
 struct AddCarView: View {
     @EnvironmentObject private var store: CloudStore
     @Environment(\.dismiss) private var dismiss
-    @State private var manual = false
-    @State private var name = ""
     @State private var plate = ""
-    @State private var odometer = 0
+    @State private var odometerText = ""
     @State private var brands: [CatalogOption] = []
     @State private var models: [CatalogOption] = []
     @State private var versions: [CatalogOption] = []
+    @State private var years: [Int] = []
     @State private var brandID = 0
     @State private var modelID = 0
     @State private var versionID = 0
-    @State private var year = Calendar.current.component(.year, from: .now)
+    @State private var year = 0
     @State private var catalogMessage: String?
     @State private var loadingBrands = false
     @State private var loadingModels = false
+    @State private var loadingYears = false
 
     private var selectedName: String {
-        if manual { return name.trimmingCharacters(in: .whitespacesAndNewlines) }
         guard let brand = brands.first(where: { $0.id == brandID }),
-              let model = models.first(where: { $0.id == modelID }) else { return "" }
-        let version = versions.first(where: { $0.id == versionID }).map { " · \($0.name)" } ?? ""
-        return "\(brand.name) \(model.name) \(year)\(version)"
+              let model = models.first(where: { $0.id == modelID }),
+              let version = versions.first(where: { $0.id == versionID }),
+              years.contains(year) else { return "" }
+        return "\(brand.name) \(model.name) \(year) · \(version.name)"
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    Toggle("Ingresar manualmente", isOn: $manual)
-                    if let catalogMessage, !manual { Text(catalogMessage).font(.footnote).foregroundStyle(.orange) }
+                if let catalogMessage {
+                    Section {
+                        Text(catalogMessage).font(.footnote).foregroundStyle(.orange)
+                        Button("Reintentar") { Task { await retryCatalog() } }
+                    }
                 }
-                if manual {
-                    Section("Auto") { TextField("Marca, modelo y año", text: $name) }
-                } else {
-                    Section("Auto") {
+                Section("Auto") {
                         if loadingBrands { ProgressView("Cargando marcas…") }
                         Picker("Marca", selection: $brandID) {
                             Text("Seleccionar").tag(0)
@@ -80,31 +79,36 @@ struct AddCarView: View {
                             }
                         }
                         if modelID != 0 {
-                            Picker("Año", selection: $year) {
-                                ForEach((1950...Calendar.current.component(.year, from: .now) + 1).reversed(), id: \.self) { value in Text(String(value)).tag(value) }
+                            Picker("Versión", selection: $versionID) {
+                                Text("Seleccionar").tag(0)
+                                ForEach(versions) { version in Text(version.name).tag(version.id) }
                             }
-                            if !versions.isEmpty {
-                                Picker("Versión (opcional)", selection: $versionID) {
-                                    Text("Sin especificar").tag(0)
-                                    ForEach(versions) { version in Text(version.name).tag(version.id) }
+                            if versionID != 0 {
+                                if loadingYears { ProgressView("Cargando años…") }
+                                Picker("Año", selection: $year) {
+                                    Text("Seleccionar").tag(0)
+                                    ForEach(years, id: \.self) { value in Text(String(value)).tag(value) }
                                 }
                             }
                         }
-                    }
                 }
                 Section("Datos actuales") {
                     TextField("Patente", text: $plate)
-                    TextField("Kilometraje actual", value: $odometer, format: .number).keyboardType(.numberPad)
+                    TextField("Kilometraje actual", text: $odometerText).keyboardType(.numberPad)
                 }
             }
             .navigationTitle("Nuevo auto")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Guardar") { Task { await store.addCar(name: selectedName, plate: plate, odometer: odometer); dismiss() } }.disabled(selectedName.isEmpty) }
+                ToolbarItem(placement: .confirmationAction) { Button("Guardar") {
+                    guard let odometer = Int(odometerText), odometer >= 0 else { return }
+                    Task { await store.addCar(name: selectedName, plate: plate, odometer: odometer); dismiss() }
+                }.disabled(selectedName.isEmpty || Int(odometerText).map { $0 < 0 } ?? true) }
             }
             .task { await loadBrands() }
             .onChange(of: brandID) { _, id in Task { await loadModels(brandID: id) } }
             .onChange(of: modelID) { _, id in Task { await loadVersions(modelID: id) } }
+            .onChange(of: versionID) { _, id in Task { await loadYears(versionID: id) } }
         }
     }
 
@@ -112,14 +116,16 @@ struct AddCarView: View {
         loadingBrands = true
         defer { loadingBrands = false }
         do { brands = try await VehicleCatalog.brands() }
-        catch { catalogMessage = "ArgAutos no está disponible. Usá la carga manual." }
+        catch { catalogMessage = "No se pudo cargar ArgAutos. Intentá de nuevo más tarde." }
     }
 
     private func loadModels(brandID: Int) async {
         modelID = 0
         versionID = 0
+        year = 0
         models = []
         versions = []
+        years = []
         guard brandID != 0 else { return }
         loadingModels = true
         defer { loadingModels = false }
@@ -129,15 +135,43 @@ struct AddCarView: View {
             models = loaded
             catalogMessage = nil
         }
-        catch { catalogMessage = "ArgAutos no está disponible. Usá la carga manual." }
+        catch { catalogMessage = "No se pudo cargar ArgAutos. Intentá de nuevo más tarde." }
     }
 
     private func loadVersions(modelID: Int) async {
         versionID = 0
+        year = 0
         versions = []
+        years = []
         guard modelID != 0 else { return }
-        let loaded = (try? await VehicleCatalog.versions(modelID: modelID)) ?? []
-        if self.modelID == modelID { versions = loaded }
+        do {
+            let loaded = try await VehicleCatalog.versions(modelID: modelID)
+            guard self.modelID == modelID else { return }
+            versions = loaded
+            catalogMessage = nil
+        } catch { catalogMessage = "No se pudieron cargar las versiones. Intentá de nuevo más tarde." }
+    }
+
+    private func loadYears(versionID: Int) async {
+        year = 0
+        years = []
+        guard versionID != 0 else { return }
+        loadingYears = true
+        defer { loadingYears = false }
+        do {
+            let loaded = try await VehicleCatalog.years(versionID: versionID)
+            guard self.versionID == versionID else { return }
+            years = loaded
+            catalogMessage = nil
+        } catch { catalogMessage = "No se pudieron cargar los años. Intentá de nuevo más tarde." }
+    }
+
+    private func retryCatalog() async {
+        catalogMessage = nil
+        if brands.isEmpty { await loadBrands() }
+        else if models.isEmpty, brandID != 0 { await loadModels(brandID: brandID) }
+        else if versions.isEmpty, modelID != 0 { await loadVersions(modelID: modelID) }
+        else if years.isEmpty, versionID != 0 { await loadYears(versionID: versionID) }
     }
 }
 

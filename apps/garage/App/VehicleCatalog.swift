@@ -15,12 +15,47 @@ enum VehicleCatalog {
         let savedAt: Date
         let options: [CatalogOption]
     }
+    private struct ValuationPage: Decodable {
+        struct Valuation: Decodable { let year: Int }
+        let data: [Valuation]
+    }
+    private struct YearCacheEntry: Codable {
+        let savedAt: Date
+        let years: [Int]
+    }
     private static let base = URL(string: "https://argautos.com/api/v1/")!
     private static let maxAge: TimeInterval = 7 * 24 * 60 * 60
 
     static func brands() async throws -> [CatalogOption] { try await fetch(path: "brands") }
     static func models(brandID: Int) async throws -> [CatalogOption] { try await fetch(path: "brands/\(brandID)/models") }
     static func versions(modelID: Int) async throws -> [CatalogOption] { try await fetch(path: "models/\(modelID)/versions") }
+
+    static func years(versionID: Int) async throws -> [Int] {
+        let key = "garage.catalog.years.\(versionID)"
+        let cached = UserDefaults.standard.data(forKey: key).flatMap { try? JSONDecoder().decode(YearCacheEntry.self, from: $0) }
+        if let cached, Date().timeIntervalSince(cached.savedAt) < maxAge { return cached.years }
+        do {
+            let url = base.appending(path: "versions/\(versionID)/valuations")
+            var request = URLRequest(url: url)
+            request.timeoutInterval = 10
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            var (data, response) = try await URLSession.shared.data(for: request)
+            if let http = response as? HTTPURLResponse, http.statusCode == 429,
+               let seconds = http.value(forHTTPHeaderField: "Retry-After").flatMap(Int.init),
+               (1...60).contains(seconds) {
+                try await Task.sleep(for: .seconds(seconds))
+                (data, response) = try await URLSession.shared.data(for: request)
+            }
+            guard let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) else { throw CatalogError.unavailable }
+            let years = Array(Set(try JSONDecoder().decode(ValuationPage.self, from: data).data.map(\.year))).sorted(by: >)
+            guard !years.isEmpty else { throw CatalogError.invalidResponse }
+            if let data = try? JSONEncoder().encode(YearCacheEntry(savedAt: .now, years: years)) { UserDefaults.standard.set(data, forKey: key) }
+            return years
+        } catch {
+            if let cached { return cached.years }
+            throw error
+        }
+    }
 
     private static func fetch(path: String) async throws -> [CatalogOption] {
         let key = "garage.catalog.\(path)"
@@ -54,5 +89,5 @@ enum VehicleCatalog {
 
 enum CatalogError: LocalizedError {
     case unavailable, invalidResponse
-    var errorDescription: String? { "No se pudo cargar ArgAutos. Podés ingresar el auto manualmente." }
+    var errorDescription: String? { "No se pudo cargar ArgAutos. Intentá de nuevo más tarde." }
 }
