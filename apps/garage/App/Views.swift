@@ -2,28 +2,121 @@ import SwiftUI
 import UIKit
 
 struct CarsView: View {
+    @AppStorage("garage.selectedCarZone") private var selectedCarZone = ""
+    @State private var selectedTab = 0
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            HomeView(selectedCarZone: $selectedCarZone, showCars: { selectedTab = 1 })
+                .tabItem { Label("Inicio", systemImage: "house.fill") }
+                .tag(0)
+            ManageCarsView(onSelectCar: { car in
+                selectedCarZone = car.id.zoneID.zoneName
+                selectedTab = 0
+            })
+                .tabItem { Label("Mis autos", systemImage: "car.side.fill") }
+                .tag(1)
+        }
+    }
+}
+
+private struct HomeView: View {
     @EnvironmentObject private var store: CloudStore
     @EnvironmentObject private var fuelMonitor: FuelVisitMonitor
+    @Binding var selectedCarZone: String
+    let showCars: () -> Void
+    @State private var suggestedFuelCar: Car?
+
+    private var selectedCar: Car? {
+        if let chosen = store.cars.first(where: { $0.id.zoneID.zoneName == selectedCarZone }) { return chosen }
+        return store.cars.max { lhs, rhs in
+            store.fuelEntries.filter { $0.carID == lhs.id }.count < store.fuelEntries.filter { $0.carID == rhs.id }.count
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            if let car = selectedCar {
+                VStack(spacing: 0) {
+                    Menu {
+                        ForEach(store.cars) { option in
+                            Button {
+                                selectedCarZone = option.id.zoneID.zoneName
+                            } label: {
+                                if option.id == car.id {
+                                    Label(option.name, systemImage: "checkmark")
+                                } else { Text(option.name) }
+                            }
+                        }
+                        Divider()
+                        Button("Gestionar autos", systemImage: "car.side") { showCars() }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "car.side.fill").foregroundStyle(.tint)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("AUTO SELECCIONADO").font(.caption2.bold()).foregroundStyle(.secondary)
+                                Text(car.name).font(.subheadline.bold()).lineLimit(1)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(.secondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+
+                    if let suggestion = fuelMonitor.suggestion {
+                        HStack {
+                            Text("¿Cargaste en \(suggestion.stationName)?").font(.subheadline)
+                            Spacer()
+                            Menu("Registrar") {
+                                ForEach(store.cars) { option in
+                                    Button(option.name) { suggestedFuelCar = option }
+                                }
+                            }
+                            Button { fuelMonitor.clearSuggestion() } label: {
+                                Image(systemName: "xmark.circle.fill")
+                            }
+                            .accessibilityLabel("Descartar sugerencia")
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                    }
+                    CarView(car: car)
+                        .id(car.id.zoneID.zoneName)
+                }
+                .sheet(item: $suggestedFuelCar) { chosen in
+                    FuelEntryView(car: chosen, suggestion: fuelMonitor.suggestion)
+                }
+            } else {
+                ContentUnavailableView {
+                    Label("Todavía no hay autos", systemImage: "car")
+                } description: {
+                    Text("Agregá un auto para ver sus cargas y servicios en Inicio.")
+                } actions: {
+                    Button("Ir a Mis autos") { showCars() }
+                }
+            }
+        }
+    }
+}
+
+private struct ManageCarsView: View {
+    @EnvironmentObject private var store: CloudStore
+    @EnvironmentObject private var fuelMonitor: FuelVisitMonitor
+    let onSelectCar: (Car) -> Void
     @State private var addCar = false
     @State private var carToDelete: Car?
-    @State private var suggestedFuelCar: Car?
     var body: some View {
         NavigationStack {
             List {
                 if let message = store.syncMessage {
                     Section { Label(message, systemImage: "icloud.slash").font(.footnote).foregroundStyle(.orange) }
                 }
-                if let suggestion = fuelMonitor.suggestion, !store.cars.isEmpty {
-                    Section("Posible carga de nafta") {
-                        Text("¿Cargaste en \(suggestion.stationName)? Elegí el auto para registrarla.")
-                        ForEach(store.cars) { car in
-                            Button(car.name) { suggestedFuelCar = car }
-                        }
-                        Button("No cargué nafta", role: .destructive) { fuelMonitor.clearSuggestion() }
-                    }
-                }
                 ForEach(store.cars) { car in
-                    NavigationLink(value: car) {
+                    Button { onSelectCar(car) } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(car.name).font(.headline)
                             Text("\(car.plate.uppercased()) · \(car.odometer) km").foregroundStyle(.secondary)
@@ -35,6 +128,7 @@ struct CarsView: View {
                             }
                         }
                     }
+                    .foregroundStyle(.primary)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button {
                             carToDelete = car
@@ -61,10 +155,8 @@ struct CarsView: View {
                 }
             }
             .navigationTitle("Mis autos")
-            .navigationDestination(for: Car.self) { CarView(car: $0) }
             .toolbar { Button("Agregar", systemImage: "plus") { addCar = true } }
             .sheet(isPresented: $addCar) { AddCarView() }
-            .sheet(item: $suggestedFuelCar) { car in FuelEntryView(car: car, suggestion: fuelMonitor.suggestion) }
             .alert("¿Eliminar este auto?", isPresented: Binding(
                 get: { carToDelete != nil },
                 set: { if !$0 { carToDelete = nil } }
@@ -98,6 +190,7 @@ struct AddCarView: View {
 
     @EnvironmentObject private var store: CloudStore
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("garage.selectedCarZone") private var selectedCarZone = ""
     @State private var plate = ""
     @State private var odometerText = ""
     @State private var brands: [CatalogOption] = []
@@ -188,6 +281,7 @@ struct AddCarView: View {
                         saving = true
                         Task {
                             let car = await store.addCar(name: name, plate: plate, odometer: odometer)
+                            selectedCarZone = car.id.zoneID.zoneName
                             if let template = MaintenanceCatalog.template(for: car) {
                                 suggestedPlan = SuggestedPlan(car: car, template: template)
                             }
@@ -340,6 +434,7 @@ struct CarView: View {
             }
         }
         .navigationTitle(current.name)
+        .refreshable { await store.reload() }
         .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
         .sheet(isPresented: $addFuel) { FuelEntryView(car: current) }
