@@ -16,6 +16,7 @@ App nativa SwiftUI para iPhone/iPad (iOS 17+) que guarda autos, planes de servic
 - Avisos opcionales de posibles cargas: con permiso de ubicación «Siempre», iOS informa visitas y Garage busca una estación de servicio cercana. Solo sugiere registrar una carga cuando la visita informada dura al menos cinco minutos; el aviso puede llegar más tarde porque iOS entrega las visitas de forma aproximada. No se registra una carga automáticamente ni se usa seguimiento GPS continuo.
 - Notificaciones locales por fecha, al acercarse el vencimiento, y por kilometraje al ingresar una nueva lectura. Cada iPhone calcula sus propias notificaciones.
 - Invitar a colaborar en un auto vía iCloud: solo las personas invitadas pueden acceder y pueden editar el auto, sus cargas y servicios. Cada auto usa una zona CloudKit propia; los cambios de los participantes se leen al abrir o actualizar la app.
+- La pantalla «Acceso» consulta iCloud para mostrar colaboradores y si la invitación está pendiente o aceptada. El propietario puede quitar el acceso de una persona; el cambio se guarda en CloudKit. Los nombres pueden no estar disponibles si iCloud no comparte la identidad del participante.
 
 ## Abrir y compilar
 

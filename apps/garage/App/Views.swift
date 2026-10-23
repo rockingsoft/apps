@@ -393,7 +393,6 @@ struct CarView: View {
     @State private var addFuel = false
     @State private var fuelEntryToDelete: FuelEntry?
     @State private var templateToReview: MaintenanceTemplate?
-    @State private var share = false
     @State private var editOdometer = false
     @State private var kilometers = 0
     private var current: Car { store.cars.first(where: { $0.id == car.id }) ?? car }
@@ -445,20 +444,16 @@ struct CarView: View {
         .navigationTitle(current.name)
         .refreshable { await store.reload() }
         .toolbar {
-            if !current.isSharedWithMe {
-                Button("Invitar a colaborar", systemImage: "person.crop.circle.badge.plus") { share = true }
-                    .disabled(!store.canShare(current))
+            NavigationLink {
+                CarAccessView(car: current, store: store)
+            } label: {
+                Label("Acceso", systemImage: "person.2")
             }
         }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
         .sheet(isPresented: $addFuel) { FuelEntryView(car: current) }
         .fuelDeletionAlert(entry: $fuelEntryToDelete, store: store)
         .sheet(item: $templateToReview) { template in MaintenanceTemplateView(car: current, template: template) }
-        .overlay {
-            if share {
-                CarSharingSheet(car: current, store: store, onClose: { share = false })
-            }
-        }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {
             TextField("Kilómetros", value: $kilometers, format: .number).keyboardType(.numberPad)
             Button("Guardar") { Task { await store.updateOdometer(current, kilometers: kilometers) } }
