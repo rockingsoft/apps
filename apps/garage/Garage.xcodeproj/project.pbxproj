@@ -14,12 +14,14 @@
 		D6030A056514FD9402D699F1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 078C5E143D97CD742B5EE465 /* Foundation.framework */; };
 		D8DCD41D327B68D5EA3F46A9 /* ServiceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454D12621089A7D8FE7CC2A5 /* ServiceModels.swift */; };
 		E3B894D2078B163D8B748926 /* GarageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C52132848B391B840BF589A /* GarageApp.swift */; };
+		E60499FAF5D1B4FEACFEAF5F /* VehicleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A682FA1C1FFF2123342161 /* VehicleCatalog.swift */; };
 		FD25B3197BFFE21BD82074C6 /* NotificationPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBE2BE8DD2920AAC6DBB8AA7 /* NotificationPlanner.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		00FFB41B9C4B4AA528AB798D /* CloudStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudStore.swift; sourceTree = "<group>"; };
 		078C5E143D97CD742B5EE465 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		09A682FA1C1FFF2123342161 /* VehicleCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VehicleCatalog.swift; sourceTree = "<group>"; };
 		274423CB02EBBB431DCB4CB2 /* Garage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Garage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C52132848B391B840BF589A /* GarageApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GarageApp.swift; sourceTree = "<group>"; };
 		454D12621089A7D8FE7CC2A5 /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 				59583D284D83A2C18D19DA64 /* Sharing.swift */,
 				AD50A10911A12EA521EB5194 /* Views.swift */,
 				98F4860D91833B67C596BC90 /* LocalSnapshot.swift */,
+				09A682FA1C1FFF2123342161 /* VehicleCatalog.swift */,
 			);
 			name = App;
 			path = App;
@@ -179,6 +182,7 @@
 				333808DFC3F1892237A881F6 /* Views.swift in Sources */,
 				D8DCD41D327B68D5EA3F46A9 /* ServiceModels.swift in Sources */,
 				53FD5F3D9B360C1268B32A03 /* LocalSnapshot.swift in Sources */,
+				E60499FAF5D1B4FEACFEAF5F /* VehicleCatalog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

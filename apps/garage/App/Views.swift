@@ -33,22 +33,111 @@ struct CarsView: View {
 struct AddCarView: View {
     @EnvironmentObject private var store: CloudStore
     @Environment(\.dismiss) private var dismiss
+    @State private var manual = false
     @State private var name = ""
     @State private var plate = ""
     @State private var odometer = 0
+    @State private var brands: [CatalogOption] = []
+    @State private var models: [CatalogOption] = []
+    @State private var versions: [CatalogOption] = []
+    @State private var brandID = 0
+    @State private var modelID = 0
+    @State private var versionID = 0
+    @State private var year = Calendar.current.component(.year, from: .now)
+    @State private var catalogMessage: String?
+    @State private var loadingBrands = false
+    @State private var loadingModels = false
+
+    private var selectedName: String {
+        if manual { return name.trimmingCharacters(in: .whitespacesAndNewlines) }
+        guard let brand = brands.first(where: { $0.id == brandID }),
+              let model = models.first(where: { $0.id == modelID }) else { return "" }
+        let version = versions.first(where: { $0.id == versionID }).map { " · \($0.name)" } ?? ""
+        return "\(brand.name) \(model.name) \(year)\(version)"
+    }
+
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Nombre (ej. Golf)", text: $name)
-                TextField("Patente", text: $plate)
-                TextField("Kilometraje actual", value: $odometer, format: .number).keyboardType(.numberPad)
+                Section {
+                    Toggle("Ingresar manualmente", isOn: $manual)
+                    if let catalogMessage, !manual { Text(catalogMessage).font(.footnote).foregroundStyle(.orange) }
+                }
+                if manual {
+                    Section("Auto") { TextField("Marca, modelo y año", text: $name) }
+                } else {
+                    Section("Auto") {
+                        if loadingBrands { ProgressView("Cargando marcas…") }
+                        Picker("Marca", selection: $brandID) {
+                            Text("Seleccionar").tag(0)
+                            ForEach(brands) { brand in Text(brand.name).tag(brand.id) }
+                        }
+                        if brandID != 0 {
+                            if loadingModels { ProgressView("Cargando modelos…") }
+                            Picker("Modelo", selection: $modelID) {
+                                Text("Seleccionar").tag(0)
+                                ForEach(models) { model in Text(model.name).tag(model.id) }
+                            }
+                        }
+                        if modelID != 0 {
+                            Picker("Año", selection: $year) {
+                                ForEach((1950...Calendar.current.component(.year, from: .now) + 1).reversed(), id: \.self) { value in Text(String(value)).tag(value) }
+                            }
+                            if !versions.isEmpty {
+                                Picker("Versión (opcional)", selection: $versionID) {
+                                    Text("Sin especificar").tag(0)
+                                    ForEach(versions) { version in Text(version.name).tag(version.id) }
+                                }
+                            }
+                        }
+                    }
+                }
+                Section("Datos actuales") {
+                    TextField("Patente", text: $plate)
+                    TextField("Kilometraje actual", value: $odometer, format: .number).keyboardType(.numberPad)
+                }
             }
             .navigationTitle("Nuevo auto")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Guardar") { Task { await store.addCar(name: name, plate: plate, odometer: odometer); dismiss() } }.disabled(name.trimmingCharacters(in: .whitespaces).isEmpty) }
+                ToolbarItem(placement: .confirmationAction) { Button("Guardar") { Task { await store.addCar(name: selectedName, plate: plate, odometer: odometer); dismiss() } }.disabled(selectedName.isEmpty) }
             }
+            .task { await loadBrands() }
+            .onChange(of: brandID) { _, id in Task { await loadModels(brandID: id) } }
+            .onChange(of: modelID) { _, id in Task { await loadVersions(modelID: id) } }
         }
+    }
+
+    private func loadBrands() async {
+        loadingBrands = true
+        defer { loadingBrands = false }
+        do { brands = try await VehicleCatalog.brands() }
+        catch { catalogMessage = "ArgAutos no está disponible. Usá la carga manual." }
+    }
+
+    private func loadModels(brandID: Int) async {
+        modelID = 0
+        versionID = 0
+        models = []
+        versions = []
+        guard brandID != 0 else { return }
+        loadingModels = true
+        defer { loadingModels = false }
+        do {
+            let loaded = try await VehicleCatalog.models(brandID: brandID)
+            guard self.brandID == brandID else { return }
+            models = loaded
+            catalogMessage = nil
+        }
+        catch { catalogMessage = "ArgAutos no está disponible. Usá la carga manual." }
+    }
+
+    private func loadVersions(modelID: Int) async {
+        versionID = 0
+        versions = []
+        guard modelID != 0 else { return }
+        let loaded = (try? await VehicleCatalog.versions(modelID: modelID)) ?? []
+        if self.modelID == modelID { versions = loaded }
     }
 }
 
