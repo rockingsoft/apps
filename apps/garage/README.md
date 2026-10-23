@@ -30,7 +30,7 @@ El script de build firma el simulador con el equipo por defecto `3SRDN9365G` (se
 
 ## TestFlight
 
-El workflow manual **Garage TestFlight** compila la configuración Release, sube el IPA con Fastlane y espera el procesamiento de TestFlight. No ejecuta pruebas. `rebuild` conserva la versión actual y usa un número de build nuevo; `major` y `minor` incrementan el componente indicado y reinician los siguientes a cero. La primera ejecución con `rebuild` usa `1.0.0`. Después de una subida exitosa, el workflow guarda un tag `garage-vX.Y.Z` para calcular la siguiente versión.
+El workflow manual **Garage TestFlight** compila la configuración Release, sube el IPA con Fastlane, espera el procesamiento de TestFlight y selecciona el build en la versión editable de App Store Connect. No ejecuta pruebas. `rebuild` conserva la versión actual y usa un número de build nuevo; `major` y `minor` incrementan el componente indicado y reinician los siguientes a cero. La primera ejecución con `rebuild` usa `1.0.0`. Después de una subida exitosa, el workflow guarda un tag `garage-vX.Y.Z` para calcular la siguiente versión.
 
 La configuración Release usa CloudKit Production. Antes del primer upload, el esquema del contenedor `iCloud.com.schoren.garage` debe estar desplegado a producción en CloudKit Console.
 
@@ -46,7 +46,7 @@ El repositorio necesita credenciales **exclusivas de Garage** en GitHub Actions 
 | `GARAGE_APPSTORE_PROFILE_BASE64` | Perfil iOS App Store para `com.schoren.garage`, asociado a ese certificado, codificado en base64. |
 | `GARAGE_KEYCHAIN_PASSWORD` | Contraseña aleatoria para el llavero temporal del runner. |
 
-El registro `Garage` en App Store Connect debe usar `com.schoren.garage`. El upload deja el build procesado en TestFlight para evaluación; completar la ficha de App Store y enviarlo a Apple para revisión pública requiere los datos y capturas de la ficha.
+El registro `Garage` en App Store Connect debe usar `com.schoren.garage`. El upload deja el build procesado en TestFlight y seleccionado en la versión de App Store; completar la ficha y enviarlo a Apple para revisión pública requiere los datos y capturas de la ficha.
 
 ## Alcances actuales
 
