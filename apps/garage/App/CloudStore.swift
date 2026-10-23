@@ -7,7 +7,9 @@ import Foundation
     @Published var entries: [ServiceEntry] = []
     @Published var fuelEntries: [FuelEntry] = []
     @Published var syncMessage: String?
+    @Published var shareError: String?
     @Published var loading = false
+    private var reloadRequested = false
 
     let container = CKContainer.default()
     private var privateDB: CKDatabase { container.privateCloudDatabase }
@@ -35,9 +37,15 @@ import Foundation
     }
 
     func reload() async {
-        guard !loading else { return }
+        guard !loading else { reloadRequested = true; return }
         loading = true
-        defer { loading = false }
+        defer {
+            loading = false
+            if reloadRequested {
+                reloadRequested = false
+                Task { await self.reload() }
+            }
+        }
         do {
             let status = try await container.accountStatus()
             guard status == .available else { throw GarageError.iCloudUnavailable }
@@ -47,7 +55,8 @@ import Foundation
             var remoteEntries: [ServiceEntry] = []
             var remoteFuelEntries: [FuelEntry] = []
             for (database, shared) in [(privateDB, false), (sharedDB, true)] {
-                for zone in try await database.allRecordZones() where zone.zoneID.zoneName.hasPrefix("garage-") {
+                for zone in try await database.allRecordZones()
+                    where shared || zone.zoneID.zoneName.hasPrefix("garage-") {
                     let allRecords = try await records(in: zone.zoneID, database: database)
                     let carRecords = allRecords.filter { $0.recordType == "Car" }
                     let planRecords = allRecords.filter { $0.recordType == "ServicePlan" }

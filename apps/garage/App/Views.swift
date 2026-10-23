@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct CarsView: View {
+    @EnvironmentObject private var store: CloudStore
     @AppStorage("garage.selectedCarZone") private var selectedCarZone = ""
     @State private var selectedTab = 0
 
@@ -16,6 +17,14 @@ struct CarsView: View {
             })
                 .tabItem { Label("Mis autos", systemImage: "car.side.fill") }
                 .tag(1)
+        }
+        .alert("No se pudo aceptar el auto compartido", isPresented: Binding(
+            get: { store.shareError != nil },
+            set: { if !$0 { store.shareError = nil } }
+        )) {
+            Button("Aceptar") { store.shareError = nil }
+        } message: {
+            Text(store.shareError ?? "Intentá abrir la invitación de nuevo.")
         }
     }
 }

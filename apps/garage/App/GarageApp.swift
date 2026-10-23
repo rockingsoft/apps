@@ -2,6 +2,11 @@ import CloudKit
 import SwiftUI
 import UIKit
 
+extension Notification.Name {
+    static let garageShareAccepted = Notification.Name("garage.shareAccepted")
+    static let garageShareAcceptanceFailed = Notification.Name("garage.shareAcceptanceFailed")
+}
+
 final class ShareSceneDelegate: UIResponder, UIWindowSceneDelegate {
     func windowScene(_ windowScene: UIWindowScene, userDidAcceptCloudKitShareWith metadata: CKShare.Metadata) {
         accept(metadata)
@@ -12,7 +17,16 @@ final class ShareSceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     private func accept(_ metadata: CKShare.Metadata) {
-        CKContainer.default().accept(metadata) { _, _ in }
+        CKContainer.default().accept(metadata) { _, error in
+            DispatchQueue.main.async {
+                if let error {
+                    NotificationCenter.default.post(name: .garageShareAcceptanceFailed, object: error.localizedDescription)
+                } else {
+                    UserDefaults.standard.set(true, forKey: "garage.shareAcceptedNeedsReload")
+                    NotificationCenter.default.post(name: .garageShareAccepted, object: nil)
+                }
+            }
+        }
     }
 }
 
@@ -40,8 +54,21 @@ final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
                 .environmentObject(store)
                 .environmentObject(fuelMonitor)
                 .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await store.reload() } } }
+                .onReceive(NotificationCenter.default.publisher(for: .garageShareAccepted)) { _ in
+                    Task {
+                        await store.reload()
+                        UserDefaults.standard.removeObject(forKey: "garage.shareAcceptedNeedsReload")
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .garageShareAcceptanceFailed)) { notification in
+                    store.shareError = notification.object as? String ?? "No se pudo aceptar la invitación."
+                }
                 .task {
                     await store.reload()
+                    if UserDefaults.standard.bool(forKey: "garage.shareAcceptedNeedsReload") {
+                        await store.reload()
+                        UserDefaults.standard.removeObject(forKey: "garage.shareAcceptedNeedsReload")
+                    }
                     await NotificationPlanner.requestPermission()
                     await NotificationPlanner.schedule(cars: store.cars, plans: store.plans)
                 }
