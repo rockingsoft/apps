@@ -10,6 +10,7 @@
 		2AE021D21844D9901021027C /* CloudStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FFB41B9C4B4AA528AB798D /* CloudStore.swift */; };
 		2BA9671F62EF2E32CE148E7F /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59583D284D83A2C18D19DA64 /* Sharing.swift */; };
 		333808DFC3F1892237A881F6 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD50A10911A12EA521EB5194 /* Views.swift */; };
+		53FD5F3D9B360C1268B32A03 /* LocalSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F4860D91833B67C596BC90 /* LocalSnapshot.swift */; };
 		D6030A056514FD9402D699F1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 078C5E143D97CD742B5EE465 /* Foundation.framework */; };
 		D8DCD41D327B68D5EA3F46A9 /* ServiceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454D12621089A7D8FE7CC2A5 /* ServiceModels.swift */; };
 		E3B894D2078B163D8B748926 /* GarageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C52132848B391B840BF589A /* GarageApp.swift */; };
@@ -23,6 +24,7 @@
 		2C52132848B391B840BF589A /* GarageApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GarageApp.swift; sourceTree = "<group>"; };
 		454D12621089A7D8FE7CC2A5 /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
 		59583D284D83A2C18D19DA64 /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
+		98F4860D91833B67C596BC90 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
 		AD50A10911A12EA521EB5194 /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
 		EBE2BE8DD2920AAC6DBB8AA7 /* NotificationPlanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPlanner.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -81,6 +83,7 @@
 				EBE2BE8DD2920AAC6DBB8AA7 /* NotificationPlanner.swift */,
 				59583D284D83A2C18D19DA64 /* Sharing.swift */,
 				AD50A10911A12EA521EB5194 /* Views.swift */,
+				98F4860D91833B67C596BC90 /* LocalSnapshot.swift */,
 			);
 			name = App;
 			path = App;
@@ -175,6 +178,7 @@
 				2BA9671F62EF2E32CE148E7F /* Sharing.swift in Sources */,
 				333808DFC3F1892237A881F6 /* Views.swift in Sources */,
 				D8DCD41D327B68D5EA3F46A9 /* ServiceModels.swift in Sources */,
+				53FD5F3D9B360C1268B32A03 /* LocalSnapshot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

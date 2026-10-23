@@ -4,7 +4,7 @@ App nativa SwiftUI para iPhone/iPad (iOS 17+) que guarda autos, planes de servic
 
 ## Funciones
 
-- Autos con nombre, patente y kilometraje actual.
+- Autos con nombre, patente y kilometraje actual. Los cambios se guardan en el iPhone aunque iCloud no esté disponible y quedan pendientes de sincronización.
 - Planes con detalle libre para especificar aceite, viscosidad, marca, filtro, repuestos o instrucciones; frecuencia en meses, kilómetros o ambos.
 - Estado próximo/vencido cuando se alcanza cualquiera de las dos condiciones.
 - Registro de cada service con fecha, kilometraje y notas. Actualiza el próximo vencimiento.
@@ -24,4 +24,4 @@ El script de build firma el simulador con el equipo por defecto `3SRDN9365G` (se
 
 ## Alcances actuales
 
-El odómetro no se lee del vehículo: el usuario debe actualizarlo; una alerta por kilómetros no puede dispararse sin una lectura nueva. Los cambios de otro participante se leen al abrir la app o al deslizar para actualizar. Esta primera versión no incluye edición o borrado de planes, fotos de facturas ni avisos remotos de cambios. El entorno CloudKit real y el enlace de invitación requieren validación en dos dispositivos firmados; el simulador sólo valida compilación y UI.
+Para compartir un auto, primero debe terminar de sincronizarse. El odómetro no se lee del vehículo: el usuario debe actualizarlo; una alerta por kilómetros no puede dispararse sin una lectura nueva. Los cambios de otro participante se leen al abrir la app o al deslizar para actualizar. Esta primera versión no incluye edición o borrado de planes, fotos de facturas ni avisos remotos de cambios. El entorno CloudKit real y el enlace de invitación requieren validación en dos dispositivos firmados; el simulador sólo valida compilación y UI.

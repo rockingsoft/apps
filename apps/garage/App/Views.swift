@@ -6,6 +6,9 @@ struct CarsView: View {
     var body: some View {
         NavigationStack {
             List {
+                if let message = store.syncMessage {
+                    Section { Label(message, systemImage: "icloud.slash").font(.footnote).foregroundStyle(.orange) }
+                }
                 ForEach(store.cars) { car in
                     NavigationLink(value: car) {
                         VStack(alignment: .leading, spacing: 4) {
@@ -23,7 +26,6 @@ struct CarsView: View {
             .sheet(isPresented: $addCar) { AddCarView() }
             .overlay { if store.cars.isEmpty && !store.loading { ContentUnavailableView("Agregá tu primer auto", systemImage: "car", description: Text("Guardá sus services y recibí avisos cuando se acerquen.")) } }
             .refreshable { await store.reload() }
-            .alert("Error", isPresented: Binding(get: { store.errorMessage != nil }, set: { if !$0 { store.errorMessage = nil } })) { Button("Aceptar") { store.errorMessage = nil } } message: { Text(store.errorMessage ?? "") }
         }
     }
 }
@@ -78,7 +80,7 @@ struct CarView: View {
             }
         }
         .navigationTitle(current.name)
-        .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true } } }
+        .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
         .sheet(isPresented: $share) { CarSharingSheet(car: current, store: store) }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {
