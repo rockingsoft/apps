@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 
 : "${GARAGE_DISTRIBUTION_CERTIFICATE_P12_BASE64:?required}"
 : "${GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD:?required}"
@@ -20,6 +21,20 @@ security set-key-partition-list -S apple-tool:,apple: -s -k "$GARAGE_KEYCHAIN_PA
 
 profile_plist="$RUNNER_TEMP/garage-profile.plist"
 security cms -D -i "$profile" > "$profile_plist"
+certificate_der="$RUNNER_TEMP/garage-certificate.der"
+openssl pkcs12 -in "$certificate" -clcerts -nokeys -passin env:GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD |
+  openssl x509 -outform DER > "$certificate_der"
+python3 - "$profile_plist" "$certificate_der" <<'PY'
+import plistlib
+import sys
+
+with open(sys.argv[1], 'rb') as source:
+    profile = plistlib.load(source)
+with open(sys.argv[2], 'rb') as source:
+    certificate = source.read()
+if certificate not in profile.get('DeveloperCertificates', []):
+    raise SystemExit('The provisioning profile does not contain the supplied distribution certificate.')
+PY
 uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$profile_plist")
 team=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$profile_plist")
 app_id=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$profile_plist")
