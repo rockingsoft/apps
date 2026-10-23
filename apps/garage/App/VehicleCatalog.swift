@@ -18,6 +18,28 @@ struct CatalogOption: Codable, Identifiable, Hashable {
     }
 }
 
+struct CatalogVersionGroup: Identifiable {
+    let id: Int
+    let name: String
+    let knownYears: [Int]
+    let baseVersionID: Int?
+
+    static func grouped(_ versions: [CatalogOption]) -> [CatalogVersionGroup] {
+        Dictionary(grouping: versions) { version in
+            version.nameWithoutYear.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+                .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "es_AR"))
+        }.map { _, variants in
+            let canonical = variants.first(where: { $0.embeddedYear == nil }) ?? variants.min(by: { $0.id < $1.id })!
+            return CatalogVersionGroup(
+                id: variants.map(\.id).min()!,
+                name: canonical.nameWithoutYear,
+                knownYears: Array(Set(variants.compactMap(\.embeddedYear))).sorted(by: >),
+                baseVersionID: variants.first(where: { $0.embeddedYear == nil })?.id
+            )
+        }.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+}
+
 enum VehicleCatalog {
     private struct Page: Decodable {
         struct Links: Decodable { let next: String? }

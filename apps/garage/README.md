@@ -4,7 +4,7 @@ App nativa SwiftUI para iPhone/iPad (iOS 17+) que guarda autos, planes de servic
 
 ## Funciones
 
-- Autos con marca, modelo, versión y año elegidos del catálogo de [ArgAutos](https://argautos.com/docs/api), más patente y kilometraje. Si la versión ya incluye un año, se usa automáticamente y no se duplica en el nombre del auto. Para las demás versiones, el selector usa las valuaciones disponibles; si esa consulta falla, se puede ingresar solo el año. Las consultas se guardan en caché durante siete días. El kilometraje comienza vacío y es obligatorio para guardar. Los cambios se guardan en el iPhone aunque iCloud no esté disponible y quedan pendientes de sincronización.
+- Autos con marca, modelo, versión y año elegidos del catálogo de [ArgAutos](https://argautos.com/docs/api), más patente y kilometraje. Las versiones se agrupan por nombre ignorando el año final, para todas las marcas y modelos. El selector de años reúne los años explícitos de esas versiones y las valuaciones de la versión base; si la consulta de valuaciones falla, se puede ingresar solo el año. Las consultas se guardan en caché durante siete días. La patente se guarda en mayúsculas y el kilometraje comienza vacío y es obligatorio para guardar. Los cambios se guardan en el iPhone aunque iCloud no esté disponible y quedan pendientes de sincronización.
 - Planes con detalle libre para especificar aceite, viscosidad, marca, filtro, repuestos o instrucciones; frecuencia en meses, kilómetros o ambos.
 - Estado próximo/vencido cuando se alcanza cualquiera de las dos condiciones.
 - Registro de cada service con fecha, kilometraje y notas. Actualiza el próximo vencimiento.

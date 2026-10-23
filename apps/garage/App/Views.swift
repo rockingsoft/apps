@@ -13,7 +13,7 @@ struct CarsView: View {
                     NavigationLink(value: car) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(car.name).font(.headline)
-                            Text("\(car.plate) · \(car.odometer) km").foregroundStyle(.secondary)
+                            Text("\(car.plate.uppercased()) · \(car.odometer) km").foregroundStyle(.secondary)
                             let due = store.plans.filter { $0.carID == car.id && $0.status(odometer: car.odometer) != .ok }.count
                             if due > 0 { Text("\(due) servicios pendientes").foregroundStyle(.orange).font(.caption) }
                         }
@@ -37,7 +37,7 @@ struct AddCarView: View {
     @State private var odometerText = ""
     @State private var brands: [CatalogOption] = []
     @State private var models: [CatalogOption] = []
-    @State private var versions: [CatalogOption] = []
+    @State private var versions: [CatalogVersionGroup] = []
     @State private var years: [Int] = []
     @State private var brandID = 0
     @State private var modelID = 0
@@ -55,7 +55,7 @@ struct AddCarView: View {
               let model = models.first(where: { $0.id == modelID }),
               let version = versions.first(where: { $0.id == versionID }),
               (years.contains(year) || (yearLookupFailed && (1950...Calendar.current.component(.year, from: .now) + 1).contains(year))) else { return "" }
-        return "\(brand.name) \(model.name) \(year) · \(version.nameWithoutYear)"
+        return "\(brand.name) \(model.name) \(year) · \(version.name)"
     }
 
     var body: some View {
@@ -85,23 +85,27 @@ struct AddCarView: View {
                                 Text("Seleccionar").tag(0)
                                 ForEach(versions) { version in Text(version.name).tag(version.id) }
                             }
-                            if versionID != 0, versions.first(where: { $0.id == versionID })?.embeddedYear == nil {
+                            if versionID != 0 {
                                 if loadingYears { ProgressView("Cargando años…") }
-                                if yearLookupFailed {
-                                    TextField("Año", text: $yearFallbackText)
-                                        .keyboardType(.numberPad)
-                                        .onChange(of: yearFallbackText) { _, text in year = Int(text) ?? 0 }
-                                } else {
+                                if !years.isEmpty {
                                     Picker("Año", selection: $year) {
                                         Text("Seleccionar").tag(0)
                                         ForEach(years, id: \.self) { value in Text(String(value)).tag(value) }
                                     }
+                                }
+                                if yearLookupFailed {
+                                    TextField("Otro año", text: $yearFallbackText)
+                                        .keyboardType(.numberPad)
+                                        .onChange(of: yearFallbackText) { _, text in year = Int(text) ?? 0 }
                                 }
                             }
                         }
                 }
                 Section("Datos actuales") {
                     TextField("Patente", text: $plate)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                        .onChange(of: plate) { _, value in plate = value.uppercased() }
                     TextField("Kilometraje actual", text: $odometerText).keyboardType(.numberPad)
                 }
             }
@@ -155,7 +159,7 @@ struct AddCarView: View {
         do {
             let loaded = try await VehicleCatalog.versions(modelID: modelID)
             guard self.modelID == modelID else { return }
-            versions = loaded
+            versions = CatalogVersionGroup.grouped(loaded)
             catalogMessage = nil
         } catch { catalogMessage = "No se pudieron cargar las versiones. Intentá de nuevo más tarde." }
     }
@@ -165,19 +169,16 @@ struct AddCarView: View {
         years = []
         yearFallbackText = ""
         yearLookupFailed = false
-        guard versionID != 0 else { return }
-        if let embeddedYear = versions.first(where: { $0.id == versionID })?.embeddedYear {
-            years = [embeddedYear]
-            year = embeddedYear
-            catalogMessage = nil
-            return
-        }
+        guard let version = versions.first(where: { $0.id == versionID }) else { return }
+        years = version.knownYears
+        catalogMessage = nil
+        guard let baseVersionID = version.baseVersionID else { return }
         loadingYears = true
         defer { loadingYears = false }
         do {
-            let loaded = try await VehicleCatalog.years(versionID: versionID)
+            let loaded = try await VehicleCatalog.years(versionID: baseVersionID)
             guard self.versionID == versionID else { return }
-            years = loaded
+            years = Array(Set(version.knownYears + loaded)).sorted(by: >)
             catalogMessage = nil
         } catch {
             guard self.versionID == versionID else { return }
@@ -191,7 +192,7 @@ struct AddCarView: View {
         if brands.isEmpty { await loadBrands() }
         else if models.isEmpty, brandID != 0 { await loadModels(brandID: brandID) }
         else if versions.isEmpty, modelID != 0 { await loadVersions(modelID: modelID) }
-        else if years.isEmpty, versionID != 0 { await loadYears(versionID: versionID) }
+        else if (years.isEmpty || yearLookupFailed), versionID != 0 { await loadYears(versionID: versionID) }
     }
 }
 
@@ -206,7 +207,7 @@ struct CarView: View {
     var body: some View {
         List {
             Section {
-                LabeledContent("Patente", value: current.plate)
+                LabeledContent("Patente", value: current.plate.uppercased())
                 Button("Kilometraje: \(current.odometer) km") { kilometers = current.odometer; editOdometer = true }
             }
             Section("Plan de servicios") {

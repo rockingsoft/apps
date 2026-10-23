@@ -157,7 +157,7 @@ import Foundation
     func addCar(name: String, plate: String, odometer: Int) async {
         let zoneID = CKRecordZone.ID(zoneName: "garage-\(UUID().uuidString)", ownerName: CKCurrentUserDefaultName)
         let id = CKRecord.ID(recordName: "car", zoneID: zoneID)
-        cars.append(Car(id: id, name: name, plate: plate, odometer: odometer, updatedAt: .now, isSharedWithMe: false))
+        cars.append(Car(id: id, name: name, plate: plate.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), odometer: odometer, updatedAt: .now, isSharedWithMe: false))
         snapshot.pendingCars.insert(RecordKey(id))
         await saveLocallyAndSync()
     }
