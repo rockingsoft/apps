@@ -29,6 +29,26 @@ Desde la raíz:
 
 El script de build firma el simulador con el equipo por defecto `3SRDN9365G` (se puede reemplazar con `DEVELOPMENT_TEAM=...`). CloudKit y las notificaciones se deben probar además en iPhone firmado con un Apple Developer Team. En Xcode, asignar el equipo a `Garage`, habilitar **iCloud > CloudKit**, asociar `iCloud.com.schoren.garage` (o cambiar identificadores para el equipo propio), y activar **Background Modes > Remote notifications** si se agregan suscripciones de cambios. El contenedor debe existir en CloudKit Dashboard y el esquema debe desplegarse a producción antes de distribuir la app. Ambos participantes necesitan iCloud activo.
 
+## TestFlight
+
+El workflow manual **Garage TestFlight** compila la configuración Release, sube el IPA con Fastlane, espera el procesamiento de TestFlight y selecciona el build en la versión editable de App Store Connect. No ejecuta pruebas. `rebuild` conserva la versión actual y usa un número de build nuevo; `major` y `minor` incrementan el componente indicado y reinician los siguientes a cero. La primera ejecución con `rebuild` usa `1.0.0`. Después de una subida exitosa, el workflow guarda un tag `garage-vX.Y.Z` para calcular la siguiente versión.
+
+La configuración Release usa CloudKit Production. Antes del primer upload, el esquema del contenedor `iCloud.com.schoren.garage` debe estar desplegado a producción en CloudKit Console.
+
+Las credenciales **exclusivas de Garage** se guardan en Infisical, proyecto `CLI General`, entorno `prod`, carpeta `/garage-ios-appstore`. GitHub Actions guarda solamente `GARAGE_INFISICAL_TOKEN`, un token de Infisical con acceso de lectura a esa carpeta. El workflow instala Infisical CLI y carga las credenciales en cada ejecución.
+
+| Secreto de Infisical | Contenido |
+| --- | --- |
+| `GARAGE_ASC_KEY_ID` | ID de la API key de App Store Connect creada para Garage. |
+| `GARAGE_ASC_ISSUER_ID` | Issuer ID de esa API key. |
+| `GARAGE_ASC_KEY_P8_BASE64` | Archivo `.p8` de esa API key codificado en base64, sin saltos de línea. |
+| `GARAGE_DISTRIBUTION_CERTIFICATE_P12_BASE64` | Certificado Apple Distribution y clave privada exclusivos, exportados como `.p12` y codificados en base64. |
+| `GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD` | Contraseña del `.p12`. |
+| `GARAGE_APPSTORE_PROFILE_BASE64` | Perfil iOS App Store para `com.schoren.garage`, asociado a ese certificado, codificado en base64. |
+| `GARAGE_KEYCHAIN_PASSWORD` | Contraseña aleatoria para el llavero temporal del runner. |
+
+El registro `Garage` en App Store Connect debe usar `com.schoren.garage`. El upload deja el build procesado en TestFlight y seleccionado en la versión de App Store; completar la ficha y enviarlo a Apple para revisión pública requiere los datos y capturas de la ficha.
+
 ## Alcances actuales
 
 Para compartir un auto, primero debe terminar de sincronizarse. El odómetro no se lee del vehículo: el usuario debe actualizarlo; una alerta por kilómetros no puede dispararse sin una lectura nueva. Los cambios de otro participante se leen al abrir la app o al deslizar para actualizar. Las plantillas son planes base, no contienen la marca o viscosidad de aceite ni todas las tareas específicas de cada versión; se debe revisar el manual del vehículo. Esta primera versión no incluye edición o borrado de planes, fotos de facturas ni avisos remotos de cambios. El entorno CloudKit real y el enlace de invitación requieren validación en dos dispositivos firmados; el simulador sólo valida compilación y UI.
