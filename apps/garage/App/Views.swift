@@ -356,7 +356,7 @@ private struct FuelEntryRow: View {
                 Spacer()
                 Text(entry.totalDescription)
             }
-            Text("\(entry.date.formatted(date: .abbreviated, time: .omitted)) · \(entry.kilometers.formatted()) km · \(NSDecimalNumber(decimal: entry.liters).stringValue) L")
+            Text("\(entry.date.formatted(date: .abbreviated, time: .shortened)) · \(entry.kilometers.formatted()) km · \(NSDecimalNumber(decimal: entry.liters).stringValue) L")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }

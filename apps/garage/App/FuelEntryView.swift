@@ -53,75 +53,153 @@ struct FuelEntryView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Estación") {
-                    Menu {
-                        Button("Detectar por ubicación", systemImage: "location") {
-                            stationWasChosen = false
-                            Task { await detectStation() }
-                        }
-                        ForEach(["YPF", "Shell", "Axion", "Puma", "Gulf", "Petrobras"], id: \.self) { brand in
-                            Button(brand) { chooseStation(brand) }
-                        }
-                        Button("Otra estación…", systemImage: "pencil") {
-                            manualStation = true
-                            stationWasChosen = true
-                            stationName = ""
-                            latitude = nil
-                            longitude = nil
-                        }
-                    } label: {
-                        HStack {
-                            Text("Estación")
-                            Spacer()
-                            if locator.loading { ProgressView() }
-                            Text(stationName.isEmpty ? (locator.loading ? "Buscando…" : "Elegir") : stationName)
-                                .foregroundStyle(.secondary)
-                            Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(.secondary)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "fuelpump.fill")
+                            .font(.title2).foregroundStyle(.tint)
+                            .frame(width: 48, height: 48)
+                            .background(.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Nueva carga").font(.title2.bold())
+                            Text(car.name).font(.subheadline).foregroundStyle(.secondary)
                         }
                     }
-                    if manualStation {
-                        TextField("Nombre de la estación", text: $stationName)
-                            .textInputAutocapitalization(.words)
-                    }
-                    if let locationMessage, stationName.isEmpty {
-                        Text(locationMessage).font(.caption).foregroundStyle(.secondary)
-                    }
-                }
 
-                Section("Carga") {
-                    DatePicker("Fecha", selection: $date, in: ...Date(), displayedComponents: .date)
-                    TextField("Kilómetros del tablero", text: $kilometersText).keyboardType(.numberPad)
-                    TextField("Litros", text: $litersText).keyboardType(.decimalPad)
-                    TextField("Precio por litro", text: $priceText).keyboardType(.decimalPad)
-                    LabeledContent("Total", value: total.map(currency) ?? "—")
-                        .fontWeight(.semibold)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("ESTACIÓN").font(.caption.bold()).foregroundStyle(.secondary)
+                        Menu {
+                            Button("Detectar por ubicación", systemImage: "location") {
+                                stationWasChosen = false
+                                Task { await detectStation() }
+                            }
+                            ForEach(["YPF", "Shell", "Axion", "Puma", "Gulf", "Petrobras"], id: \.self) { brand in
+                                Button(brand) { chooseStation(brand) }
+                            }
+                            Button("Otra estación…", systemImage: "pencil") {
+                                manualStation = true
+                                stationWasChosen = true
+                                stationName = ""
+                                latitude = nil
+                                longitude = nil
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "mappin.circle.fill").foregroundStyle(.tint)
+                                Text(stationName.isEmpty ? (locator.loading ? "Buscando cerca tuyo…" : "Elegir estación") : stationName)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                if locator.loading { ProgressView() }
+                                Image(systemName: "chevron.down").font(.caption.bold()).foregroundStyle(.secondary)
+                            }
+                            .padding(14)
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+                        }
+                        if manualStation {
+                            TextField("Nombre de la estación", text: $stationName)
+                                .textInputAutocapitalization(.words)
+                                .padding(14)
+                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+                        }
+                        if let locationMessage, stationName.isEmpty {
+                            Text(locationMessage).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("FECHA").font(.caption.bold()).foregroundStyle(.secondary)
+                            DatePicker("Fecha", selection: $date, in: ...Date(), displayedComponents: .date)
+                                .labelsHidden()
+                        }
+                        Spacer(minLength: 0)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("HORA").font(.caption.bold()).foregroundStyle(.secondary)
+                            DatePicker("Hora", selection: $date, displayedComponents: .hourAndMinute)
+                                .labelsHidden()
+                        }
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("KILOMETRAJE").font(.caption.bold()).foregroundStyle(.secondary)
+                        HStack {
+                            TextField("Kilómetros del tablero", text: $kilometersText)
+                                .keyboardType(.numberPad)
+                            Text("km").foregroundStyle(.secondary)
+                        }
+                        .font(.title3)
+                    }
+                    .padding(14)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+
+                    HStack(spacing: 12) {
+                        quantityField("LITROS", placeholder: "0", value: $litersText, suffix: "L")
+                        quantityField("PRECIO / L", placeholder: "0", value: $priceText, suffix: "$")
+                    }
+
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("Total").font(.headline)
+                        Spacer()
+                        Text(total.map(currency) ?? "—")
+                            .font(.title.bold()).contentTransition(.numericText())
+                    }
+                    .padding(18)
+                    .foregroundStyle(.white)
+                    .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 18))
                 }
+                .padding(16)
             }
+            .background(Color(uiColor: .systemGroupedBackground))
             .disabled(saving)
             .navigationTitle("Cargar nafta")
+            .navigationBarTitleDisplayMode(.inline)
             .task { if suggestion == nil { await detectStation() } }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        guard !saving, canSave, let kilometers, let liters, let price else { return }
-                        saving = true
-                        Task {
-                            await store.addFuelEntry(car: car, date: date, kilometers: kilometers, liters: liters,
-                                                     pricePerLiter: price, stationName: stationName.trimmingCharacters(in: .whitespacesAndNewlines),
-                                                     latitude: latitude, longitude: longitude)
-                            if suggestion != nil { FuelVisitMonitor.shared.clearSuggestion() }
-                            dismiss()
-                        }
-                    } label: {
-                        if saving { ProgressView().accessibilityLabel("Guardando carga") }
-                        else { Text("Guardar") }
-                    }
-                    .disabled(saving || !canSave)
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button(action: save) {
+                    if saving { ProgressView().tint(.white) }
+                    else { Text("Guardar carga").fontWeight(.semibold) }
                 }
+                .frame(maxWidth: .infinity, minHeight: 50)
+                .foregroundStyle(.white)
+                .background(canSave ? Color.accentColor : Color.gray, in: RoundedRectangle(cornerRadius: 14))
+                .disabled(saving || !canSave)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(.bar)
             }
             .interactiveDismissDisabled(saving)
+        }
+    }
+
+    private func quantityField(_ title: String, placeholder: String, value: Binding<String>, suffix: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(.caption.bold()).foregroundStyle(.secondary)
+            HStack {
+                TextField(placeholder, text: value).keyboardType(.decimalPad)
+                Text(suffix).foregroundStyle(.secondary)
+            }
+            .font(.title3)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func save() {
+        guard !saving, canSave, let kilometers, let liters, let price else { return }
+        saving = true
+        Task {
+            await store.addFuelEntry(car: car, date: date, kilometers: kilometers, liters: liters,
+                                     pricePerLiter: price, stationName: stationName.trimmingCharacters(in: .whitespacesAndNewlines),
+                                     latitude: latitude, longitude: longitude)
+            if suggestion != nil { FuelVisitMonitor.shared.clearSuggestion() }
+            dismiss()
         }
     }
 
