@@ -65,7 +65,7 @@ platform :ios do
         app.ensure_version!(version_name, platform: platform)
       else
         previous = editable.first
-        if Gem::Version.new(version_name) <= Gem::Version.new(previous.version_string)
+        if Gem::Version.new(version_name) < Gem::Version.new(previous.version_string)
           UI.user_error!("#{version_name} must be newer than editable version #{previous.version_string}")
         end
         previous.update(attributes: { versionString: version_name })
