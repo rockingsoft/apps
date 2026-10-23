@@ -1,14 +1,26 @@
 import SwiftUI
+import UIKit
 
 struct CarsView: View {
     @EnvironmentObject private var store: CloudStore
+    @EnvironmentObject private var fuelMonitor: FuelVisitMonitor
     @State private var addCar = false
     @State private var carToDelete: Car?
+    @State private var suggestedFuelCar: Car?
     var body: some View {
         NavigationStack {
             List {
                 if let message = store.syncMessage {
                     Section { Label(message, systemImage: "icloud.slash").font(.footnote).foregroundStyle(.orange) }
+                }
+                if let suggestion = fuelMonitor.suggestion, !store.cars.isEmpty {
+                    Section("Posible carga de nafta") {
+                        Text("¿Cargaste en \(suggestion.stationName)? Elegí el auto para registrarla.")
+                        ForEach(store.cars) { car in
+                            Button(car.name) { suggestedFuelCar = car }
+                        }
+                        Button("No cargué nafta", role: .destructive) { fuelMonitor.clearSuggestion() }
+                    }
                 }
                 ForEach(store.cars) { car in
                     NavigationLink(value: car) {
@@ -32,11 +44,27 @@ struct CarsView: View {
                         .tint(.red)
                     }
                 }
+                Section("Sugerencias de carga") {
+                    Toggle("Avisarme al parar en una estación", isOn: Binding(
+                        get: { fuelMonitor.enabled }, set: { enabled in
+                            fuelMonitor.setEnabled(enabled)
+                            if enabled { Task { await NotificationPlanner.requestPermission() } }
+                        }
+                    ))
+                    Text("Garage usa visitas de iOS y busca estaciones cercanas. Si detecta una parada de al menos 5 minutos, puede sugerir una carga. La detección no es instantánea ni exacta.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                    if fuelMonitor.enabled && fuelMonitor.authorization != .authorizedAlways {
+                        Text("Para recibir avisos con Garage cerrada, permití ubicación ‘Siempre’ en Configuración.")
+                            .font(.footnote).foregroundStyle(.orange)
+                        Link("Abrir Configuración", destination: URL(string: UIApplication.openSettingsURLString)!)
+                    }
+                }
             }
             .navigationTitle("Mis autos")
             .navigationDestination(for: Car.self) { CarView(car: $0) }
             .toolbar { Button("Agregar", systemImage: "plus") { addCar = true } }
             .sheet(isPresented: $addCar) { AddCarView() }
+            .sheet(item: $suggestedFuelCar) { car in FuelEntryView(car: car, suggestion: fuelMonitor.suggestion) }
             .alert("¿Eliminar este auto?", isPresented: Binding(
                 get: { carToDelete != nil },
                 set: { if !$0 { carToDelete = nil } }
@@ -259,6 +287,7 @@ struct CarView: View {
     @EnvironmentObject private var store: CloudStore
     let car: Car
     @State private var addPlan = false
+    @State private var addFuel = false
     @State private var templateToReview: MaintenanceTemplate?
     @State private var share = false
     @State private var editOdometer = false
@@ -293,10 +322,25 @@ struct CarView: View {
                 }
                 Button("Agregar servicio", systemImage: "plus") { addPlan = true }
             }
+            Section("Cargas de nafta") {
+                ForEach(store.fuelEntries.filter { $0.carID == car.id }.sorted { $0.date > $1.date }) { entry in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(entry.stationName).font(.headline)
+                            Spacer()
+                            Text(entry.totalDescription)
+                        }
+                        Text("\(entry.date.formatted(date: .abbreviated, time: .omitted)) · \(entry.kilometers.formatted()) km · \(NSDecimalNumber(decimal: entry.liters).stringValue) L")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Button("Registrar carga", systemImage: "fuelpump") { addFuel = true }
+            }
         }
         .navigationTitle(current.name)
         .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
+        .sheet(isPresented: $addFuel) { FuelEntryView(car: current) }
         .sheet(item: $templateToReview) { template in MaintenanceTemplateView(car: current, template: template) }
         .sheet(isPresented: $share) { CarSharingSheet(car: current, store: store) }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {

@@ -47,3 +47,24 @@ struct ServiceEntry: Identifiable, Hashable {
     var kilometers: Int
     var notes: String
 }
+
+struct FuelEntry: Identifiable, Hashable {
+    let id: CKRecord.ID
+    let carID: CKRecord.ID
+    var date: Date
+    var kilometers: Int
+    var liters: Decimal
+    var pricePerLiter: Decimal
+    var stationName: String
+    var latitude: Double?
+    var longitude: Double?
+
+    var total: Decimal { liters * pricePerLiter }
+    var totalDescription: String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = Locale(identifier: "es_AR")
+        formatter.currencyCode = "ARS"
+        return formatter.string(from: NSDecimalNumber(decimal: total)) ?? "$ \(total)"
+    }
+}

@@ -13,6 +13,8 @@
 		53FD5F3D9B360C1268B32A03 /* LocalSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F4860D91833B67C596BC90 /* LocalSnapshot.swift */; };
 		624813AF8C3A426FA1E11E50 /* MaintenanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624813AF8C3A426FA1E11E51 /* MaintenanceCatalog.swift */; };
 		624813AF8C3A426FA1E11E52 /* MaintenanceTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624813AF8C3A426FA1E11E53 /* MaintenanceTemplateView.swift */; };
+		A001F5A10000000000000001 /* FuelLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A001F5A10000000000000002 /* FuelLocation.swift */; };
+		A001F5A10000000000000003 /* FuelEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A001F5A10000000000000004 /* FuelEntryView.swift */; };
 		D6030A056514FD9402D699F1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 078C5E143D97CD742B5EE465 /* Foundation.framework */; };
 		D8DCD41D327B68D5EA3F46A9 /* ServiceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454D12621089A7D8FE7CC2A5 /* ServiceModels.swift */; };
 		E3B894D2078B163D8B748926 /* GarageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C52132848B391B840BF589A /* GarageApp.swift */; };
@@ -29,6 +31,8 @@
 		454D12621089A7D8FE7CC2A5 /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
 		624813AF8C3A426FA1E11E51 /* MaintenanceCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceCatalog.swift; sourceTree = "<group>"; };
 		624813AF8C3A426FA1E11E53 /* MaintenanceTemplateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceTemplateView.swift; sourceTree = "<group>"; };
+		A001F5A10000000000000002 /* FuelLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelLocation.swift; sourceTree = "<group>"; };
+		A001F5A10000000000000004 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
 		59583D284D83A2C18D19DA64 /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
 		98F4860D91833B67C596BC90 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
 		AD50A10911A12EA521EB5194 /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
@@ -92,6 +96,8 @@
 				98F4860D91833B67C596BC90 /* LocalSnapshot.swift */,
 				624813AF8C3A426FA1E11E51 /* MaintenanceCatalog.swift */,
 				624813AF8C3A426FA1E11E53 /* MaintenanceTemplateView.swift */,
+				A001F5A10000000000000002 /* FuelLocation.swift */,
+				A001F5A10000000000000004 /* FuelEntryView.swift */,
 				09A682FA1C1FFF2123342161 /* VehicleCatalog.swift */,
 			);
 			name = App;
@@ -190,6 +196,8 @@
 				53FD5F3D9B360C1268B32A03 /* LocalSnapshot.swift in Sources */,
 				624813AF8C3A426FA1E11E50 /* MaintenanceCatalog.swift in Sources */,
 				624813AF8C3A426FA1E11E52 /* MaintenanceTemplateView.swift in Sources */,
+				A001F5A10000000000000001 /* FuelLocation.swift in Sources */,
+				A001F5A10000000000000003 /* FuelEntryView.swift in Sources */,
 				E60499FAF5D1B4FEACFEAF5F /* VehicleCatalog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -207,6 +215,8 @@
 				DEVELOPMENT_TEAM = 3SRDN9365G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CKSharingSupported = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Si activás los avisos de cargas, Garage detecta paradas en estaciones incluso con la app cerrada.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -229,6 +239,8 @@
 				DEVELOPMENT_TEAM = 3SRDN9365G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CKSharingSupported = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Si activás los avisos de cargas, Garage detecta paradas en estaciones incluso con la app cerrada.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

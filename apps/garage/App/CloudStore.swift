@@ -5,6 +5,7 @@ import Foundation
     @Published var cars: [Car] = []
     @Published var plans: [ServicePlan] = []
     @Published var entries: [ServiceEntry] = []
+    @Published var fuelEntries: [FuelEntry] = []
     @Published var syncMessage: String?
     @Published var loading = false
 
@@ -19,6 +20,7 @@ import Foundation
         cars = saved.cars.map(\.car)
         plans = saved.plans.map(\.plan)
         entries = saved.entries.map(\.entry)
+        fuelEntries = (saved.fuelEntries ?? []).map(\.entry)
     }
 
     func database(for car: Car) -> CKDatabase { car.isSharedWithMe ? sharedDB : privateDB }
@@ -28,6 +30,7 @@ import Foundation
         snapshot.cars = cars.map(LocalSnapshot.CarData.init)
         snapshot.plans = plans.map(LocalSnapshot.PlanData.init)
         snapshot.entries = entries.map(LocalSnapshot.EntryData.init)
+        snapshot.fuelEntries = fuelEntries.map(LocalSnapshot.FuelData.init)
         snapshot.save()
     }
 
@@ -42,12 +45,14 @@ import Foundation
             var remoteCars: [Car] = []
             var remotePlans: [ServicePlan] = []
             var remoteEntries: [ServiceEntry] = []
+            var remoteFuelEntries: [FuelEntry] = []
             for (database, shared) in [(privateDB, false), (sharedDB, true)] {
                 for zone in try await database.allRecordZones() where zone.zoneID.zoneName.hasPrefix("garage-") {
                     let allRecords = try await records(in: zone.zoneID, database: database)
                     let carRecords = allRecords.filter { $0.recordType == "Car" }
                     let planRecords = allRecords.filter { $0.recordType == "ServicePlan" }
                     let entryRecords = allRecords.filter { $0.recordType == "ServiceEntry" }
+                    let fuelRecords = allRecords.filter { $0.recordType == "FuelEntry" }
                     let zoneCars = carRecords.map { Car(id: $0.recordID, name: $0["name"] as? String ?? "Auto", plate: $0["plate"] as? String ?? "", odometer: $0["odometer"] as? Int ?? 0, updatedAt: $0["updatedAt"] as? Date ?? .distantPast, isSharedWithMe: shared) }
                     remoteCars += zoneCars
                     remotePlans += planRecords.compactMap { record in
@@ -58,12 +63,22 @@ import Foundation
                         guard let reference = record["plan"] as? CKRecord.Reference else { return nil }
                         return ServiceEntry(id: record.recordID, planID: reference.recordID, date: record["date"] as? Date ?? .now, kilometers: record["kilometers"] as? Int ?? 0, notes: record["notes"] as? String ?? "")
                     }
+                    remoteFuelEntries += fuelRecords.compactMap { record in
+                        guard let car = zoneCars.first,
+                              let liters = Decimal(string: record["liters"] as? String ?? "", locale: Locale(identifier: "en_US_POSIX")),
+                              let price = Decimal(string: record["pricePerLiter"] as? String ?? "", locale: Locale(identifier: "en_US_POSIX")) else { return nil }
+                        return FuelEntry(id: record.recordID, carID: car.id, date: record["date"] as? Date ?? .now,
+                                         kilometers: record["kilometers"] as? Int ?? 0, liters: liters,
+                                         pricePerLiter: price, stationName: record["stationName"] as? String ?? "Estación",
+                                         latitude: record["latitude"] as? Double, longitude: record["longitude"] as? Double)
+                    }
                 }
             }
             let deletedZones = Set((snapshot.pendingDeletions ?? []).map { $0.car.id.zoneID })
             cars = remoteCars.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.name < $1.name }
             plans = remotePlans.filter { !deletedZones.contains($0.id.zoneID) }
             entries = remoteEntries.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.date > $1.date }
+            fuelEntries = remoteFuelEntries.filter { !deletedZones.contains($0.id.zoneID) }.sorted { $0.date > $1.date }
             persist()
             syncMessage = nil
         } catch {
@@ -164,6 +179,22 @@ import Foundation
             snapshot.pendingEntries.remove(key)
             persist()
         }
+        for key in (snapshot.pendingFuelEntries ?? []).sorted(by: { $0.name < $1.name }) {
+            guard let entry = fuelEntries.first(where: { $0.id == key.id }),
+                  let car = cars.first(where: { $0.id == entry.carID }) else { continue }
+            let db = database(for: car)
+            let record = (try? await db.record(for: entry.id)) ?? CKRecord(recordType: "FuelEntry", recordID: entry.id)
+            record["date"] = entry.date as CKRecordValue
+            record["kilometers"] = entry.kilometers as CKRecordValue
+            record["liters"] = NSDecimalNumber(decimal: entry.liters).stringValue as CKRecordValue
+            record["pricePerLiter"] = NSDecimalNumber(decimal: entry.pricePerLiter).stringValue as CKRecordValue
+            record["stationName"] = entry.stationName as CKRecordValue
+            if let latitude = entry.latitude { record["latitude"] = latitude as CKRecordValue }
+            if let longitude = entry.longitude { record["longitude"] = longitude as CKRecordValue }
+            _ = try await db.save(record)
+            snapshot.pendingFuelEntries?.remove(key)
+            persist()
+        }
     }
 
     private func saveLocallyAndSync() async {
@@ -186,12 +217,15 @@ import Foundation
         guard cars.contains(where: { $0.id == car.id }) else { return }
         let planIDs = Set(plans.filter { $0.carID == car.id }.map(\.id))
         let entryIDs = entries.filter { planIDs.contains($0.planID) }.map(\.id)
+        let fuelIDs = fuelEntries.filter { $0.carID == car.id }.map(\.id)
         cars.removeAll { $0.id == car.id }
         plans.removeAll { planIDs.contains($0.id) }
         entries.removeAll { entryIDs.contains($0.id) }
+        fuelEntries.removeAll { fuelIDs.contains($0.id) }
         snapshot.pendingCars.remove(RecordKey(car.id))
         snapshot.pendingPlans.subtract(planIDs.map(RecordKey.init))
         snapshot.pendingEntries.subtract(entryIDs.map(RecordKey.init))
+        snapshot.pendingFuelEntries?.subtract(fuelIDs.map(RecordKey.init))
         snapshot.pendingDeletions = (snapshot.pendingDeletions ?? []).union([
             LocalSnapshot.PendingDeletion(car: RecordKey(car.id), sharedWithMe: car.isSharedWithMe)
         ])
@@ -203,6 +237,22 @@ import Foundation
         cars[index].odometer = kilometers
         cars[index].updatedAt = .now
         snapshot.pendingCars.insert(RecordKey(car.id))
+        await saveLocallyAndSync()
+    }
+
+    func addFuelEntry(car: Car, date: Date, kilometers: Int, liters: Decimal, pricePerLiter: Decimal,
+                      stationName: String, latitude: Double?, longitude: Double?) async {
+        guard cars.contains(where: { $0.id == car.id }) else { return }
+        let id = CKRecord.ID(recordName: UUID().uuidString, zoneID: car.id.zoneID)
+        fuelEntries.insert(FuelEntry(id: id, carID: car.id, date: date, kilometers: kilometers, liters: liters,
+                                     pricePerLiter: pricePerLiter, stationName: stationName,
+                                     latitude: latitude, longitude: longitude), at: 0)
+        snapshot.pendingFuelEntries = (snapshot.pendingFuelEntries ?? []).union([RecordKey(id)])
+        if kilometers > car.odometer, let index = cars.firstIndex(where: { $0.id == car.id }) {
+            cars[index].odometer = kilometers
+            cars[index].updatedAt = .now
+            snapshot.pendingCars.insert(RecordKey(car.id))
+        }
         await saveLocallyAndSync()
     }
 

@@ -61,6 +61,26 @@ struct LocalSnapshot: Codable {
         init(_ entry: ServiceEntry) { id = RecordKey(entry.id); planID = RecordKey(entry.planID); date = entry.date; kilometers = entry.kilometers; notes = entry.notes }
         var entry: ServiceEntry { ServiceEntry(id: id.id, planID: planID.id, date: date, kilometers: kilometers, notes: notes) }
     }
+    struct FuelData: Codable {
+        let id: RecordKey
+        let carID: RecordKey
+        var date: Date
+        var kilometers: Int
+        var liters: Decimal
+        var pricePerLiter: Decimal
+        var stationName: String
+        var latitude: Double?
+        var longitude: Double?
+        init(_ entry: FuelEntry) {
+            id = RecordKey(entry.id); carID = RecordKey(entry.carID); date = entry.date
+            kilometers = entry.kilometers; liters = entry.liters; pricePerLiter = entry.pricePerLiter
+            stationName = entry.stationName; latitude = entry.latitude; longitude = entry.longitude
+        }
+        var entry: FuelEntry {
+            FuelEntry(id: id.id, carID: carID.id, date: date, kilometers: kilometers, liters: liters,
+                      pricePerLiter: pricePerLiter, stationName: stationName, latitude: latitude, longitude: longitude)
+        }
+    }
     var cars: [CarData] = []
     var plans: [PlanData] = []
     var entries: [EntryData] = []
@@ -69,6 +89,9 @@ struct LocalSnapshot: Codable {
     var pendingEntries: Set<RecordKey> = []
     // Optional so snapshots saved before deletion support was added still decode.
     var pendingDeletions: Set<PendingDeletion>? = nil
+    // Optional so snapshots written before fuel logging still decode.
+    var fuelEntries: [FuelData]? = nil
+    var pendingFuelEntries: Set<RecordKey>? = nil
 
     static func load() -> LocalSnapshot {
         guard let data = UserDefaults.standard.data(forKey: "garage.localSnapshot"),

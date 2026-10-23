@@ -14,6 +14,8 @@ target.build_configurations.each do |config|
   config.build_settings['GENERATE_INFOPLIST_FILE'] = 'YES'
   config.build_settings['INFOPLIST_KEY_UILaunchScreen_Generation'] = 'YES'
   config.build_settings['INFOPLIST_KEY_CKSharingSupported'] = 'YES'
+  config.build_settings['INFOPLIST_KEY_NSLocationWhenInUseUsageDescription'] = 'Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.'
+  config.build_settings['INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription'] = 'Si activás los avisos de cargas, Garage detecta paradas en estaciones incluso con la app cerrada.'
   config.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/Garage.entitlements'
   config.build_settings['TARGETED_DEVICE_FAMILY'] = '1,2'
   config.build_settings['SWIFT_EMIT_LOC_STRINGS'] = 'YES'

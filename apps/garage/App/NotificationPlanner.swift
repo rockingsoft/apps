@@ -9,7 +9,9 @@ import UserNotifications
     static func schedule(cars: [Car], plans: [ServicePlan]) async {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
-        center.removePendingNotificationRequests(withIdentifiers: pending.map(\.identifier).filter { $0.hasPrefix("garage.") })
+        center.removePendingNotificationRequests(withIdentifiers: pending.map(\.identifier).filter {
+            $0.hasPrefix("garage.") && !$0.hasPrefix("garage.fuel.")
+        })
         let authorized = await center.notificationSettings().authorizationStatus
         guard authorized == .authorized || authorized == .provisional else { return }
         for plan in plans.prefix(60) {
