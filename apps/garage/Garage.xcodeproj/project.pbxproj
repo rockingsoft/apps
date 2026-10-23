@@ -10,6 +10,7 @@
 		2AE021D21844D9901021027C /* CloudStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FFB41B9C4B4AA528AB798D /* CloudStore.swift */; };
 		2BA9671F62EF2E32CE148E7F /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59583D284D83A2C18D19DA64 /* Sharing.swift */; };
 		333808DFC3F1892237A881F6 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD50A10911A12EA521EB5194 /* Views.swift */; };
+		4B6122E0B6842E3F2C047487 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 512E11185CEC8AE92C4B31D0 /* Assets.xcassets */; };
 		53FD5F3D9B360C1268B32A03 /* LocalSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F4860D91833B67C596BC90 /* LocalSnapshot.swift */; };
 		624813AF8C3A426FA1E11E50 /* MaintenanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624813AF8C3A426FA1E11E51 /* MaintenanceCatalog.swift */; };
 		624813AF8C3A426FA1E11E52 /* MaintenanceTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 624813AF8C3A426FA1E11E53 /* MaintenanceTemplateView.swift */; };
@@ -29,12 +30,13 @@
 		274423CB02EBBB431DCB4CB2 /* Garage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Garage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C52132848B391B840BF589A /* GarageApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GarageApp.swift; sourceTree = "<group>"; };
 		454D12621089A7D8FE7CC2A5 /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
+		512E11185CEC8AE92C4B31D0 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = App/Assets.xcassets; sourceTree = "<group>"; };
+		59583D284D83A2C18D19DA64 /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
 		624813AF8C3A426FA1E11E51 /* MaintenanceCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceCatalog.swift; sourceTree = "<group>"; };
 		624813AF8C3A426FA1E11E53 /* MaintenanceTemplateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceTemplateView.swift; sourceTree = "<group>"; };
+		98F4860D91833B67C596BC90 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
 		A001F5A10000000000000002 /* FuelLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelLocation.swift; sourceTree = "<group>"; };
 		A001F5A10000000000000004 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
-		59583D284D83A2C18D19DA64 /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
-		98F4860D91833B67C596BC90 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
 		AD50A10911A12EA521EB5194 /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
 		EBE2BE8DD2920AAC6DBB8AA7 /* NotificationPlanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPlanner.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -66,6 +68,7 @@
 				A7ADA25442464EFF7BAE4FD4 /* Frameworks */,
 				AA70AC08F0B7290CA0D6E79E /* App */,
 				BB2080C44CE5FE3B85E1F2B0 /* Shared */,
+				512E11185CEC8AE92C4B31D0 /* Assets.xcassets */,
 			);
 			sourceTree = "<group>";
 		};
@@ -177,6 +180,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B6122E0B6842E3F2C047487 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,8 +219,8 @@
 				DEVELOPMENT_TEAM = 3SRDN9365G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CKSharingSupported = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Si activás los avisos de cargas, Garage detecta paradas en estaciones incluso con la app cerrada.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -239,8 +243,8 @@
 				DEVELOPMENT_TEAM = 3SRDN9365G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CKSharingSupported = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Si activás los avisos de cargas, Garage detecta paradas en estaciones incluso con la app cerrada.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
