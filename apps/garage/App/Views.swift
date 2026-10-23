@@ -43,6 +43,8 @@ struct AddCarView: View {
     @State private var modelID = 0
     @State private var versionID = 0
     @State private var year = 0
+    @State private var yearFallbackText = ""
+    @State private var yearLookupFailed = false
     @State private var catalogMessage: String?
     @State private var loadingBrands = false
     @State private var loadingModels = false
@@ -52,8 +54,8 @@ struct AddCarView: View {
         guard let brand = brands.first(where: { $0.id == brandID }),
               let model = models.first(where: { $0.id == modelID }),
               let version = versions.first(where: { $0.id == versionID }),
-              years.contains(year) else { return "" }
-        return "\(brand.name) \(model.name) \(year) · \(version.name)"
+              (years.contains(year) || (yearLookupFailed && (1950...Calendar.current.component(.year, from: .now) + 1).contains(year))) else { return "" }
+        return "\(brand.name) \(model.name) \(year) · \(version.nameWithoutYear)"
     }
 
     var body: some View {
@@ -83,11 +85,17 @@ struct AddCarView: View {
                                 Text("Seleccionar").tag(0)
                                 ForEach(versions) { version in Text(version.name).tag(version.id) }
                             }
-                            if versionID != 0 {
+                            if versionID != 0, versions.first(where: { $0.id == versionID })?.embeddedYear == nil {
                                 if loadingYears { ProgressView("Cargando años…") }
-                                Picker("Año", selection: $year) {
-                                    Text("Seleccionar").tag(0)
-                                    ForEach(years, id: \.self) { value in Text(String(value)).tag(value) }
+                                if yearLookupFailed {
+                                    TextField("Año", text: $yearFallbackText)
+                                        .keyboardType(.numberPad)
+                                        .onChange(of: yearFallbackText) { _, text in year = Int(text) ?? 0 }
+                                } else {
+                                    Picker("Año", selection: $year) {
+                                        Text("Seleccionar").tag(0)
+                                        ForEach(years, id: \.self) { value in Text(String(value)).tag(value) }
+                                    }
                                 }
                             }
                         }
@@ -155,7 +163,15 @@ struct AddCarView: View {
     private func loadYears(versionID: Int) async {
         year = 0
         years = []
+        yearFallbackText = ""
+        yearLookupFailed = false
         guard versionID != 0 else { return }
+        if let embeddedYear = versions.first(where: { $0.id == versionID })?.embeddedYear {
+            years = [embeddedYear]
+            year = embeddedYear
+            catalogMessage = nil
+            return
+        }
         loadingYears = true
         defer { loadingYears = false }
         do {
@@ -163,7 +179,11 @@ struct AddCarView: View {
             guard self.versionID == versionID else { return }
             years = loaded
             catalogMessage = nil
-        } catch { catalogMessage = "No se pudieron cargar los años. Intentá de nuevo más tarde." }
+        } catch {
+            guard self.versionID == versionID else { return }
+            yearLookupFailed = true
+            catalogMessage = "ArgAutos no pudo cargar los años. Ingresá el año o reintentá."
+        }
     }
 
     private func retryCatalog() async {

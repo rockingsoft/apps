@@ -3,6 +3,19 @@ import Foundation
 struct CatalogOption: Codable, Identifiable, Hashable {
     let id: Int
     let name: String
+
+    var embeddedYear: Int? {
+        guard let last = name.split(separator: " ").last,
+              last.count == 4,
+              let year = Int(last),
+              (1950...Calendar.current.component(.year, from: .now) + 1).contains(year) else { return nil }
+        return year
+    }
+
+    var nameWithoutYear: String {
+        guard embeddedYear != nil, let index = name.lastIndex(of: " ") else { return name }
+        return String(name[..<index])
+    }
 }
 
 enum VehicleCatalog {
