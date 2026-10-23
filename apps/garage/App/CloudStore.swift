@@ -223,7 +223,7 @@ import Foundation
                                      intervalMonths: rule.intervalMonths, intervalKilometers: rule.intervalKilometers,
                                      lastDate: selection.lastDate, lastKilometers: selection.lastKilometers,
                                      noticeDays: 14, noticeKilometers: 500,
-                                     sourceURL: sourceURL.absoluteString, templateRuleID: rule.id))
+                                     sourceURL: (rule.sourceURL ?? sourceURL).absoluteString, templateRuleID: rule.id))
             snapshot.pendingPlans.insert(RecordKey(id))
             added = true
         }
