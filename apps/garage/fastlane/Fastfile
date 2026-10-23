@@ -84,6 +84,16 @@ platform :ios do
     UI.user_error!("Processed Garage build #{version_name} (#{build_number}) was not found") if build.nil?
     UI.user_error!("Garage build is #{build.processing_state}") unless build.processing_state == "VALID"
     version.select_build(build_id: build.id)
-    UI.user_error!("App Store Connect did not retain the selected build") unless version.get_build&.id == build.id
+    selected = nil
+    5.times do |attempt|
+      begin
+        selected = version.get_build
+      rescue => error
+        raise unless error.message.match?(/No data|not found|404/i)
+      end
+      break if selected&.id == build.id
+      sleep(2**attempt) if attempt < 4
+    end
+    UI.user_error!("App Store Connect did not retain the selected build") unless selected&.id == build.id
   end
 end
