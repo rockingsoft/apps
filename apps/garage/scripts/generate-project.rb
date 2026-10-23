@@ -27,5 +27,7 @@ end
     target.source_build_phase.add_file_reference(ref)
   end
 end
+assets = project.main_group.new_file('App/Assets.xcassets')
+target.resources_build_phase.add_file_reference(assets)
 project.root_object.attributes['TargetAttributes'] = { target.uuid => { 'DevelopmentTeam' => '3SRDN9365G', 'SystemCapabilities' => { 'com.apple.iCloud' => { 'enabled' => 1 } } } }
 project.save
