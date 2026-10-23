@@ -20,7 +20,7 @@ struct MaintenanceTemplateView: View {
     init(car: Car, template: MaintenanceTemplate) {
         self.car = car
         self.template = template
-        _drafts = State(initialValue: template.rules.map { Draft(rule: $0, selected: $0.initiallySelected) })
+        _drafts = State(initialValue: template.rules.map { Draft(rule: $0, selected: true) })
     }
 
     private var canSave: Bool {
@@ -40,7 +40,7 @@ struct MaintenanceTemplateView: View {
                     Text(template.applicability)
                     Text("Este plan es una base. Revisá el manual de tu versión y el historial antes de activarlo; no incluye una marca ni viscosidad de aceite.")
                         .font(.footnote).foregroundStyle(.secondary)
-                    Text("Las revisiones adicionales son opcionales. Marcá solo las que quieras seguir; algunas indican inspeccionar y cambiar únicamente si hace falta.")
+                    Text("Todas las tareas empiezan seleccionadas. Desactivá las que no quieras seguir; algunas indican inspeccionar y cambiar únicamente si hace falta.")
                         .font(.footnote).foregroundStyle(.secondary)
                     Link(template.sourceName, destination: template.sourceURL)
                 } header: { Text("Fuente oficial") }

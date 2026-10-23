@@ -8,7 +8,6 @@ struct MaintenanceRule: Identifiable, Hashable {
     let intervalKilometers: Int
     var sourceName: String? = nil
     var sourceURL: URL? = nil
-    var initiallySelected = true
 }
 
 struct MaintenanceSelection {
@@ -71,13 +70,13 @@ enum MaintenanceCatalog {
         func inspection(_ id: String, _ title: String, _ details: String) -> MaintenanceRule {
             MaintenanceRule(id: "\(maker)-\(id)", title: title, details: "Revisión sugerida en cada service. \(details)",
                             intervalMonths: 12, intervalKilometers: km, sourceName: manualName,
-                            sourceURL: manualURL, initiallySelected: false)
+                            sourceURL: manualURL)
         }
         return [
-            MaintenanceRule(id: "common-tire-pressure-monthly", title: "Revisar presión de cubiertas", details: "Controlá en frío las cuatro cubiertas y la de auxilio, si tiene. Usá la presión indicada por el fabricante del auto. Michelin recomienda al menos una revisión mensual y antes de viajes largos.", intervalMonths: 1, intervalKilometers: 0, sourceName: "Michelin Argentina · presión", sourceURL: tirePressure, initiallySelected: false),
-            MaintenanceRule(id: "common-tire-rotation-10000", title: "Rotar cubiertas", details: "Michelin sugiere aproximadamente cada 8.000–10.000 km. Respetá el patrón del manual y verificá que las medidas y el tipo de cubiertas permitan rotarlas.", intervalMonths: 0, intervalKilometers: 10_000, sourceName: "Michelin Argentina · rotación", sourceURL: tireRotation, initiallySelected: false),
+            MaintenanceRule(id: "common-tire-pressure-monthly", title: "Revisar presión de cubiertas", details: "Controlá en frío las cuatro cubiertas y la de auxilio, si tiene. Usá la presión indicada por el fabricante del auto. Michelin recomienda al menos una revisión mensual y antes de viajes largos.", intervalMonths: 1, intervalKilometers: 0, sourceName: "Michelin Argentina · presión", sourceURL: tirePressure),
+            MaintenanceRule(id: "common-tire-rotation-10000", title: "Rotar cubiertas", details: "Michelin sugiere aproximadamente cada 8.000–10.000 km. Respetá el patrón del manual y verificá que las medidas y el tipo de cubiertas permitan rotarlas.", intervalMonths: 0, intervalKilometers: 10_000, sourceName: "Michelin Argentina · rotación", sourceURL: tireRotation),
             inspection("tire-condition", "Revisar desgaste de cubiertas", "Comprobá dibujo, cortes, deformaciones y desgaste desigual; revisá también el auxilio. Cambiá las cubiertas según su estado, no por un kilometraje fijo."),
-            MaintenanceRule(id: "common-wipers-12m", title: "Cambiar escobillas limpiaparabrisas", details: "Bosch recomienda cambiarlas al menos una vez al año; adelantá el cambio si dejan vetas, hacen ruido o la goma está dañada. Revisá también el lavaparabrisas.", intervalMonths: 12, intervalKilometers: 0, sourceName: "Bosch Car Service · limpiaparabrisas", sourceURL: wipers, initiallySelected: false),
+            MaintenanceRule(id: "common-wipers-12m", title: "Cambiar escobillas limpiaparabrisas", details: "Bosch recomienda cambiarlas al menos una vez al año; adelantá el cambio si dejan vetas, hacen ruido o la goma está dañada. Revisá también el lavaparabrisas.", intervalMonths: 12, intervalKilometers: 0, sourceName: "Bosch Car Service · limpiaparabrisas", sourceURL: wipers),
             inspection("brakes", "Revisar frenos", "Inspeccioná pastillas, discos, mangueras y funcionamiento. Cambiá las piezas por desgaste o indicación del taller, sin esperar un vencimiento fijo."),
             inspection("transmission-fluid", "Revisar aceite de caja", "Pedí controlar pérdidas, estado y mantenimiento de la transmisión. El cambio de aceite o fluido y su especificación dependen de la caja exacta y del manual; esta alerta no indica reemplazarlo automáticamente."),
             inspection("engine-air-filter", "Revisar filtro de aire del motor", "Inspeccioná suciedad y obstrucciones; sustituí según el plan de la versión o antes si circulás en zonas con mucho polvo."),
