@@ -35,9 +35,9 @@ El workflow manual **Garage TestFlight** compila la configuración Release, sube
 
 La configuración Release usa CloudKit Production. Antes del primer upload, el esquema del contenedor `iCloud.com.schoren.garage` debe estar desplegado a producción en CloudKit Console.
 
-El repositorio necesita credenciales **exclusivas de Garage** en GitHub Actions Secrets:
+Las credenciales **exclusivas de Garage** se guardan en Infisical, proyecto `CLI General`, entorno `prod`, carpeta `/garage-ios-appstore`. GitHub Actions guarda solamente `GARAGE_INFISICAL_TOKEN`, un token de Infisical con acceso de lectura a esa carpeta. El workflow instala Infisical CLI y carga las credenciales en cada ejecución.
 
-| Secret | Contenido |
+| Secreto de Infisical | Contenido |
 | --- | --- |
 | `GARAGE_ASC_KEY_ID` | ID de la API key de App Store Connect creada para Garage. |
 | `GARAGE_ASC_ISSUER_ID` | Issuer ID de esa API key. |

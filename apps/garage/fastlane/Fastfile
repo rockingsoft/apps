@@ -5,14 +5,14 @@ default_platform(:ios)
 platform :ios do
   desc "Archive Garage and upload the processed build to TestFlight"
   lane :testflight do
-    %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_API_ISSUER_ID APP_STORE_CONNECT_API_KEY_P8].each do |name|
+    %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID GARAGE_ASC_KEY_ID GARAGE_ASC_ISSUER_ID GARAGE_ASC_KEY_P8_BASE64].each do |name|
       UI.user_error!("#{name} is required") if ENV[name].to_s.empty?
     end
 
     api_key = app_store_connect_api_key(
-      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
-      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_ISSUER_ID"),
-      key_content: ENV.fetch("APP_STORE_CONNECT_API_KEY_P8"),
+      key_id: ENV.fetch("GARAGE_ASC_KEY_ID"),
+      issuer_id: ENV.fetch("GARAGE_ASC_ISSUER_ID"),
+      key_content: ENV.fetch("GARAGE_ASC_KEY_P8_BASE64"),
       is_key_content_base64: true
     )
 

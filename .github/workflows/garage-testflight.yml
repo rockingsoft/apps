@@ -46,24 +46,30 @@ jobs:
           echo "GARAGE_VERSION=$version" >> "$GITHUB_ENV"
           echo "GARAGE_BUILD_NUMBER=$(date +%s)" >> "$GITHUB_ENV"
 
+      - name: Install Infisical CLI
+        run: brew install infisical/get-cli/infisical
+
       - name: Prepare App Store signing
         shell: bash
         env:
-          GARAGE_DISTRIBUTION_CERTIFICATE_P12_BASE64: ${{ secrets.GARAGE_DISTRIBUTION_CERTIFICATE_P12_BASE64 }}
-          GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
-          GARAGE_APPSTORE_PROFILE_BASE64: ${{ secrets.GARAGE_APPSTORE_PROFILE_BASE64 }}
-          GARAGE_KEYCHAIN_PASSWORD: ${{ secrets.GARAGE_KEYCHAIN_PASSWORD }}
-        run: ./scripts/prepare-release-signing.sh
+          INFISICAL_TOKEN: ${{ secrets.GARAGE_INFISICAL_TOKEN }}
+        run: >-
+          infisical run --projectId=45def33c-abc5-482d-b0c0-812256633665
+          --env=prod --path=/garage-ios-appstore
+          --domain=https://infiscal.rockingsoft.com --silent
+          -- ./scripts/prepare-release-signing.sh
 
       - name: Install Fastlane
         run: bundle install
 
       - name: Build and upload to TestFlight
         env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.GARAGE_ASC_KEY_ID }}
-          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.GARAGE_ASC_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.GARAGE_ASC_KEY_P8_BASE64 }}
-        run: bundle exec fastlane ios testflight
+          INFISICAL_TOKEN: ${{ secrets.GARAGE_INFISICAL_TOKEN }}
+        run: >-
+          infisical run --projectId=45def33c-abc5-482d-b0c0-812256633665
+          --env=prod --path=/garage-ios-appstore
+          --domain=https://infiscal.rockingsoft.com --silent
+          -- bundle exec fastlane ios testflight
 
       - name: Record version after successful upload
         if: ${{ inputs.version_bump != 'rebuild' || steps.release.outputs.previous_tag == '' }}
