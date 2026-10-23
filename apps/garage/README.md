@@ -1,6 +1,6 @@
 # Garage — services del auto
 
-App nativa SwiftUI para iPhone/iPad (iOS 17+) que guarda autos, planes de servicio e historial en CloudKit. Cada auto tiene una zona privada separada para compartir sólo ese auto con otra persona mediante la interfaz de iCloud, sin cuentas ni servidor propios.
+App nativa SwiftUI para iPhone (iOS 17+) que guarda autos, planes de servicio e historial en CloudKit. Cada auto tiene una zona privada separada para compartir sólo ese auto con otra persona mediante la interfaz de iCloud, sin cuentas ni servidor propios.
 
 ## Funciones
 

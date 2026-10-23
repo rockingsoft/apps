@@ -25,7 +25,7 @@ target.build_configurations.each do |config|
   config.build_settings['MARKETING_VERSION'] = '1.0.0'
   config.build_settings['CURRENT_PROJECT_VERSION'] = '1'
   config.build_settings['VERSIONING_SYSTEM'] = 'apple-generic'
-  config.build_settings['TARGETED_DEVICE_FAMILY'] = '1,2'
+  config.build_settings['TARGETED_DEVICE_FAMILY'] = '1'
   config.build_settings['SWIFT_EMIT_LOC_STRINGS'] = 'YES'
 end
 %w[App Shared].each do |directory|
