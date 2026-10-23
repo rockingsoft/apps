@@ -375,6 +375,10 @@ struct PlanView: View {
                 Section("Fuente") { Link("Ver plan oficial", destination: sourceURL) }
             }
             Section("Próximo vencimiento") {
+                if plan.baselineUnknown {
+                    Text("Pendiente de revisión: todavía no hay una última realización registrada para calcular el siguiente vencimiento.")
+                        .foregroundStyle(.orange)
+                }
                 if let date = plan.nextDate { LabeledContent("Fecha", value: date.formatted(date: .abbreviated, time: .omitted)) }
                 if let km = plan.nextKilometers { LabeledContent("Kilometraje", value: "\(km) km") }
             }

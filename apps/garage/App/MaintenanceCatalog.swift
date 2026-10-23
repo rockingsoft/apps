@@ -15,6 +15,7 @@ struct MaintenanceSelection {
     let rule: MaintenanceRule
     let lastDate: Date
     let lastKilometers: Int
+    let baselineUnknown: Bool
 }
 
 struct MaintenanceTemplate: Identifiable {

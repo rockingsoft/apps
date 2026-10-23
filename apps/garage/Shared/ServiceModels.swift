@@ -23,8 +23,10 @@ struct ServicePlan: Identifiable, Hashable {
     var noticeKilometers: Int
     var sourceURL: String? = nil
     var templateRuleID: String? = nil
+    var baselineUnknown = false
 
     func status(odometer: Int, now: Date = .now) -> ServiceStatus {
+        if baselineUnknown { return .overdue }
         let dueDate = intervalMonths > 0 ? Calendar.current.date(byAdding: .month, value: intervalMonths, to: lastDate) : nil
         let dueKM = intervalKilometers > 0 ? lastKilometers + intervalKilometers : nil
         let overdue = (dueDate.map { $0 <= now } ?? false) || (dueKM.map { $0 <= odometer } ?? false)
@@ -32,8 +34,8 @@ struct ServicePlan: Identifiable, Hashable {
         return overdue ? .overdue : (soon ? .soon : .ok)
     }
 
-    var nextDate: Date? { intervalMonths > 0 ? Calendar.current.date(byAdding: .month, value: intervalMonths, to: lastDate) : nil }
-    var nextKilometers: Int? { intervalKilometers > 0 ? lastKilometers + intervalKilometers : nil }
+    var nextDate: Date? { !baselineUnknown && intervalMonths > 0 ? Calendar.current.date(byAdding: .month, value: intervalMonths, to: lastDate) : nil }
+    var nextKilometers: Int? { !baselineUnknown && intervalKilometers > 0 ? lastKilometers + intervalKilometers : nil }
 }
 
 enum ServiceStatus: String { case overdue = "Vencido", soon = "Próximo", ok = "Al día" }

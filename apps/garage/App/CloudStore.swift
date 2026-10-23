@@ -52,7 +52,7 @@ import Foundation
                     remoteCars += zoneCars
                     remotePlans += planRecords.compactMap { record in
                         guard let car = zoneCars.first else { return nil }
-                        return ServicePlan(id: record.recordID, carID: car.id, title: record["title"] as? String ?? "Servicio", details: record["details"] as? String ?? "", intervalMonths: record["intervalMonths"] as? Int ?? 0, intervalKilometers: record["intervalKilometers"] as? Int ?? 0, lastDate: record["lastDate"] as? Date ?? .now, lastKilometers: record["lastKilometers"] as? Int ?? 0, noticeDays: record["noticeDays"] as? Int ?? 14, noticeKilometers: record["noticeKilometers"] as? Int ?? 500, sourceURL: record["sourceURL"] as? String, templateRuleID: record["templateRuleID"] as? String)
+                        return ServicePlan(id: record.recordID, carID: car.id, title: record["title"] as? String ?? "Servicio", details: record["details"] as? String ?? "", intervalMonths: record["intervalMonths"] as? Int ?? 0, intervalKilometers: record["intervalKilometers"] as? Int ?? 0, lastDate: record["lastDate"] as? Date ?? .now, lastKilometers: record["lastKilometers"] as? Int ?? 0, noticeDays: record["noticeDays"] as? Int ?? 14, noticeKilometers: record["noticeKilometers"] as? Int ?? 500, sourceURL: record["sourceURL"] as? String, templateRuleID: record["templateRuleID"] as? String, baselineUnknown: record["baselineUnknown"] as? Bool ?? false)
                     }
                     remoteEntries += entryRecords.compactMap { record in
                         guard let reference = record["plan"] as? CKRecord.Reference else { return nil }
@@ -145,6 +145,7 @@ import Foundation
             record["noticeKilometers"] = plan.noticeKilometers as CKRecordValue
             if let sourceURL = plan.sourceURL { record["sourceURL"] = sourceURL as CKRecordValue }
             if let templateRuleID = plan.templateRuleID { record["templateRuleID"] = templateRuleID as CKRecordValue }
+            record["baselineUnknown"] = plan.baselineUnknown as CKRecordValue
             _ = try await db.save(record)
             snapshot.pendingPlans.remove(key)
             persist()
@@ -223,7 +224,8 @@ import Foundation
                                      intervalMonths: rule.intervalMonths, intervalKilometers: rule.intervalKilometers,
                                      lastDate: selection.lastDate, lastKilometers: selection.lastKilometers,
                                      noticeDays: 14, noticeKilometers: 500,
-                                     sourceURL: (rule.sourceURL ?? sourceURL).absoluteString, templateRuleID: rule.id))
+                                     sourceURL: (rule.sourceURL ?? sourceURL).absoluteString, templateRuleID: rule.id,
+                                     baselineUnknown: selection.baselineUnknown))
             snapshot.pendingPlans.insert(RecordKey(id))
             added = true
         }
@@ -237,6 +239,7 @@ import Foundation
         if let index = plans.firstIndex(where: { $0.id == plan.id }) {
             plans[index].lastDate = date
             plans[index].lastKilometers = kilometers
+            plans[index].baselineUnknown = false
             snapshot.pendingPlans.insert(RecordKey(plan.id))
         }
         if kilometers > car.odometer, let index = cars.firstIndex(where: { $0.id == car.id }) {

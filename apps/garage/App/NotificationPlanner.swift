@@ -13,6 +13,8 @@ import UserNotifications
         let authorized = await center.notificationSettings().authorizationStatus
         guard authorized == .authorized || authorized == .provisional else { return }
         for plan in plans.prefix(60) {
+            // Without a prior completion there is no defensible due date; the app shows it as pending.
+            guard !plan.baselineUnknown else { continue }
             guard let car = cars.first(where: { $0.id == plan.carID }) else { continue }
             let status = plan.status(odometer: car.odometer)
             let content = UNMutableNotificationContent()

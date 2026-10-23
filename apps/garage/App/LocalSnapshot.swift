@@ -41,14 +41,16 @@ struct LocalSnapshot: Codable {
         var noticeKilometers: Int
         var sourceURL: String?
         var templateRuleID: String?
+        var baselineUnknown: Bool?
         init(_ plan: ServicePlan) {
             id = RecordKey(plan.id); carID = RecordKey(plan.carID); title = plan.title; details = plan.details
             intervalMonths = plan.intervalMonths; intervalKilometers = plan.intervalKilometers
             lastDate = plan.lastDate; lastKilometers = plan.lastKilometers
             noticeDays = plan.noticeDays; noticeKilometers = plan.noticeKilometers
             sourceURL = plan.sourceURL; templateRuleID = plan.templateRuleID
+            baselineUnknown = plan.baselineUnknown
         }
-        var plan: ServicePlan { ServicePlan(id: id.id, carID: carID.id, title: title, details: details, intervalMonths: intervalMonths, intervalKilometers: intervalKilometers, lastDate: lastDate, lastKilometers: lastKilometers, noticeDays: noticeDays, noticeKilometers: noticeKilometers, sourceURL: sourceURL, templateRuleID: templateRuleID) }
+        var plan: ServicePlan { ServicePlan(id: id.id, carID: carID.id, title: title, details: details, intervalMonths: intervalMonths, intervalKilometers: intervalKilometers, lastDate: lastDate, lastKilometers: lastKilometers, noticeDays: noticeDays, noticeKilometers: noticeKilometers, sourceURL: sourceURL, templateRuleID: templateRuleID, baselineUnknown: baselineUnknown ?? false) }
     }
     struct EntryData: Codable {
         let id: RecordKey
