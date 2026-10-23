@@ -12,17 +12,17 @@ struct FuelEntryView: View {
     @State private var litersText = ""
     @State private var priceText = ""
     @State private var stationName: String
-    @State private var detectedStationName: String?
     @State private var latitude: Double?
     @State private var longitude: Double?
     @State private var locationMessage: String?
+    @State private var manualStation = false
+    @State private var stationWasChosen = false
     @State private var saving = false
 
     init(car: Car, suggestion: FuelVisitSuggestion? = nil) {
         self.car = car
         self.suggestion = suggestion
         _stationName = State(initialValue: suggestion?.stationName ?? "")
-        _detectedStationName = State(initialValue: suggestion?.stationName)
         _date = State(initialValue: suggestion?.arrivedAt ?? .now)
         _latitude = State(initialValue: suggestion?.latitude)
         _longitude = State(initialValue: suggestion?.longitude)
@@ -55,36 +55,38 @@ struct FuelEntryView: View {
         NavigationStack {
             Form {
                 Section("Estación") {
-                    TextField("Marca o nombre", text: $stationName)
-                        .textInputAutocapitalization(.words)
-                        .onChange(of: stationName) { _, value in
-                            if value != detectedStationName { latitude = nil; longitude = nil }
+                    Menu {
+                        Button("Detectar por ubicación", systemImage: "location") {
+                            stationWasChosen = false
+                            Task { await detectStation() }
                         }
-                    HStack {
-                        ForEach(["YPF", "Shell", "Axion", "Puma"], id: \.self) { brand in
-                            Button(brand) { detectedStationName = nil; stationName = brand; latitude = nil; longitude = nil }
-                                .buttonStyle(.bordered)
+                        ForEach(["YPF", "Shell", "Axion", "Puma", "Gulf", "Petrobras"], id: \.self) { brand in
+                            Button(brand) { chooseStation(brand) }
                         }
-                    }
-                    .font(.caption)
-                    Button {
-                        Task {
-                            do {
-                                if let match = try await locator.search() {
-                                    detectedStationName = match.name
-                                    stationName = match.name
-                                    latitude = match.coordinate.latitude
-                                    longitude = match.coordinate.longitude
-                                    locationMessage = "Encontré \(match.name). Podés cambiarlo a mano."
-                                } else { locationMessage = "No encontré una estación cercana. Elegila a mano." }
-                            } catch { locationMessage = "No pude obtener la ubicación. Elegí la estación a mano." }
+                        Button("Otra estación…", systemImage: "pencil") {
+                            manualStation = true
+                            stationWasChosen = true
+                            stationName = ""
+                            latitude = nil
+                            longitude = nil
                         }
                     } label: {
-                        if locator.loading { ProgressView("Buscando estación…") }
-                        else { Label("Detectar estación cercana", systemImage: "location") }
+                        HStack {
+                            Text("Estación")
+                            Spacer()
+                            if locator.loading { ProgressView() }
+                            Text(stationName.isEmpty ? (locator.loading ? "Buscando…" : "Elegir") : stationName)
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(.secondary)
+                        }
                     }
-                    .disabled(locator.loading)
-                    if let locationMessage { Text(locationMessage).font(.footnote).foregroundStyle(.secondary) }
+                    if manualStation {
+                        TextField("Nombre de la estación", text: $stationName)
+                            .textInputAutocapitalization(.words)
+                    }
+                    if let locationMessage, stationName.isEmpty {
+                        Text(locationMessage).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
 
                 Section("Carga") {
@@ -95,13 +97,10 @@ struct FuelEntryView: View {
                     LabeledContent("Total", value: total.map(currency) ?? "—")
                         .fontWeight(.semibold)
                 }
-                Section {
-                    Text("La carga se guarda en el historial de \(car.name). Si el kilometraje es mayor al actual, se actualiza el auto.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                }
             }
             .disabled(saving)
             .navigationTitle("Cargar nafta")
+            .task { if suggestion == nil { await detectStation() } }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) {
@@ -123,6 +122,32 @@ struct FuelEntryView: View {
                 }
             }
             .interactiveDismissDisabled(saving)
+        }
+    }
+
+    private func chooseStation(_ name: String) {
+        stationWasChosen = true
+        manualStation = false
+        stationName = name
+        latitude = nil
+        longitude = nil
+        locationMessage = nil
+    }
+
+    private func detectStation() async {
+        do {
+            if let match = try await locator.search() {
+                guard !stationWasChosen else { return }
+                stationName = match.name
+                latitude = match.coordinate.latitude
+                longitude = match.coordinate.longitude
+                manualStation = false
+                locationMessage = nil
+            } else if stationName.isEmpty {
+                locationMessage = "No encontré una estación cercana. Elegila de la lista."
+            }
+        } catch {
+            if stationName.isEmpty { locationMessage = "No pude obtener la ubicación. Elegí la estación de la lista." }
         }
     }
 }

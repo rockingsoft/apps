@@ -293,6 +293,9 @@ struct CarView: View {
     @State private var editOdometer = false
     @State private var kilometers = 0
     private var current: Car { store.cars.first(where: { $0.id == car.id }) ?? car }
+    private var recentFuelEntries: [FuelEntry] {
+        store.fuelEntries.filter { $0.carID == car.id }.sorted { $0.date > $1.date }
+    }
     private var availableTemplate: MaintenanceTemplate? {
         guard !current.isSharedWithMe, let template = MaintenanceCatalog.template(for: current) else { return nil }
         let existing = Set(store.plans.filter { $0.carID == current.id }.compactMap(\.templateRuleID))
@@ -304,6 +307,13 @@ struct CarView: View {
             Section {
                 LabeledContent("Patente", value: current.plate.uppercased())
                 Button("Kilometraje: \(current.odometer) km") { kilometers = current.odometer; editOdometer = true }
+            }
+            Section("Cargas de nafta") {
+                ForEach(recentFuelEntries.prefix(3)) { entry in FuelEntryRow(entry: entry) }
+                if recentFuelEntries.count > 3 {
+                    NavigationLink("Ver más") { FuelHistoryView(car: current) }
+                }
+                Button("Registrar carga", systemImage: "fuelpump") { addFuel = true }
             }
             Section("Plan de servicios") {
                 if availableTemplate != nil {
@@ -322,20 +332,6 @@ struct CarView: View {
                 }
                 Button("Agregar servicio", systemImage: "plus") { addPlan = true }
             }
-            Section("Cargas de nafta") {
-                ForEach(store.fuelEntries.filter { $0.carID == car.id }.sorted { $0.date > $1.date }) { entry in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(entry.stationName).font(.headline)
-                            Spacer()
-                            Text(entry.totalDescription)
-                        }
-                        Text("\(entry.date.formatted(date: .abbreviated, time: .omitted)) · \(entry.kilometers.formatted()) km · \(NSDecimalNumber(decimal: entry.liters).stringValue) L")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-                Button("Registrar carga", systemImage: "fuelpump") { addFuel = true }
-            }
         }
         .navigationTitle(current.name)
         .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
@@ -348,6 +344,34 @@ struct CarView: View {
             Button("Guardar") { Task { await store.updateOdometer(current, kilometers: kilometers) } }
             Button("Cancelar", role: .cancel) {}
         } message: { Text("Las alertas por kilometraje se recalculan con esta lectura.") }
+    }
+}
+
+private struct FuelEntryRow: View {
+    let entry: FuelEntry
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(entry.stationName).font(.headline)
+                Spacer()
+                Text(entry.totalDescription)
+            }
+            Text("\(entry.date.formatted(date: .abbreviated, time: .omitted)) · \(entry.kilometers.formatted()) km · \(NSDecimalNumber(decimal: entry.liters).stringValue) L")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct FuelHistoryView: View {
+    @EnvironmentObject private var store: CloudStore
+    let car: Car
+    var body: some View {
+        List {
+            ForEach(store.fuelEntries.filter { $0.carID == car.id }.sorted { $0.date > $1.date }) { entry in
+                FuelEntryRow(entry: entry)
+            }
+        }
+        .navigationTitle("Cargas de nafta")
     }
 }
 
