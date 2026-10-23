@@ -15,7 +15,7 @@ App nativa SwiftUI para iPhone/iPad (iOS 17+) que guarda autos, planes de servic
 - Registro de cargas de nafta por auto con estación editable, fecha, kilómetros, litros y precio por litro; el total en pesos se calcula en el formulario. La carga se conserva localmente y se sincroniza por iCloud con el auto. Se puede buscar la estación cercana con MapKit o elegir YPF, Shell, Axion, Puma u otro nombre a mano.
 - Avisos opcionales de posibles cargas: con permiso de ubicación «Siempre», iOS informa visitas y Garage busca una estación de servicio cercana. Solo sugiere registrar una carga cuando la visita informada dura al menos cinco minutos; el aviso puede llegar más tarde porque iOS entrega las visitas de forma aproximada. No se registra una carga automáticamente ni se usa seguimiento GPS continuo.
 - Notificaciones locales por fecha, al acercarse el vencimiento, y por kilometraje al ingresar una nueva lectura. Cada iPhone calcula sus propias notificaciones.
-- Compartir un auto vía iCloud con permiso de lectura o edición.
+- Invitar a colaborar en un auto vía iCloud: solo las personas invitadas pueden acceder y pueden editar el auto, sus cargas y servicios. Cada auto usa una zona CloudKit propia; los cambios de los participantes se leen al abrir o actualizar la app.
 
 ## Abrir y compilar
 

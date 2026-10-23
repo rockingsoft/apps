@@ -444,12 +444,21 @@ struct CarView: View {
         }
         .navigationTitle(current.name)
         .refreshable { await store.reload() }
-        .toolbar { if !current.isSharedWithMe { Button("Compartir", systemImage: "person.crop.circle.badge.plus") { share = true }.disabled(!store.canShare(current)) } }
+        .toolbar {
+            if !current.isSharedWithMe {
+                Button("Invitar a colaborar", systemImage: "person.crop.circle.badge.plus") { share = true }
+                    .disabled(!store.canShare(current))
+            }
+        }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
         .sheet(isPresented: $addFuel) { FuelEntryView(car: current) }
         .fuelDeletionAlert(entry: $fuelEntryToDelete, store: store)
         .sheet(item: $templateToReview) { template in MaintenanceTemplateView(car: current, template: template) }
-        .sheet(isPresented: $share) { CarSharingSheet(car: current, store: store) }
+        .overlay {
+            if share {
+                CarSharingSheet(car: current, store: store, onClose: { share = false })
+            }
+        }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {
             TextField("Kilómetros", value: $kilometers, format: .number).keyboardType(.numberPad)
             Button("Guardar") { Task { await store.updateOdometer(current, kilometers: kilometers) } }

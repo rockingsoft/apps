@@ -3,29 +3,39 @@ import SwiftUI
 import UIKit
 
 struct CarSharingSheet: View {
-    @Environment(\.dismiss) private var dismiss
     let car: Car
     let store: CloudStore
+    let onClose: () -> Void
     @State private var existingShare: CKShare?
     @State private var loading = true
     @State private var errorMessage: String?
 
     var body: some View {
-        Group {
+        ZStack {
+            Color.black.opacity(0.16).ignoresSafeArea()
             if loading {
-                ProgressView("Preparando invitación…")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let errorMessage {
-                ContentUnavailableView {
-                    Label("No se pudo compartir", systemImage: "icloud.slash")
-                } description: {
-                    Text(errorMessage)
-                } actions: {
-                    Button("Reintentar") { Task { await loadShare() } }
+                VStack(spacing: 10) {
+                    ProgressView()
+                    Text("Preparando colaboración…").font(.subheadline)
                 }
+                .padding(24)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
+            } else if let errorMessage {
+                VStack(spacing: 12) {
+                    Label("No se pudo invitar", systemImage: "icloud.slash").font(.headline)
+                    Text(errorMessage).font(.subheadline).multilineTextAlignment(.center)
+                    HStack {
+                        Button("Cancelar", action: onClose)
+                        Button("Reintentar") { Task { await loadShare() } }
+                            .buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding(24)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
+                .padding(24)
             } else {
                 SharingController(car: car, store: store, existingShare: existingShare,
-                                  onClose: { dismiss() },
+                                  onClose: onClose,
                                   onError: { errorMessage = $0.localizedDescription })
             }
         }
@@ -83,10 +93,12 @@ private struct SharingController: UIViewControllerRepresentable {
             }
         }
         controller.delegate = context.coordinator
-        controller.availablePermissions = [.allowReadOnly, .allowReadWrite, .allowPrivate]
+        controller.availablePermissions = [.allowPrivate, .allowReadWrite]
         let host = SharingHostController()
+        host.view.backgroundColor = .clear
         host.onAppear = { [weak host] in
-            guard let host, host.presentedViewController == nil else { return }
+            guard let host, !host.didPresent else { return }
+            host.didPresent = true
             if let popover = controller.popoverPresentationController {
                 popover.sourceView = host.view
                 popover.sourceRect = host.view.bounds
@@ -119,6 +131,7 @@ private struct SharingController: UIViewControllerRepresentable {
 
 private final class SharingHostController: UIViewController {
     var onAppear: (() -> Void)?
+    var didPresent = false
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         onAppear?()
