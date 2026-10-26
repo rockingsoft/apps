@@ -43,11 +43,13 @@ enum FuelStationFinder {
     private static let enabledKey = "garage.fuelVisitEnabled"
     private static let suggestionKey = "garage.fuelVisitSuggestion"
     private static let lastPromptKey = "garage.fuelVisitLastPrompt"
+    private static let minimumVisitDuration: TimeInterval = 5 * 60
 
     @Published private(set) var enabled: Bool
     @Published private(set) var authorization: CLAuthorizationStatus
     @Published private(set) var suggestion: FuelVisitSuggestion?
     private let manager = CLLocationManager()
+    private var endedVisits: [Date: Date] = [:]
 
     private override init() {
         enabled = UserDefaults.standard.bool(forKey: Self.enabledKey)
@@ -76,6 +78,9 @@ enum FuelStationFinder {
     }
 
     func clearSuggestion() {
+        if let suggestion {
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["garage.fuel.\(suggestion.id)"])
+        }
         suggestion = nil
         UserDefaults.standard.removeObject(forKey: Self.suggestionKey)
     }
@@ -89,8 +94,17 @@ enum FuelStationFinder {
     func locationManager(_ manager: CLLocationManager, didVisit visit: CLVisit) {
         guard enabled, authorization == .authorizedAlways,
               visit.arrivalDate != .distantPast else { return }
-        let end = visit.departureDate == .distantFuture ? Date() : visit.departureDate
-        guard end.timeIntervalSince(visit.arrivalDate) >= 5 * 60 else { return }
+        if visit.departureDate != .distantFuture {
+            endedVisits = endedVisits.filter { Date().timeIntervalSince($0.key) < 24 * 60 * 60 }
+            endedVisits[visit.arrivalDate] = visit.departureDate
+            if visit.departureDate.timeIntervalSince(visit.arrivalDate) < Self.minimumVisitDuration {
+                if suggestion?.arrivedAt == visit.arrivalDate {
+                    clearSuggestion()
+                    UserDefaults.standard.removeObject(forKey: Self.lastPromptKey)
+                }
+                return
+            }
+        }
         let location = CLLocation(latitude: visit.coordinate.latitude, longitude: visit.coordinate.longitude)
         Task { await offerFuelLog(near: location, arrivedAt: visit.arrivalDate, accuracy: visit.horizontalAccuracy) }
     }
@@ -102,18 +116,29 @@ enum FuelStationFinder {
         let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Buscar estación de servicio")
         defer { if backgroundTask != .invalid { UIApplication.shared.endBackgroundTask(backgroundTask) } }
         guard let station = try? await FuelStationFinder.nearest(to: location, within: max(90, min(150, accuracy))) else { return }
+        if let departure = endedVisits[arrivedAt], departure.timeIntervalSince(arrivedAt) < Self.minimumVisitDuration { return }
+        let latestPrompt = UserDefaults.standard.object(forKey: Self.lastPromptKey) as? Date ?? .distantPast
+        guard Date().timeIntervalSince(latestPrompt) > 6 * 60 * 60 else { return }
+        // An arrival callback may precede the five-minute threshold. Let iOS deliver the
+        // local notification at that threshold even if Nido is suspended meanwhile.
+        let delay = max(1, arrivedAt.addingTimeInterval(Self.minimumVisitDuration).timeIntervalSinceNow)
         let found = FuelVisitSuggestion(id: UUID(), stationName: station.name,
                                         latitude: station.coordinate.latitude, longitude: station.coordinate.longitude,
                                         arrivedAt: arrivedAt)
-        suggestion = found
-        UserDefaults.standard.set(try? JSONEncoder().encode(found), forKey: Self.suggestionKey)
-        UserDefaults.standard.set(Date(), forKey: Self.lastPromptKey)
         let content = UNMutableNotificationContent()
         content.title = "¿Cargaste nafta en \(station.name)?"
         content.body = "Abrí Nido para registrar kilómetros, litros y precio."
         content.sound = .default
-        let request = UNNotificationRequest(identifier: "garage.fuel.\(found.id)", content: content, trigger: nil)
-        try? await UNUserNotificationCenter.current().add(request)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
+        let request = UNNotificationRequest(identifier: "garage.fuel.\(found.id)", content: content, trigger: trigger)
+        do { try await UNUserNotificationCenter.current().add(request) } catch { return }
+        if let departure = endedVisits[arrivedAt], departure.timeIntervalSince(arrivedAt) < Self.minimumVisitDuration {
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [request.identifier])
+            return
+        }
+        suggestion = found
+        UserDefaults.standard.set(try? JSONEncoder().encode(found), forKey: Self.suggestionKey)
+        UserDefaults.standard.set(Date(), forKey: Self.lastPromptKey)
     }
 }
 
