@@ -22,6 +22,10 @@ struct LocalSnapshot: Codable {
         let entry: RecordKey
         let sharedWithMe: Bool
     }
+    struct PendingExpensePlaceDeletion: Codable, Hashable {
+        let place: RecordKey
+        let sharedWithMe: Bool
+    }
     struct CarData: Codable {
         let id: RecordKey
         var name: String
@@ -129,6 +133,7 @@ struct LocalSnapshot: Codable {
     var pendingFuelDeletions: Set<PendingFuelDeletion>? = nil
     var expensePlaces: [ExpensePlaceData]? = nil
     var pendingExpensePlaces: Set<RecordKey>? = nil
+    var pendingExpensePlaceDeletions: Set<PendingExpensePlaceDeletion>? = nil
     var familyMembers: [FamilyMemberData]? = nil
     var pendingFamilyMembers: Set<RecordKey>? = nil
 

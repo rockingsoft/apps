@@ -235,6 +235,13 @@ struct FinanceDashboardView: View {
 
 private struct ExpenseHistoryView: View {
     @EnvironmentObject private var finances: FinanceStore
+    @EnvironmentObject private var cars: CloudStore
+    @State private var editingExpense: FamilyExpense?
+    @State private var deletingExpense: FamilyExpense?
+    @State private var showingDeleteConfirmation = false
+    @State private var busyID: String?
+    @State private var errorMessage: String?
+
     var body: some View {
         List(finances.expenses) { expense in
             HStack {
@@ -244,11 +251,131 @@ private struct ExpenseHistoryView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text(FamilyBudget.money(expense.amount)).font(.subheadline.bold())
+                if busyID == expense.id { ProgressView() }
+                else { Text(FamilyBudget.money(expense.amount)).font(.subheadline.bold()) }
+            }
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                Button("Editar", systemImage: "pencil") {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(180))
+                        editingExpense = expense
+                    }
+                }
+                    .tint(.blue)
+                    .disabled(busyID != nil)
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button("Eliminar", systemImage: "trash") {
+                    deletingExpense = expense
+                    showingDeleteConfirmation = true
+                }
+                .tint(.red)
+                .disabled(busyID != nil)
             }
         }
         .navigationTitle("Todos los gastos")
         .refreshable { await finances.reload() }
+        .sheet(item: $editingExpense) { expense in ExpenseEditView(original: expense) }
+        .confirmationDialog("Eliminar gasto", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+            Button("Eliminar gasto", role: .destructive) {
+                if let deletingExpense { Task { await delete(deletingExpense) } }
+            }
+            Button("Cancelar", role: .cancel) { deletingExpense = nil }
+        } message: {
+            if let deletingExpense {
+                Text("Se quitará \(deletingExpense.detail) de la planilla familiar.\(deletingExpense.id.hasPrefix("fuel-") || deletingExpense.id.hasPrefix("service-") ? " El registro del auto seguirá disponible." : "")")
+            }
+        }
+        .alert("No se pudo modificar el gasto", isPresented: Binding(
+            get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("Aceptar") { errorMessage = nil }
+        } message: { Text(errorMessage ?? "") }
+    }
+
+    private func delete(_ expense: FamilyExpense) async {
+        busyID = expense.id
+        defer { busyID = nil; deletingExpense = nil }
+        do {
+            try await finances.delete(expense)
+            await cars.deleteExpensePlace(for: expense)
+        } catch { errorMessage = error.localizedDescription }
+    }
+}
+
+private struct ExpenseEditView: View {
+    @EnvironmentObject private var finances: FinanceStore
+    @EnvironmentObject private var cars: CloudStore
+    @Environment(\.dismiss) private var dismiss
+    let original: FamilyExpense
+    @State private var date: Date
+    @State private var category: String
+    @State private var paidBy: String
+    @State private var detail: String
+    @State private var amount: String
+    @State private var saving = false
+    @State private var errorMessage: String?
+
+    init(original: FamilyExpense) {
+        self.original = original
+        _date = State(initialValue: original.date)
+        _category = State(initialValue: original.category)
+        _paidBy = State(initialValue: original.paidBy)
+        _detail = State(initialValue: original.detail)
+        _amount = State(initialValue: NSDecimalNumber(decimal: original.amount).stringValue)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                DatePicker("Fecha", selection: $date, displayedComponents: .date)
+                Picker("Categoría", selection: $category) {
+                    ForEach(FamilyBudget.categories, id: \.self) { Text($0) }
+                }
+                Picker("Pagado por", selection: $paidBy) {
+                    ForEach(FamilyBudget.payers, id: \.self) { Text($0) }
+                }
+                TextField("Detalle", text: $detail)
+                TextField("Monto en pesos", text: $amount).keyboardType(.decimalPad)
+                if original.id.hasPrefix("fuel-") || original.id.hasPrefix("service-") {
+                    Text("Este cambio modifica el presupuesto. El registro del auto se conserva.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                if let errorMessage { Text(errorMessage).font(.footnote).foregroundStyle(.red) }
+            }
+            .navigationTitle("Editar gasto")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Guardar") { Task { await save() } }
+                        .disabled(saving || parsedAmount == nil || detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .disabled(saving)
+        }
+    }
+
+    private var parsedAmount: Decimal? {
+        guard let value = Decimal(string: amount.replacingOccurrences(of: ".", with: "").replacingOccurrences(of: ",", with: "."),
+                                  locale: Locale(identifier: "en_US_POSIX")), value > 0 else { return nil }
+        return value
+    }
+
+    private func save() async {
+        guard let parsedAmount else { return }
+        saving = true
+        defer { saving = false }
+        var edited = original
+        edited.date = date
+        edited.category = category
+        edited.paidBy = paidBy
+        edited.detail = detail.trimmingCharacters(in: .whitespacesAndNewlines)
+        edited.amount = parsedAmount
+        do {
+            try await finances.update(original, with: edited)
+            await cars.updateExpensePlace(for: edited)
+            dismiss()
+        } catch { errorMessage = error.localizedDescription }
     }
 }
 

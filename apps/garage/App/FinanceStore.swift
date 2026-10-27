@@ -48,6 +48,7 @@ enum FamilyBudget {
 
     private let google = GoogleSheetsAccess()
     private var pending: [FamilyExpense] = []
+    private var reloadRequested = false
 
     init() {
         if let data = UserDefaults.standard.data(forKey: "garage.pendingExpenses"),
@@ -85,9 +86,16 @@ enum FamilyBudget {
     }
 
     func reload() async {
-        guard signedIn, !loading else { return }
+        guard signedIn else { return }
+        if loading { reloadRequested = true; return }
         loading = true
-        defer { loading = false }
+        defer {
+            loading = false
+            if reloadRequested {
+                reloadRequested = false
+                Task { await self.reload() }
+            }
+        }
         do {
             let rows = try await google.values("'Registro de Gastos'!B4:G1000")
             expenses = rows.enumerated().compactMap { offset, row in
@@ -138,6 +146,66 @@ enum FamilyBudget {
         }
     }
 
+    func update(_ original: FamilyExpense, with edited: FamilyExpense) async throws {
+        try validate(edited)
+        guard edited.id == original.id else { throw FinanceError.invalidExpense }
+        let row = try await verifiedRow(for: original)
+        try await google.update(sheetValues(for: edited), in: "'Registro de Gastos'!B\(row):G\(row)")
+        pending.removeAll { $0.id == original.id }
+        persistPending()
+        if let index = expenses.firstIndex(where: { $0.id == original.id }) {
+            var saved = edited
+            saved.row = row
+            expenses[index] = saved
+            expenses.sort { $0.date > $1.date }
+        }
+        await reload()
+    }
+
+    func delete(_ expense: FamilyExpense) async throws {
+        let row = try await verifiedRow(for: expense)
+        try await google.clear("'Registro de Gastos'!B\(row):G\(row)")
+        pending.removeAll { $0.id == expense.id }
+        persistPending()
+        expenses.removeAll { $0.id == expense.id }
+        await reload()
+    }
+
+    private func validate(_ expense: FamilyExpense) throws {
+        guard expense.amount > 0,
+              FamilyBudget.categories.contains(expense.category),
+              FamilyBudget.payers.contains(expense.paidBy),
+              !expense.detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw FinanceError.invalidExpense
+        }
+    }
+
+    private func sheetValues(for expense: FamilyExpense) -> [String] {
+        [String(FamilyBudget.serial(from: expense.date)), expense.category, expense.paidBy,
+         expense.detail, NSDecimalNumber(decimal: expense.amount).stringValue, expense.id]
+    }
+
+    private func verifiedRow(for expense: FamilyExpense) async throws -> Int {
+        let rows = try await google.values("'Registro de Gastos'!B4:G1000")
+        let matches = rows.enumerated().filter { offset, values in
+            let rowNumber = offset + 4
+            let stableID = values.count > 5 ? values[5] : ""
+            return stableID == expense.id ||
+                (stableID.isEmpty && expense.id == "sheet-row-\(rowNumber)" && expense.row == rowNumber)
+        }
+        guard matches.count == 1, let match = matches.first else { throw FinanceError.expenseMissing }
+        let values = match.element
+        guard values.count >= 5,
+              let serial = Double(values[0]),
+              let amount = Decimal(string: values[4], locale: Locale(identifier: "en_US_POSIX")),
+              Int(serial) == FamilyBudget.serial(from: expense.date),
+              values[1] == expense.category,
+              values[2] == expense.paidBy,
+              values[3] == expense.detail,
+              amount == expense.amount else { throw FinanceError.expenseChanged }
+        return match.offset + 4
+    }
+
     private func flushPending() async {
         for expense in pending {
             do {
@@ -184,11 +252,13 @@ enum FamilyBudget {
 }
 
 private enum FinanceError: LocalizedError {
-    case invalidExpense, sheetFull
+    case invalidExpense, sheetFull, expenseMissing, expenseChanged
     var errorDescription: String? {
         switch self {
         case .invalidExpense: "Revisá monto, categoría, pagador y detalle antes de guardar."
         case .sheetFull: "La planilla llegó a la fila 1000. Hay que extender sus fórmulas antes de agregar más gastos."
+        case .expenseMissing: "Este gasto ya no está en la planilla. Actualizá la lista."
+        case .expenseChanged: "El gasto cambió en la planilla desde que lo abriste. Actualizá la lista antes de editarlo."
         }
     }
 }

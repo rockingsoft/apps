@@ -56,6 +56,7 @@ struct FamilyMember {
         !snapshot.pendingCars.isEmpty || !snapshot.pendingPlans.isEmpty || !snapshot.pendingEntries.isEmpty ||
         !(snapshot.pendingDeletions ?? []).isEmpty || !(snapshot.pendingFuelEntries ?? []).isEmpty ||
         !(snapshot.pendingFuelDeletions ?? []).isEmpty || !(snapshot.pendingExpensePlaces ?? []).isEmpty ||
+        !(snapshot.pendingExpensePlaceDeletions ?? []).isEmpty ||
         !(snapshot.pendingFamilyMembers ?? []).isEmpty
     }
 
@@ -198,7 +199,8 @@ struct FamilyMember {
                 pendingFuelIDs.contains($0.id) && !deletedZones.contains($0.id.zoneID) && !pendingFuelDeletionIDs.contains($0.id)
             }).sorted { $0.date > $1.date }
             let pendingPlaceIDs = Set((snapshot.pendingExpensePlaces ?? []).map(\.id))
-            expensePlaces = remoteExpensePlaces.filter { !pendingPlaceIDs.contains($0.id) } +
+            let deletedPlaceIDs = Set((snapshot.pendingExpensePlaceDeletions ?? []).map { $0.place.id })
+            expensePlaces = remoteExpensePlaces.filter { !pendingPlaceIDs.contains($0.id) && !deletedPlaceIDs.contains($0.id) } +
                 expensePlaces.filter { pendingPlaceIDs.contains($0.id) }
             let pendingMemberIDs = Set((snapshot.pendingFamilyMembers ?? []).map(\.id))
             familyMembers = remoteFamilyMembers.filter { !pendingMemberIDs.contains($0.id) } +
@@ -346,6 +348,16 @@ struct FamilyMember {
                 // The entry only existed locally, or was already removed.
             }
             snapshot.pendingFuelDeletions?.remove(deletion)
+            persist()
+        }
+        for deletion in (snapshot.pendingExpensePlaceDeletions ?? []).sorted(by: { $0.place.name < $1.place.name }) {
+            do {
+                let database = deletion.sharedWithMe ? sharedDB : privateDB
+                _ = try await database.deleteRecord(withID: deletion.place.id)
+            } catch let error as CKError where error.code == .unknownItem || error.code == .zoneNotFound {
+                // The place only existed locally, or was already removed.
+            }
+            snapshot.pendingExpensePlaceDeletions?.remove(deletion)
             persist()
         }
         for key in snapshot.pendingCars.sorted(by: { $0.name < $1.name }) {
@@ -537,6 +549,30 @@ struct FamilyMember {
                                           detail: expense.detail, latitude: latitude, longitude: longitude,
                                           recordedAt: expense.date))
         snapshot.pendingExpensePlaces = (snapshot.pendingExpensePlaces ?? []).union([RecordKey(id)])
+        await saveLocallyAndSync()
+    }
+
+    func updateExpensePlace(for expense: FamilyExpense) async {
+        guard let index = expensePlaces.firstIndex(where: { $0.expenseID == expense.id }) else { return }
+        let old = expensePlaces[index]
+        expensePlaces[index] = ExpensePlace(id: old.id, expenseID: old.expenseID,
+                                            category: expense.category, detail: expense.detail,
+                                            latitude: old.latitude, longitude: old.longitude,
+                                            recordedAt: expense.date)
+        snapshot.pendingExpensePlaces = (snapshot.pendingExpensePlaces ?? []).union([RecordKey(old.id)])
+        ExpenseVisitMonitor.shared.updatePlaces(expensePlaces)
+        await saveLocallyAndSync()
+    }
+
+    func deleteExpensePlace(for expense: FamilyExpense) async {
+        guard let zoneID = familyZoneID, !expense.id.hasPrefix("sheet-row-") else { return }
+        let id = CKRecord.ID(recordName: "expense-\(expense.id)", zoneID: zoneID)
+        expensePlaces.removeAll { $0.id == id }
+        snapshot.pendingExpensePlaces?.remove(RecordKey(id))
+        snapshot.pendingExpensePlaceDeletions = (snapshot.pendingExpensePlaceDeletions ?? []).union([
+            LocalSnapshot.PendingExpensePlaceDeletion(place: RecordKey(id), sharedWithMe: familyZoneSharedWithMe)
+        ])
+        ExpenseVisitMonitor.shared.updatePlaces(expensePlaces)
         await saveLocallyAndSync()
     }
 

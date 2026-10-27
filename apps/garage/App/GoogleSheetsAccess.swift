@@ -91,6 +91,20 @@ import UIKit
         _ = try await request(url.url!, method: "POST", body: body)
     }
 
+    func update(_ row: [String], in range: String) async throws {
+        let encoded = range.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+        var url = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/\(FamilyBudget.spreadsheetID)/values/\(encoded)")!
+        url.queryItems = [URLQueryItem(name: "valueInputOption", value: "USER_ENTERED")]
+        let body = try JSONEncoder().encode(ValuesResponse(values: [row]))
+        _ = try await request(url.url!, method: "PUT", body: body)
+    }
+
+    func clear(_ range: String) async throws {
+        let encoded = range.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+        let url = URL(string: "https://sheets.googleapis.com/v4/spreadsheets/\(FamilyBudget.spreadsheetID)/values/\(encoded):clear")!
+        _ = try await request(url, method: "POST", body: Data("{}".utf8))
+    }
+
     private func request(_ url: URL, method: String, body: Data?) async throws -> Data {
         var request = URLRequest(url: url)
         request.httpMethod = method
