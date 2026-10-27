@@ -7,6 +7,7 @@ struct FinanceDashboardView: View {
     @EnvironmentObject private var cars: CloudStore
     @EnvironmentObject private var expenseMonitor: ExpenseVisitMonitor
     @State private var showingExpense = false
+    @State private var showingPayerProfile = false
     @State private var suggestedExpense: ExpenseVisitSuggestion?
 
     private var monthName: String { Date.now.formatted(.dateTime.month(.wide).year().locale(Locale(identifier: "es_AR"))).capitalized }
@@ -17,6 +18,10 @@ struct FinanceDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
+                    if cars.familyZoneID != nil && cars.myPayerName == nil {
+                        Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
+                            .buttonStyle(.borderedProminent)
+                    }
                     if let suggestion = expenseMonitor.suggestion {
                         Button {
                             suggestedExpense = suggestion
@@ -69,6 +74,7 @@ struct FinanceDashboardView: View {
                 if finances.signedIn {
                     ToolbarItem(placement: .topBarLeading) {
                         Menu {
+                            Button("Mi nombre en el presupuesto", systemImage: "person.crop.circle") { showingPayerProfile = true }
                             Button("Actualizar", systemImage: "arrow.clockwise") { Task { await finances.reload() } }
                             Button("Cerrar sesión de Google", systemImage: "rectangle.portrait.and.arrow.right") { finances.signOut() }
                             Toggle("Sugerencias por ubicación", isOn: Binding(
@@ -89,6 +95,7 @@ struct FinanceDashboardView: View {
                 }
             }
             .sheet(isPresented: $showingExpense) { ExpenseEditorView(suggestion: suggestedExpense) }
+            .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
             .refreshable { await finances.reload() }
             .overlay { if finances.loading { ProgressView().controlSize(.large) } }
         }
@@ -226,7 +233,7 @@ struct ExpenseEditorView: View {
     let suggestion: ExpenseVisitSuggestion?
     @State private var date = Date()
     @State private var category = "Super"
-    @State private var paidBy = "Sebastián"
+    @State private var paidBy = "Común"
     @State private var detail = ""
     @State private var amount = ""
     @State private var saving = false
@@ -289,7 +296,7 @@ struct ExpenseEditorView: View {
                 }
                 Picker("Pagado por", selection: $paidBy) {
                     if paidBy.isEmpty { Text("Elegir persona").tag("") }
-                    ForEach(FamilyBudget.payers, id: \.self) { Text($0) }
+                    ForEach(cars.activePayers, id: \.self) { Text($0) }
                 }
                 TextField("Detalle", text: $detail)
                 TextField("Monto en pesos", text: $amount).keyboardType(.decimalPad)
@@ -306,6 +313,7 @@ struct ExpenseEditorView: View {
                 }
             }
             .disabled(saving)
+            .onAppear { paidBy = cars.myPayerName ?? "Común" }
         }
     }
 
@@ -343,7 +351,7 @@ struct ExpenseEditorView: View {
             let result = try await ExpenseModel.interpret(speech.transcript)
             amount = result.amount.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
             category = result.category.flatMap { FamilyBudget.categories.contains($0) ? $0 : nil } ?? ""
-            paidBy = result.paidBy.flatMap { FamilyBudget.payers.contains($0) ? $0 : nil } ?? ""
+            paidBy = result.paidBy.flatMap { cars.activePayers.contains($0) ? $0 : nil } ?? ""
             detail = result.detail ?? ""
             if let writtenDate = result.date {
                 let formatter = DateFormatter()
@@ -354,5 +362,35 @@ struct ExpenseEditorView: View {
             }
             error = nil
         } catch { self.error = error.localizedDescription }
+    }
+}
+
+private struct MyPayerProfileView: View {
+    @EnvironmentObject private var cars: CloudStore
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(FamilyBudget.payers.filter { $0 != "Común" }, id: \.self) { name in
+                        Button {
+                            Task { await cars.setMyPayerName(name); dismiss() }
+                        } label: {
+                            HStack {
+                                Text(name)
+                                Spacer()
+                                if cars.myPayerName == name { Image(systemName: "checkmark") }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Tu nombre en la planilla")
+                } footer: {
+                    Text("Los nombres disponibles corresponden a la columna Pagado por de la planilla familiar. Cada integrante elige el suyo una vez.")
+                }
+            }
+            .navigationTitle("Identificarme")
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { dismiss() } } }
+        }
     }
 }

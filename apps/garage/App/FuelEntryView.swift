@@ -19,7 +19,7 @@ struct FuelEntryView: View {
     @State private var manualStation = false
     @State private var stationWasChosen = false
     @State private var saving = false
-    @State private var paidBy = "Sebastián"
+    @State private var paidBy = "Común"
 
     init(car: Car, suggestion: FuelVisitSuggestion? = nil) {
         self.car = car
@@ -152,7 +152,7 @@ struct FuelEntryView: View {
                     .foregroundStyle(.white)
                     .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 18))
                     Picker("Pagado por", selection: $paidBy) {
-                        ForEach(FamilyBudget.payers, id: \.self) { Text($0) }
+                        ForEach(store.activePayers, id: \.self) { Text($0) }
                     }
                     .padding(10)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
@@ -163,7 +163,10 @@ struct FuelEntryView: View {
             .disabled(saving)
             .navigationTitle("Cargar nafta")
             .navigationBarTitleDisplayMode(.inline)
-            .task { if suggestion == nil { await detectStation() } }
+            .task {
+                paidBy = store.myPayerName ?? "Común"
+                if suggestion == nil { await detectStation() }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
             }

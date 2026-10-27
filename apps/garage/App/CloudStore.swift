@@ -3,12 +3,22 @@ import CryptoKit
 import Foundation
 import Network
 
+struct FamilyMember {
+    let id: CKRecord.ID
+    let userRecordName: String
+    let payerName: String
+    let updatedAt: Date
+}
+
 @MainActor final class CloudStore: ObservableObject {
     @Published var cars: [Car] = []
     @Published var plans: [ServicePlan] = []
     @Published var entries: [ServiceEntry] = []
     @Published var fuelEntries: [FuelEntry] = []
     @Published var expensePlaces: [ExpensePlace] = []
+    @Published var familyMembers: [FamilyMember] = []
+    @Published private(set) var activeMemberIDs = Set<String>()
+    @Published private(set) var myUserRecordName: String?
     @Published var syncMessage: String?
     @Published var shareError: String?
     @Published var loading = false
@@ -31,6 +41,7 @@ import Network
         entries = saved.entries.map(\.entry)
         fuelEntries = (saved.fuelEntries ?? []).map(\.entry)
         expensePlaces = (saved.expensePlaces ?? []).map(\.place)
+        familyMembers = (saved.familyMembers ?? []).map(\.member)
         networkMonitor.pathUpdateHandler = { [weak self] path in
             guard path.status == .satisfied else { return }
             Task { @MainActor [weak self] in
@@ -44,12 +55,22 @@ import Network
     private var hasPendingChanges: Bool {
         !snapshot.pendingCars.isEmpty || !snapshot.pendingPlans.isEmpty || !snapshot.pendingEntries.isEmpty ||
         !(snapshot.pendingDeletions ?? []).isEmpty || !(snapshot.pendingFuelEntries ?? []).isEmpty ||
-        !(snapshot.pendingFuelDeletions ?? []).isEmpty || !(snapshot.pendingExpensePlaces ?? []).isEmpty
+        !(snapshot.pendingFuelDeletions ?? []).isEmpty || !(snapshot.pendingExpensePlaces ?? []).isEmpty ||
+        !(snapshot.pendingFamilyMembers ?? []).isEmpty
     }
 
     func database(for car: Car) -> CKDatabase { car.isSharedWithMe ? sharedDB : privateDB }
     func canShare(_ car: Car) -> Bool { !snapshot.pendingCars.contains(RecordKey(car.id)) && syncMessage == nil }
     var canShareFamily: Bool { familyZoneID != nil && !familyZoneSharedWithMe && syncMessage == nil && !hasPendingChanges }
+    var myPayerName: String? {
+        guard let myUserRecordName else { return nil }
+        return familyMembers.first { $0.userRecordName == myUserRecordName }?.payerName
+    }
+    var activePayers: [String] {
+        FamilyBudget.payers.filter { name in
+            name == "Común" || familyMembers.contains { activeMemberIDs.contains($0.userRecordName) && $0.payerName == name }
+        }
+    }
     var familySpace: Car? {
         guard let familyZoneID else { return nil }
         return Car(id: CKRecord.ID(recordName: "family-space", zoneID: familyZoneID), name: "Garage familiar",
@@ -62,6 +83,7 @@ import Network
         snapshot.entries = entries.map(LocalSnapshot.EntryData.init)
         snapshot.fuelEntries = fuelEntries.map(LocalSnapshot.FuelData.init)
         snapshot.expensePlaces = expensePlaces.map(LocalSnapshot.ExpensePlaceData.init)
+        snapshot.familyMembers = familyMembers.map(LocalSnapshot.FamilyMemberData.init)
         snapshot.save()
     }
 
@@ -79,6 +101,7 @@ import Network
             let status = try await container.accountStatus()
             guard status == .available else { throw GarageError.iCloudUnavailable }
             try await prepareFamilyZone()
+            await refreshFamilyParticipants()
             try await uploadPending()
             try await migrateLegacyZones()
             var remoteCars: [Car] = []
@@ -86,6 +109,7 @@ import Network
             var remoteEntries: [ServiceEntry] = []
             var remoteFuelEntries: [FuelEntry] = []
             var remoteExpensePlaces: [ExpensePlace] = []
+            var remoteFamilyMembers: [FamilyMember] = []
             var migrationMarkers = Set<String>()
             for (database, shared) in [(privateDB, false), (sharedDB, true)] {
                 for zone in try await database.allRecordZones()
@@ -98,6 +122,14 @@ import Network
                     let entryRecords = allRecords.filter { $0.recordType == "ServiceEntry" }
                     let fuelRecords = allRecords.filter { $0.recordType == "FuelEntry" }
                     let placeRecords = allRecords.filter { $0.recordType == "ExpensePlace" }
+                    if zone.zoneID == familyZoneID {
+                        remoteFamilyMembers += allRecords.filter { $0.recordType == "FamilyMember" }.compactMap { record in
+                            guard let userRecordName = record["userRecordName"] as? String,
+                                  let payerName = record["payerName"] as? String else { return nil }
+                            return FamilyMember(id: record.recordID, userRecordName: userRecordName,
+                                                payerName: payerName, updatedAt: record["updatedAt"] as? Date ?? .distantPast)
+                        }
+                    }
                     let zoneCars = carRecords.map { Car(id: $0.recordID, name: $0["name"] as? String ?? "Auto", plate: $0["plate"] as? String ?? "", odometer: $0["odometer"] as? Int ?? 0, updatedAt: $0["updatedAt"] as? Date ?? .distantPast, isSharedWithMe: shared) }
                     remoteCars += zoneCars
                     remotePlans += planRecords.compactMap { record in
@@ -168,6 +200,9 @@ import Network
             let pendingPlaceIDs = Set((snapshot.pendingExpensePlaces ?? []).map(\.id))
             expensePlaces = remoteExpensePlaces.filter { !pendingPlaceIDs.contains($0.id) } +
                 expensePlaces.filter { pendingPlaceIDs.contains($0.id) }
+            let pendingMemberIDs = Set((snapshot.pendingFamilyMembers ?? []).map(\.id))
+            familyMembers = remoteFamilyMembers.filter { !pendingMemberIDs.contains($0.id) } +
+                familyMembers.filter { pendingMemberIDs.contains($0.id) }
             ExpenseVisitMonitor.shared.updatePlaces(expensePlaces)
             persist()
             syncMessage = nil
@@ -396,6 +431,41 @@ import Network
             snapshot.pendingExpensePlaces?.remove(key)
             persist()
         }
+        for key in (snapshot.pendingFamilyMembers ?? []).sorted(by: { $0.name < $1.name }) {
+            guard let member = familyMembers.first(where: { $0.id == key.id }) else { continue }
+            let database = familyZoneSharedWithMe ? sharedDB : privateDB
+            let record = (try? await database.record(for: member.id)) ?? CKRecord(recordType: "FamilyMember", recordID: member.id)
+            record["userRecordName"] = member.userRecordName as CKRecordValue
+            record["payerName"] = member.payerName as CKRecordValue
+            record["updatedAt"] = member.updatedAt as CKRecordValue
+            _ = try await database.save(record)
+            snapshot.pendingFamilyMembers?.remove(key)
+            persist()
+        }
+    }
+
+    private func refreshFamilyParticipants() async {
+        guard let myID = try? await container.userRecordID() else { return }
+        myUserRecordName = myID.recordName
+        activeMemberIDs = [myID.recordName]
+        guard let familyZoneID else { return }
+        let shareID = CKRecord.ID(recordName: CKRecordNameZoneWideShare, zoneID: familyZoneID)
+        let database = familyZoneSharedWithMe ? sharedDB : privateDB
+        guard let share = try? await database.record(for: shareID) as? CKShare else { return }
+        activeMemberIDs.formUnion(share.participants.filter { $0.role == .owner || $0.acceptanceStatus == .accepted }
+            .compactMap { $0.userIdentity.userRecordID?.recordName })
+    }
+
+    func setMyPayerName(_ name: String) async {
+        guard let familyZoneID, let myUserRecordName,
+              FamilyBudget.payers.contains(name), name != "Común" else { return }
+        let recordName = "member-" + SHA256.hash(data: Data(myUserRecordName.utf8)).map { String(format: "%02x", $0) }.joined()
+        let id = CKRecord.ID(recordName: recordName, zoneID: familyZoneID)
+        let member = FamilyMember(id: id, userRecordName: myUserRecordName, payerName: name, updatedAt: .now)
+        familyMembers.removeAll { $0.id == id }
+        familyMembers.append(member)
+        snapshot.pendingFamilyMembers = (snapshot.pendingFamilyMembers ?? []).union([RecordKey(id)])
+        await saveLocallyAndSync()
     }
 
     private func saveLocallyAndSync() async {

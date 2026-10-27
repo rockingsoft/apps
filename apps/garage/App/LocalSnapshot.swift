@@ -102,6 +102,19 @@ struct LocalSnapshot: Codable {
                          latitude: latitude, longitude: longitude, recordedAt: recordedAt)
         }
     }
+    struct FamilyMemberData: Codable {
+        let id: RecordKey
+        let userRecordName: String
+        let payerName: String
+        let updatedAt: Date
+        init(_ member: FamilyMember) {
+            id = RecordKey(member.id); userRecordName = member.userRecordName
+            payerName = member.payerName; updatedAt = member.updatedAt
+        }
+        var member: FamilyMember {
+            FamilyMember(id: id.id, userRecordName: userRecordName, payerName: payerName, updatedAt: updatedAt)
+        }
+    }
     var cars: [CarData] = []
     var plans: [PlanData] = []
     var entries: [EntryData] = []
@@ -116,6 +129,8 @@ struct LocalSnapshot: Codable {
     var pendingFuelDeletions: Set<PendingFuelDeletion>? = nil
     var expensePlaces: [ExpensePlaceData]? = nil
     var pendingExpensePlaces: Set<RecordKey>? = nil
+    var familyMembers: [FamilyMemberData]? = nil
+    var pendingFamilyMembers: Set<RecordKey>? = nil
 
     static func load() -> LocalSnapshot {
         guard let data = UserDefaults.standard.data(forKey: "garage.localSnapshot"),

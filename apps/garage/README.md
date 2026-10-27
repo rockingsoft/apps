@@ -33,6 +33,7 @@ La pantalla de gastos tiene un botón de micrófono propio. Apple Speech convier
 - Notificaciones locales por fecha, al acercarse el vencimiento, y por kilometraje al ingresar una nueva lectura. Cada iPhone calcula sus propias notificaciones.
 - Invitar a colaborar en el espacio familiar completo vía iCloud: la zona incluye todos los autos y lugares guardados para sugerir gastos. Los gastos y presupuestos de la planilla requieren además acceso de Google a ese archivo. Al abrir la nueva versión, Garage copia los registros de las zonas antiguas por auto a la zona familiar con IDs estables; conserva las zonas originales como respaldo.
 - La pantalla «Acceso familiar» consulta iCloud para mostrar colaboradores y si la invitación está pendiente o aceptada. El propietario puede quitar el acceso de una persona; el cambio se guarda en CloudKit. Los nombres pueden no estar disponibles si iCloud no comparte la identidad del participante.
+- Cada integrante aceptado elige una vez su nombre de la columna «Pagado por» en «Mi nombre en el presupuesto». Garage guarda esa asociación en la zona familiar de CloudKit y ofrece como pagadores solo a integrantes activos más «Común». Los nombres disponibles deben existir antes en la lista de pagadores de la planilla (`FamilyBudget.payers`).
 
 ## Abrir y compilar
 

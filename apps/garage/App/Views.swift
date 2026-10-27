@@ -622,7 +622,7 @@ struct CompleteServiceView: View {
     @State private var kilometers = 0
     @State private var notes = ""
     @State private var amount = ""
-    @State private var paidBy = "Sebastián"
+    @State private var paidBy = "Común"
     @State private var saving = false
     private var serviceCost: Decimal? {
         guard let value = Decimal(string: amount.replacingOccurrences(of: ",", with: ".")), value > 0 else { return nil }
@@ -636,7 +636,7 @@ struct CompleteServiceView: View {
                 TextField("Notas, repuestos, taller…", text: $notes, axis: .vertical)
                 TextField("Costo en pesos", text: $amount).keyboardType(.decimalPad)
                 Picker("Pagado por", selection: $paidBy) {
-                    ForEach(FamilyBudget.payers, id: \.self) { Text($0) }
+                    ForEach(store.activePayers, id: \.self) { Text($0) }
                 }
             }
             .disabled(saving)
@@ -670,6 +670,6 @@ struct CompleteServiceView: View {
             }
             .interactiveDismissDisabled(saving)
         }
-        .onAppear { kilometers = car.odometer }
+        .onAppear { kilometers = car.odometer; paidBy = store.myPayerName ?? "Común" }
     }
 }
