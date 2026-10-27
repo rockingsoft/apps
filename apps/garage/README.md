@@ -4,11 +4,11 @@ App nativa SwiftUI para iPhone (iOS 17+) con dashboard del mes, finanzas familia
 
 ## Configuración de Google Sheets
 
-1. En Google Cloud Console, creá un proyecto para Garage y habilitá **Google Sheets API**.
-2. Configurá la pantalla de consentimiento OAuth con alcance `https://www.googleapis.com/auth/spreadsheets`. Agregá las cuentas familiares como usuarios de prueba mientras la app esté en modo de prueba. Para sesiones persistentes, publicá la app OAuth según las opciones de tu cuenta de Google.
-3. Creá un **ID de cliente OAuth de tipo iOS** con Bundle ID `com.schoren.garage`. No se necesita secreto de cliente.
+1. Proyecto Google Cloud: `garage-familiar-schoren-2026`, con **Google Sheets API** habilitada.
+2. La pantalla de consentimiento OAuth debe incluir el alcance `https://www.googleapis.com/auth/spreadsheets`. Agregá las cuentas familiares como usuarios de prueba mientras la app esté en modo de prueba. En ese modo Google hace expirar la autorización y el refresh token a los siete días; para sesiones persistentes, completá la publicación OAuth según las opciones de tu cuenta de Google.
+3. El cliente OAuth de tipo iOS para Bundle ID `com.schoren.garage` está en `App/GoogleConfig.xcconfig`. Garage Prueba (`com.schoren.garage.preview`) tiene un cliente iOS distinto y se configura al compilar la instalación de prueba. Los IDs de cliente son públicos y no requieren secretos en Infisical.
 4. Compartí [la planilla familiar](https://docs.google.com/spreadsheets/d/1U0yGuLsn2UfWi309xsY7gW-_IJCd5nh1nJ1NQ6Ip654/edit) con permiso de edición a cada cuenta que vaya a iniciar sesión en Garage.
-5. Ejecutá `./apps/garage/scripts/configure-google-oauth.sh '<ID-del-cliente-iOS>'` desde la raíz del repositorio y recompilá. El script configura el esquema de retorno de OAuth en `App/GoogleConfig.xcconfig`.
+5. Si rotás el cliente principal, ejecutá `./apps/garage/scripts/configure-google-oauth.sh '<ID-del-cliente-iOS>'` desde la raíz del repositorio y recompilá. El script configura el esquema de retorno de OAuth en `App/GoogleConfig.xcconfig`.
 
 Garage usa el acceso OAuth directamente desde cada iPhone; no hay servidor intermedio. El ID de cliente puede versionarse, pero cada integrante debe autorizar Google Sheets en su teléfono. Las escrituras fallidas quedan pendientes localmente con un ID estable para evitar duplicados al reintentar. La app lee las filas B:G de `Registro de Gastos`, los presupuestos de `Control Mensual` y los ingresos de `Presupuesto y Balance`; la columna G de gastos contiene el ID de Garage y está oculta. Las fórmulas actuales llegan a la fila 1000, por lo que se debe extender esa plantilla antes de superar ese límite.
 
