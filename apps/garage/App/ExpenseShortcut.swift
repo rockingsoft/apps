@@ -20,7 +20,9 @@ struct RegisterExpenseIntent: AppIntent {
 struct GarageShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: RegisterExpenseIntent(), phrases: ["Registrar gasto con \(.applicationName)",
-                                                             "Cargar gasto en \(.applicationName)"],
+                                                             "Cargar gasto en \(.applicationName)",
+                                                             "Registra en \(.applicationName)",
+                                                             "Regista en \(.applicationName)"],
                     shortTitle: "Registrar gasto", systemImageName: "mic.circle")
     }
 }
