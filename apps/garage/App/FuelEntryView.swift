@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FuelEntryView: View {
     @EnvironmentObject private var store: CloudStore
+    @EnvironmentObject private var finances: FinanceStore
     @Environment(\.dismiss) private var dismiss
     @StateObject private var locator = CurrentFuelStation()
 
@@ -18,6 +19,7 @@ struct FuelEntryView: View {
     @State private var manualStation = false
     @State private var stationWasChosen = false
     @State private var saving = false
+    @State private var paidBy = "Sebastián"
 
     init(car: Car, suggestion: FuelVisitSuggestion? = nil) {
         self.car = car
@@ -149,6 +151,11 @@ struct FuelEntryView: View {
                     .padding(18)
                     .foregroundStyle(.white)
                     .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 18))
+                    Picker("Pagado por", selection: $paidBy) {
+                        ForEach(FamilyBudget.payers, id: \.self) { Text($0) }
+                    }
+                    .padding(10)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
                 }
                 .padding(16)
             }
@@ -195,9 +202,18 @@ struct FuelEntryView: View {
         guard !saving, canSave, let kilometers, let liters, let price else { return }
         saving = true
         Task {
-            await store.addFuelEntry(car: car, date: date, kilometers: kilometers, liters: liters,
+            let entryID = await store.addFuelEntry(car: car, date: date, kilometers: kilometers, liters: liters,
                                      pricePerLiter: price, stationName: stationName.trimmingCharacters(in: .whitespacesAndNewlines),
                                      latitude: latitude, longitude: longitude)
+            if let entryID {
+                let expense = FamilyExpense(id: "fuel-\(entryID)", date: date, category: "Auto",
+                                            paidBy: paidBy, detail: "Nafta · \(stationName) · \(car.name)",
+                                            amount: liters * price, row: nil)
+                try? await finances.add(expense)
+                if let latitude, let longitude {
+                    await store.addExpensePlace(expense: expense, latitude: latitude, longitude: longitude)
+                }
+            }
             if suggestion != nil { FuelVisitMonitor.shared.clearSuggestion() }
             dismiss()
         }

@@ -33,6 +33,7 @@ final class ShareSceneDelegate: UIResponder, UIWindowSceneDelegate {
 final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         FuelVisitMonitor.shared.startIfEnabled()
+        ExpenseVisitMonitor.shared.startIfEnabled()
         return true
     }
 
@@ -46,13 +47,17 @@ final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
 @main struct GarageApp: App {
     @UIApplicationDelegateAdaptor(ShareAcceptanceDelegate.self) private var shareDelegate
     @StateObject private var store = CloudStore()
+    @StateObject private var finances = FinanceStore()
     @StateObject private var fuelMonitor = FuelVisitMonitor.shared
+    @StateObject private var expenseMonitor = ExpenseVisitMonitor.shared
     @Environment(\.scenePhase) private var scenePhase
     var body: some Scene {
         WindowGroup {
             CarsView()
                 .environmentObject(store)
+                .environmentObject(finances)
                 .environmentObject(fuelMonitor)
+                .environmentObject(expenseMonitor)
                 .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await store.reload() } } }
                 .onReceive(NotificationCenter.default.publisher(for: .garageShareAccepted)) { _ in
                     Task {
@@ -64,6 +69,7 @@ final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
                     store.shareError = notification.object as? String ?? "No se pudo aceptar la invitación."
                 }
                 .task {
+                    await finances.restore()
                     await store.reload()
                     if UserDefaults.standard.bool(forKey: "garage.shareAcceptedNeedsReload") {
                         await store.reload()

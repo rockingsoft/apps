@@ -1,22 +1,38 @@
-# Garage — services del auto
+# Garage — hogar y autos
 
-App nativa SwiftUI para iPhone (iOS 17+) que guarda autos, planes de servicio e historial en CloudKit. Cada auto tiene una zona privada separada para compartir sólo ese auto con otra persona mediante la interfaz de iCloud, sin cuentas ni servidor propios.
+App nativa SwiftUI para iPhone (iOS 17+) con dashboard del mes, finanzas familiares y autos. Los autos, servicios, cargas y lugares de gastos se sincronizan en una zona familiar de CloudKit. El registro y presupuesto de gastos viven en la planilla de Google Sheets existente.
+
+## Configuración de Google Sheets
+
+1. En Google Cloud Console, creá un proyecto para Garage y habilitá **Google Sheets API**.
+2. Configurá la pantalla de consentimiento OAuth con alcance `https://www.googleapis.com/auth/spreadsheets`. Agregá las cuentas familiares como usuarios de prueba mientras la app esté en modo de prueba. Para sesiones persistentes, publicá la app OAuth según las opciones de tu cuenta de Google.
+3. Creá un **ID de cliente OAuth de tipo iOS** con Bundle ID `com.schoren.garage`. No se necesita secreto de cliente.
+4. Compartí [la planilla familiar](https://docs.google.com/spreadsheets/d/1U0yGuLsn2UfWi309xsY7gW-_IJCd5nh1nJ1NQ6Ip654/edit) con permiso de edición a cada cuenta que vaya a iniciar sesión en Garage.
+5. Ejecutá `./apps/garage/scripts/configure-google-oauth.sh '<ID-del-cliente-iOS>'` desde la raíz del repositorio y recompilá. El script configura el esquema de retorno de OAuth en `App/GoogleConfig.xcconfig`.
+
+Garage usa el acceso OAuth directamente desde cada iPhone; no hay servidor intermedio. El ID de cliente puede versionarse, pero cada integrante debe autorizar Google Sheets en su teléfono. Las escrituras fallidas quedan pendientes localmente con un ID estable para evitar duplicados al reintentar. La app lee las filas B:G de `Registro de Gastos`, los presupuestos de `Control Mensual` y los ingresos de `Presupuesto y Balance`; la columna G de gastos contiene el ID de Garage y está oculta. Las fórmulas actuales llegan a la fila 1000, por lo que se debe extender esa plantilla antes de superar ese límite.
+
+## Voz sin servidor
+
+La pantalla de gastos tiene un botón de micrófono propio. Apple Speech convierte voz a texto **en el iPhone** si el dispositivo admite el reconocimiento local en español; Garage muestra un error claro si no está disponible. Después, `llama.cpp` ejecuta el modelo [Qwen2.5-1.5B-Instruct Q4_K_M](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF) en el dispositivo para proponer un JSON. La primera vez se descargan aproximadamente 1,1 GB, se verifica SHA-256 y se excluye el archivo del backup. El usuario revisa importe, categoría, pagador, detalle y fecha antes de guardar. El atajo **Registrar gasto con Garage** abre ese mismo flujo. El rendimiento y la disponibilidad del reconocimiento local deben probarse en un iPhone 13 real antes de considerarlos validados.
+
+`./apps/garage/scripts/build-llama.sh` compila un XCFramework de llama.cpp desde la versión fijada en el script; `./apps/garage/scripts/build.sh` lo prepara antes de compilar Garage. Requiere Xcode y CMake, y deja las salidas en `apps/garage/build/`.
 
 ## Funciones
 
-- Inicio muestra directamente las cargas y el plan del auto seleccionado. El selector superior permite cambiar de auto y recuerda la elección en este iPhone; al principio propone el auto con más cargas registradas. La pestaña «Mis autos» concentra agregar, seleccionar y eliminar autos.
+- Inicio muestra un dashboard gráfico del mes actual con ingresos, gastos, balance, comparación por categoría y últimos movimientos. La pestaña «Autos» conserva las cargas y el plan del auto seleccionado; «Mis autos» concentra agregar, seleccionar y eliminar autos.
 - Autos con marca, modelo, versión y año elegidos del catálogo de [ArgAutos](https://argautos.com/docs/api), más patente y kilometraje. Las versiones se agrupan por nombre ignorando el año final, para todas las marcas y modelos. El selector de años reúne los años explícitos de esas versiones y las valuaciones de la versión base; si la consulta de valuaciones falla, se puede ingresar solo el año. Las consultas se guardan en caché durante siete días. La patente se guarda en mayúsculas y el kilometraje comienza vacío y es obligatorio para guardar. Los cambios se guardan en el iPhone aunque iCloud no esté disponible y quedan pendientes de sincronización.
 - Planes con detalle libre para especificar aceite, viscosidad, marca, filtro, repuestos o instrucciones; frecuencia en meses, kilómetros o ambos.
 - Planes base sugeridos para Volkswagen Taos TSI 2021–2026 (service 15.000 km/12 meses y líquido de frenos 24 meses) y Toyota Corolla 2020–2026 (service 10.000 km/12 meses). Garage los ofrece al guardar un auto compatible o desde su ficha y muestra la fuente oficial. Se pueden agregar tareas sin conocer la última realización: quedan pendientes de revisión, sin una fecha de vencimiento inventada. Cuando se conoce, se carga fecha y kilometraje para calcular el próximo aviso. Los planes importados conservan el enlace a la fuente y no se duplican.
 - Recomendaciones por tarea, seleccionadas por defecto y desactivables: presión, rotación y desgaste de cubiertas; escobillas; frenos; aceite de caja; filtros de motor y habitáculo; refrigeración; correas; batería; luces y lavaparabrisas; dirección, suspensión y climatización. Cada regla distingue inspección de reemplazo y enlaza su fuente. El aceite de caja, las cubiertas y otras piezas sujetas a condición se revisan periódicamente, pero no se marcan para reemplazo automático.
 - Estado próximo/vencido cuando se alcanza cualquiera de las dos condiciones.
 - En «Mis autos», deslizar una fila permite eliminar un auto propio junto con sus services, o quitar de la cuenta un auto compartido por otra persona. La eliminación se guarda localmente y se sincroniza con iCloud al recuperar conexión.
-- Registro de cada service con fecha, kilometraje y notas. Actualiza el próximo vencimiento.
-- Registro de cargas de nafta por auto con estación editable, fecha, kilómetros, litros y precio por litro; el total en pesos se calcula en el formulario. La carga se conserva localmente y se sincroniza por iCloud con el auto. Se puede buscar la estación cercana con MapKit o elegir YPF, Shell, Axion, Puma u otro nombre a mano.
+- Registro de cada service con fecha, kilometraje, notas, costo y pagador. Actualiza el próximo vencimiento y crea el gasto en la planilla.
+- Registro de cargas de nafta por auto con estación editable, fecha, kilómetros, litros, precio por litro y pagador; el total en pesos se calcula en el formulario y se registra en la planilla. La carga se conserva localmente y se sincroniza por iCloud con el auto. Se puede buscar la estación cercana con MapKit o elegir YPF, Shell, Axion, Puma u otro nombre a mano.
 - Avisos opcionales de posibles cargas: con permiso de ubicación «Siempre», iOS informa visitas y Garage busca una estación de servicio cercana. Solo sugiere registrar una carga cuando la visita informada dura al menos cinco minutos; el aviso puede llegar más tarde porque iOS entrega las visitas de forma aproximada. No se registra una carga automáticamente ni se usa seguimiento GPS continuo.
 - Notificaciones locales por fecha, al acercarse el vencimiento, y por kilometraje al ingresar una nueva lectura. Cada iPhone calcula sus propias notificaciones.
-- Invitar a colaborar en un auto vía iCloud: solo las personas invitadas pueden acceder y pueden editar el auto, sus cargas y servicios. Cada auto usa una zona CloudKit propia; los cambios de los participantes se leen al abrir o actualizar la app.
-- La pantalla «Acceso» consulta iCloud para mostrar colaboradores y si la invitación está pendiente o aceptada. El propietario puede quitar el acceso de una persona; el cambio se guarda en CloudKit. Los nombres pueden no estar disponibles si iCloud no comparte la identidad del participante.
+- Invitar a colaborar en el espacio familiar completo vía iCloud: la zona incluye todos los autos y lugares guardados para sugerir gastos. Los gastos y presupuestos de la planilla requieren además acceso de Google a ese archivo. Al abrir la nueva versión, Garage copia los registros de las zonas antiguas por auto a la zona familiar con IDs estables; conserva las zonas originales como respaldo.
+- La pantalla «Acceso familiar» consulta iCloud para mostrar colaboradores y si la invitación está pendiente o aceptada. El propietario puede quitar el acceso de una persona; el cambio se guarda en CloudKit. Los nombres pueden no estar disponibles si iCloud no comparte la identidad del participante.
 
 ## Abrir y compilar
 
@@ -51,4 +67,4 @@ El registro `Garage` en App Store Connect debe usar `com.schoren.garage`. El upl
 
 ## Alcances actuales
 
-Para compartir un auto, primero debe terminar de sincronizarse. El odómetro no se lee del vehículo: el usuario debe actualizarlo; una alerta por kilómetros no puede dispararse sin una lectura nueva. Los cambios de otro participante se leen al abrir la app o al deslizar para actualizar. Las plantillas son planes base, no contienen la marca o viscosidad de aceite ni todas las tareas específicas de cada versión; se debe revisar el manual del vehículo. Esta primera versión no incluye edición o borrado de planes, fotos de facturas ni avisos remotos de cambios. El entorno CloudKit real y el enlace de invitación requieren validación en dos dispositivos firmados; el simulador sólo valida compilación y UI.
+Para compartir el espacio familiar, primero debe terminar de sincronizarse. El odómetro no se lee del vehículo: el usuario debe actualizarlo; una alerta por kilómetros no puede dispararse sin una lectura nueva. Los cambios de otro participante se leen al abrir la app o al deslizar para actualizar. Las plantillas son planes base, no contienen la marca o viscosidad de aceite ni todas las tareas específicas de cada versión; se debe revisar el manual del vehículo. Esta versión no incluye edición o borrado de planes, fotos de facturas ni avisos remotos de cambios. El entorno CloudKit real, la migración y el enlace de invitación requieren validación en dos dispositivos firmados; el simulador sólo valida compilación y UI.
