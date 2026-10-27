@@ -493,7 +493,7 @@ struct ExpenseEditorView: View {
     @ObservedObject private var diagnostics = ExpenseVoiceDiagnostics.shared
     @StateObject private var location = CurrentExpenseLocation()
     let suggestion: ExpenseVisitSuggestion?
-    let initialTranscript: String?
+    let startListening: Bool
     @State private var date = Date()
     @State private var category = "Super"
     @State private var paidBy = ""
@@ -508,9 +508,9 @@ struct ExpenseEditorView: View {
     @State private var rememberPlace = true
     @State private var error: String?
 
-    init(suggestion: ExpenseVisitSuggestion? = nil, initialTranscript: String? = nil) {
+    init(suggestion: ExpenseVisitSuggestion? = nil, startListening: Bool = false) {
         self.suggestion = suggestion
-        self.initialTranscript = initialTranscript
+        self.startListening = startListening
         _category = State(initialValue: suggestion?.category ?? "Super")
         _detail = State(initialValue: suggestion?.detail ?? "")
         _date = State(initialValue: suggestion?.arrivedAt ?? .now)
@@ -561,18 +561,20 @@ struct ExpenseEditorView: View {
             .disabled(saving)
             .onAppear { if paidBy.isEmpty { paidBy = cars.myPayerName ?? "" } }
             .task {
-                guard let initialTranscript, !initialTranscript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                voicePhase = .processing
-                showingVoiceFlow = true
-                interpretationTask = Task { await interpret(initialTranscript) }
+                guard startListening else { return }
+                try? await Task.sleep(for: .milliseconds(700))
+                guard !Task.isCancelled else { return }
+                beginVoiceFlow()
             }
             .onChange(of: cars.myPayerName) { _, name in
                 if paidBy.isEmpty, let name { paidBy = name }
             }
             .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
-            .fullScreenCover(isPresented: $showingVoiceFlow) {
-                ExpenseVoiceFlowView(speech: speech, phase: $voicePhase,
-                                     onCancel: cancelVoiceFlow, onRetry: retryVoiceFlow)
+            .overlay {
+                if showingVoiceFlow {
+                    ExpenseVoiceFlowView(speech: speech, phase: $voicePhase,
+                                         onCancel: cancelVoiceFlow, onRetry: retryVoiceFlow)
+                }
             }
             .onReceive(speech.$completedTranscript.compactMap { $0 }) { spoken in
                 guard showingVoiceFlow else { return }
