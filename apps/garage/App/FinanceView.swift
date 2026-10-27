@@ -238,7 +238,6 @@ struct ExpenseEditorView: View {
     @State private var amount = ""
     @State private var saving = false
     @State private var interpreting = false
-    @State private var downloadingModel = false
     @State private var rememberPlace = true
     @State private var error: String?
 
@@ -253,40 +252,24 @@ struct ExpenseEditorView: View {
         NavigationStack {
             Form {
                 Section("Por voz") {
-                    if !ExpenseModel.isDownloaded {
+                    HStack {
                         Button {
-                            downloadingModel = true
-                            Task {
-                                do { try await ExpenseModel.download() }
-                                catch { self.error = error.localizedDescription }
-                                downloadingModel = false
-                            }
+                            if speech.listening { speech.stop() }
+                            else { Task { await speech.start() } }
                         } label: {
-                            Label("Descargar IA local (1,1 GB)", systemImage: "arrow.down.circle")
+                            Label(speech.listening ? "Detener" : "Dictar gasto", systemImage: speech.listening ? "stop.circle" : "mic")
                         }
-                        .disabled(downloadingModel)
-                        Text("La descarga se hace una vez por iPhone. La interpretación del gasto se ejecuta en el dispositivo.")
-                            .font(.footnote).foregroundStyle(.secondary)
-                    } else {
-                        HStack {
-                            Button {
-                                if speech.listening { speech.stop() }
-                                else { Task { await speech.start() } }
-                            } label: {
-                                Label(speech.listening ? "Detener" : "Dictar gasto", systemImage: speech.listening ? "stop.circle" : "mic")
-                            }
-                            Spacer()
-                            if !speech.transcript.isEmpty {
-                                Button("Interpretar") { Task { await interpret() } }
-                                    .disabled(interpreting || speech.listening)
-                            }
-                        }
+                        Spacer()
                         if !speech.transcript.isEmpty {
-                            Text(speech.transcript).font(.subheadline)
+                            Button("Interpretar") { Task { await interpret() } }
+                                .disabled(interpreting || speech.listening)
                         }
-                        if let message = speech.errorMessage { Text(message).font(.footnote).foregroundStyle(.orange) }
                     }
-                    if interpreting || downloadingModel { ProgressView() }
+                    if !speech.transcript.isEmpty {
+                        Text(speech.transcript).font(.subheadline)
+                    }
+                    if let message = speech.errorMessage { Text(message).font(.footnote).foregroundStyle(.orange) }
+                    if interpreting { ProgressView() }
                 }
                 Section("Revisar antes de guardar") {
                 DatePicker("Fecha", selection: $date, displayedComponents: .date)

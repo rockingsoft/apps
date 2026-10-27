@@ -1,5 +1,4 @@
 import AVFoundation
-import CryptoKit
 import Foundation
 import llama
 import Speech
@@ -76,12 +75,11 @@ struct ExpenseInterpretation: Decodable {
 }
 
 enum ExpenseModelError: LocalizedError {
-    case invalidResult, modelUnavailable, modelDownloadFailed, modelLoadFailed
+    case invalidResult, modelUnavailable, modelLoadFailed
     var errorDescription: String? {
         switch self {
         case .invalidResult: return "La IA no pudo interpretar el gasto. Probá decirlo de otra forma."
-        case .modelUnavailable: return "Todavía falta descargar el modelo de IA local."
-        case .modelDownloadFailed: return "No se pudo descargar o verificar el modelo de IA."
+        case .modelUnavailable: return "Esta versión de Garage no incluye el modelo de IA. Reinstalá la app."
         case .modelLoadFailed: return "Este iPhone no pudo abrir el modelo de IA."
         }
     }
@@ -89,33 +87,10 @@ enum ExpenseModelError: LocalizedError {
 
 enum ExpenseModel {
     static let fileName = "qwen2.5-1.5b-instruct-q4_k_m.gguf"
-    static let expectedSHA256 = "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
-    static let url = URL(string: "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/\(fileName)")!
-
-    static var fileURL: URL {
-        let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return directory.appendingPathComponent(fileName)
-    }
-
-    static var isDownloaded: Bool { FileManager.default.fileExists(atPath: fileURL.path) }
-
-    static func download() async throws {
-        let (temporary, response) = try await URLSession.shared.download(from: url)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw ExpenseModelError.modelDownloadFailed }
-        let data = try Data(contentsOf: temporary, options: .mappedIfSafe)
-        let hash = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-        guard hash == expectedSHA256 else { throw ExpenseModelError.modelDownloadFailed }
-        try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-        if isDownloaded { try FileManager.default.removeItem(at: fileURL) }
-        try FileManager.default.moveItem(at: temporary, to: fileURL)
-        var values = URLResourceValues()
-        values.isExcludedFromBackup = true
-        var saved = fileURL
-        try saved.setResourceValues(values)
-    }
+    static var fileURL: URL? { Bundle.main.url(forResource: "qwen2.5-1.5b-instruct-q4_k_m", withExtension: "gguf") }
 
     static func interpret(_ transcript: String) async throws -> ExpenseInterpretation {
-        guard isDownloaded else { throw ExpenseModelError.modelUnavailable }
+        guard fileURL != nil else { throw ExpenseModelError.modelUnavailable }
         let result = try await Task.detached(priority: .userInitiated) { try generate(transcript) }.value
         guard let start = result.firstIndex(of: "{"), let end = result.lastIndex(of: "}"),
               let data = String(result[start...end]).data(using: .utf8),
@@ -126,6 +101,7 @@ enum ExpenseModel {
     }
 
     private static func generate(_ transcript: String) throws -> String {
+        guard let fileURL else { throw ExpenseModelError.modelUnavailable }
         llama_backend_init()
         defer { llama_backend_free() }
         var modelParams = llama_model_default_params()

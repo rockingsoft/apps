@@ -166,6 +166,7 @@
 				74E36196B858ADF2C1CAFDA1 /* Frameworks */,
 				34870295419FCBAA19E8D1B0 /* Resources */,
 				F8DD0FCB78FF21597EAF1B50 /* Embed Frameworks */,
+				D9EAF7A21C4B4031A6800500 /* Bundle Expense Model */,
 			);
 			buildRules = (
 			);
@@ -225,6 +226,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D9EAF7A21C4B4031A6800500 /* Bundle Expense Model */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Bundle Expense Model";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$PROJECT_DIR/scripts/bundle-expense-model.sh\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B50D75002C4745BA213D7EDA /* Sources */ = {
