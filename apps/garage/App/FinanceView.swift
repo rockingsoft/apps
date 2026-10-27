@@ -494,6 +494,7 @@ struct ExpenseEditorView: View {
     @StateObject private var location = CurrentExpenseLocation()
     let suggestion: ExpenseVisitSuggestion?
     let initialTranscript: String?
+    let startListeningWhenEmpty: Bool
     @State private var date = Date()
     @State private var category = "Super"
     @State private var paidBy = ""
@@ -508,9 +509,11 @@ struct ExpenseEditorView: View {
     @State private var rememberPlace = true
     @State private var error: String?
 
-    init(suggestion: ExpenseVisitSuggestion? = nil, initialTranscript: String? = nil) {
+    init(suggestion: ExpenseVisitSuggestion? = nil, initialTranscript: String? = nil,
+         startListeningWhenEmpty: Bool = false) {
         self.suggestion = suggestion
         self.initialTranscript = initialTranscript
+        self.startListeningWhenEmpty = startListeningWhenEmpty
         _category = State(initialValue: suggestion?.category ?? "Super")
         _detail = State(initialValue: suggestion?.detail ?? "")
         _date = State(initialValue: suggestion?.arrivedAt ?? .now)
@@ -561,7 +564,14 @@ struct ExpenseEditorView: View {
             .disabled(saving)
             .onAppear { if paidBy.isEmpty { paidBy = cars.myPayerName ?? "" } }
             .task {
-                guard let initialTranscript, !initialTranscript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                guard let initialTranscript, !initialTranscript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                    if startListeningWhenEmpty {
+                        diagnostics.record("Formulario: el atajo no entregó texto; iniciando escucha")
+                        beginVoiceFlow()
+                    }
+                    return
+                }
+                diagnostics.record("Formulario: texto de Siri recibido (\(initialTranscript.count) caracteres)")
                 voicePhase = .processing
                 showingVoiceFlow = true
                 interpretationTask = Task { await interpret(initialTranscript) }

@@ -1,12 +1,16 @@
 import SwiftUI
 import UIKit
 
+private struct ShortcutExpenseRequest: Identifiable {
+    let id = UUID()
+    let transcript: String?
+}
+
 struct CarsView: View {
     @EnvironmentObject private var store: CloudStore
     @AppStorage("garage.selectedCarID") private var selectedCarID = ""
     @State private var selectedTab = 0
-    @State private var showExpenseFromShortcut = false
-    @State private var shortcutExpenseText: String?
+    @State private var shortcutExpenseRequest: ShortcutExpenseRequest?
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -31,7 +35,9 @@ struct CarsView: View {
         } message: {
             Text(store.shareError ?? "Intentá abrir la invitación de nuevo.")
         }
-        .sheet(isPresented: $showExpenseFromShortcut) { ExpenseEditorView(initialTranscript: shortcutExpenseText) }
+        .sheet(item: $shortcutExpenseRequest) { request in
+            ExpenseEditorView(initialTranscript: request.transcript, startListeningWhenEmpty: true)
+        }
         .onReceive(NotificationCenter.default.publisher(for: .garageOpenExpense)) { _ in openRequestedExpense() }
         .onAppear { openRequestedExpense() }
     }
@@ -39,10 +45,11 @@ struct CarsView: View {
     private func openRequestedExpense() {
         guard UserDefaults.standard.bool(forKey: "garage.openExpenseRequested") else { return }
         UserDefaults.standard.removeObject(forKey: "garage.openExpenseRequested")
-        shortcutExpenseText = UserDefaults.standard.string(forKey: "garage.shortcutExpenseText")
+        let transcript = UserDefaults.standard.string(forKey: "garage.shortcutExpenseText")
         UserDefaults.standard.removeObject(forKey: "garage.shortcutExpenseText")
+        ExpenseVoiceDiagnostics.shared.record("Atajo: texto recibido (\(transcript?.count ?? 0) caracteres)")
         selectedTab = 0
-        showExpenseFromShortcut = true
+        shortcutExpenseRequest = ShortcutExpenseRequest(transcript: transcript)
     }
 }
 
