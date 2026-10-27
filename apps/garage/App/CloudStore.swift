@@ -17,6 +17,7 @@ struct FamilyMember {
     @Published var fuelEntries: [FuelEntry] = []
     @Published var expensePlaces: [ExpensePlace] = []
     @Published var familyMembers: [FamilyMember] = []
+    @Published private(set) var localPayerName: String?
     @Published private(set) var activeMemberIDs = Set<String>()
     @Published private(set) var myUserRecordName: String?
     @Published var syncMessage: String?
@@ -36,6 +37,7 @@ struct FamilyMember {
     init() {
         let saved = LocalSnapshot.load()
         snapshot = saved
+        localPayerName = UserDefaults.standard.string(forKey: "garage.myPayerName")
         cars = saved.cars.map(\.car)
         plans = saved.plans.map(\.plan)
         entries = saved.entries.map(\.entry)
@@ -64,12 +66,16 @@ struct FamilyMember {
     func canShare(_ car: Car) -> Bool { !snapshot.pendingCars.contains(RecordKey(car.id)) && syncMessage == nil }
     var canShareFamily: Bool { familyZoneID != nil && !familyZoneSharedWithMe && syncMessage == nil && !hasPendingChanges }
     var myPayerName: String? {
-        guard let myUserRecordName else { return nil }
-        return familyMembers.first { $0.userRecordName == myUserRecordName }?.payerName
+        if let myUserRecordName,
+           let member = familyMembers.first(where: { $0.userRecordName == myUserRecordName }) {
+            return member.payerName
+        }
+        return localPayerName
     }
     var activePayers: [String] {
         FamilyBudget.payers.filter { name in
-            name == "Común" || familyMembers.contains { activeMemberIDs.contains($0.userRecordName) && $0.payerName == name }
+            name == "Común" || name == localPayerName ||
+                familyMembers.contains { activeMemberIDs.contains($0.userRecordName) && $0.payerName == name }
         }
     }
     var familySpace: Car? {
@@ -205,6 +211,12 @@ struct FamilyMember {
             let pendingMemberIDs = Set((snapshot.pendingFamilyMembers ?? []).map(\.id))
             familyMembers = remoteFamilyMembers.filter { !pendingMemberIDs.contains($0.id) } +
                 familyMembers.filter { pendingMemberIDs.contains($0.id) }
+            if let myUserRecordName,
+               let profile = familyMembers.first(where: { $0.userRecordName == myUserRecordName }),
+               localPayerName != profile.payerName {
+                localPayerName = profile.payerName
+                UserDefaults.standard.set(profile.payerName, forKey: "garage.myPayerName")
+            }
             ExpenseVisitMonitor.shared.updatePlaces(expensePlaces)
             persist()
             syncMessage = nil
@@ -469,8 +481,10 @@ struct FamilyMember {
     }
 
     func setMyPayerName(_ name: String) async {
-        guard let familyZoneID, let myUserRecordName,
-              FamilyBudget.payers.contains(name), name != "Común" else { return }
+        guard FamilyBudget.payers.contains(name), name != "Común" else { return }
+        localPayerName = name
+        UserDefaults.standard.set(name, forKey: "garage.myPayerName")
+        guard let familyZoneID, let myUserRecordName else { return }
         let recordName = "member-" + SHA256.hash(data: Data(myUserRecordName.utf8)).map { String(format: "%02x", $0) }.joined()
         let id = CKRecord.ID(recordName: recordName, zoneID: familyZoneID)
         let member = FamilyMember(id: id, userRecordName: myUserRecordName, payerName: name, updatedAt: .now)

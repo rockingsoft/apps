@@ -20,7 +20,7 @@ struct FinanceDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    if cars.familyZoneID != nil && cars.myPayerName == nil {
+                    if finances.signedIn && cars.myPayerName == nil {
                         Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
                             .buttonStyle(.borderedProminent)
                     }
@@ -493,9 +493,11 @@ struct ExpenseEditorView: View {
     @ObservedObject private var diagnostics = ExpenseVoiceDiagnostics.shared
     @StateObject private var location = CurrentExpenseLocation()
     let suggestion: ExpenseVisitSuggestion?
+    let startListening: Bool
     @State private var date = Date()
     @State private var category = "Super"
-    @State private var paidBy = "Común"
+    @State private var paidBy = ""
+    @State private var showingPayerProfile = false
     @State private var detail = ""
     @State private var amount = ""
     @State private var saving = false
@@ -506,8 +508,9 @@ struct ExpenseEditorView: View {
     @State private var rememberPlace = true
     @State private var error: String?
 
-    init(suggestion: ExpenseVisitSuggestion? = nil) {
+    init(suggestion: ExpenseVisitSuggestion? = nil, startListening: Bool = false) {
         self.suggestion = suggestion
+        self.startListening = startListening
         _category = State(initialValue: suggestion?.category ?? "Super")
         _detail = State(initialValue: suggestion?.detail ?? "")
         _date = State(initialValue: suggestion?.arrivedAt ?? .now)
@@ -539,6 +542,9 @@ struct ExpenseEditorView: View {
                     if paidBy.isEmpty { Text("Elegir persona").tag("") }
                     ForEach(cars.activePayers, id: \.self) { Text($0) }
                 }
+                if cars.myPayerName == nil {
+                    Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
+                }
                 TextField("Detalle", text: $detail)
                 TextField("Monto en pesos", text: $amount).keyboardType(.decimalPad)
                 Toggle("Recordar este lugar para futuras sugerencias", isOn: $rememberPlace)
@@ -553,7 +559,17 @@ struct ExpenseEditorView: View {
                 }
             }
             .disabled(saving)
-            .onAppear { paidBy = cars.myPayerName ?? "Común" }
+            .onAppear { if paidBy.isEmpty { paidBy = cars.myPayerName ?? "" } }
+            .task {
+                guard startListening else { return }
+                try? await Task.sleep(for: .milliseconds(700))
+                guard !Task.isCancelled else { return }
+                beginVoiceFlow()
+            }
+            .onChange(of: cars.myPayerName) { _, name in
+                if paidBy.isEmpty, let name { paidBy = name }
+            }
+            .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
             .fullScreenCover(isPresented: $showingVoiceFlow) {
                 ExpenseVoiceFlowView(speech: speech, phase: $voicePhase,
                                      onCancel: cancelVoiceFlow, onRetry: retryVoiceFlow)
@@ -655,7 +671,7 @@ struct ExpenseEditorView: View {
     }
 }
 
-private struct MyPayerProfileView: View {
+struct MyPayerProfileView: View {
     @EnvironmentObject private var cars: CloudStore
     @Environment(\.dismiss) private var dismiss
     var body: some View {

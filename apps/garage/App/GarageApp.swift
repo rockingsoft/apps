@@ -1,4 +1,5 @@
 import CloudKit
+import AppIntents
 import SwiftUI
 import UIKit
 
@@ -52,6 +53,9 @@ final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
     @StateObject private var fuelMonitor = FuelVisitMonitor.shared
     @StateObject private var expenseMonitor = ExpenseVisitMonitor.shared
     @Environment(\.scenePhase) private var scenePhase
+    init() {
+        GarageShortcuts.updateAppShortcutParameters()
+    }
     var body: some Scene {
         WindowGroup {
             CarsView()

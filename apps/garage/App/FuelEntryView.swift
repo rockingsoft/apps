@@ -19,7 +19,8 @@ struct FuelEntryView: View {
     @State private var manualStation = false
     @State private var stationWasChosen = false
     @State private var saving = false
-    @State private var paidBy = "Común"
+    @State private var paidBy = ""
+    @State private var showingPayerProfile = false
 
     init(car: Car, suggestion: FuelVisitSuggestion? = nil) {
         self.car = car
@@ -42,7 +43,7 @@ struct FuelEntryView: View {
     private var kilometers: Int? { Int(kilometersText) }
     private var canSave: Bool {
         !stationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        (kilometers.map { $0 >= 0 } ?? false) && liters != nil && price != nil
+        (kilometers.map { $0 >= 0 } ?? false) && liters != nil && price != nil && !paidBy.isEmpty
     }
 
     private func currency(_ value: Decimal) -> String {
@@ -152,10 +153,14 @@ struct FuelEntryView: View {
                     .foregroundStyle(.white)
                     .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 18))
                     Picker("Pagado por", selection: $paidBy) {
+                        if paidBy.isEmpty { Text("Elegir persona").tag("") }
                         ForEach(store.activePayers, id: \.self) { Text($0) }
                     }
                     .padding(10)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+                    if store.myPayerName == nil {
+                        Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
+                    }
                 }
                 .padding(16)
             }
@@ -164,9 +169,13 @@ struct FuelEntryView: View {
             .navigationTitle("Cargar nafta")
             .navigationBarTitleDisplayMode(.inline)
             .task {
-                paidBy = store.myPayerName ?? "Común"
+                if paidBy.isEmpty { paidBy = store.myPayerName ?? "" }
                 if suggestion == nil { await detectStation() }
             }
+            .onChange(of: store.myPayerName) { _, name in
+                if paidBy.isEmpty, let name { paidBy = name }
+            }
+            .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
             }

@@ -30,7 +30,7 @@ struct CarsView: View {
         } message: {
             Text(store.shareError ?? "Intentá abrir la invitación de nuevo.")
         }
-        .sheet(isPresented: $showExpenseFromShortcut) { ExpenseEditorView() }
+        .sheet(isPresented: $showExpenseFromShortcut) { ExpenseEditorView(startListening: true) }
         .onReceive(NotificationCenter.default.publisher(for: .garageOpenExpense)) { _ in openRequestedExpense() }
         .onAppear { openRequestedExpense() }
     }
@@ -622,7 +622,8 @@ struct CompleteServiceView: View {
     @State private var kilometers = 0
     @State private var notes = ""
     @State private var amount = ""
-    @State private var paidBy = "Común"
+    @State private var paidBy = ""
+    @State private var showingPayerProfile = false
     @State private var saving = false
     private var serviceCost: Decimal? {
         guard let value = Decimal(string: amount.replacingOccurrences(of: ",", with: ".")), value > 0 else { return nil }
@@ -636,7 +637,11 @@ struct CompleteServiceView: View {
                 TextField("Notas, repuestos, taller…", text: $notes, axis: .vertical)
                 TextField("Costo en pesos", text: $amount).keyboardType(.decimalPad)
                 Picker("Pagado por", selection: $paidBy) {
+                    if paidBy.isEmpty { Text("Elegir persona").tag("") }
                     ForEach(store.activePayers, id: \.self) { Text($0) }
+                }
+                if store.myPayerName == nil {
+                    Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
                 }
             }
             .disabled(saving)
@@ -665,11 +670,15 @@ struct CompleteServiceView: View {
                         if saving { ProgressView().accessibilityLabel("Guardando service") }
                         else { Text("Guardar") }
                     }
-                    .disabled(saving || serviceCost == nil)
+                    .disabled(saving || serviceCost == nil || paidBy.isEmpty)
                 }
             }
             .interactiveDismissDisabled(saving)
         }
-        .onAppear { kilometers = car.odometer; paidBy = store.myPayerName ?? "Común" }
+        .onAppear { kilometers = car.odometer; if paidBy.isEmpty { paidBy = store.myPayerName ?? "" } }
+        .onChange(of: store.myPayerName) { _, name in
+            if paidBy.isEmpty, let name { paidBy = name }
+        }
+        .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
     }
 }
