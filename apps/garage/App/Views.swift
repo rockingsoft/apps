@@ -6,6 +6,7 @@ struct CarsView: View {
     @AppStorage("garage.selectedCarID") private var selectedCarID = ""
     @State private var selectedTab = 0
     @State private var showExpenseFromShortcut = false
+    @State private var shortcutExpenseText: String?
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -30,7 +31,7 @@ struct CarsView: View {
         } message: {
             Text(store.shareError ?? "Intentá abrir la invitación de nuevo.")
         }
-        .sheet(isPresented: $showExpenseFromShortcut) { ExpenseEditorView(startListening: true) }
+        .sheet(isPresented: $showExpenseFromShortcut) { ExpenseEditorView(initialTranscript: shortcutExpenseText) }
         .onReceive(NotificationCenter.default.publisher(for: .garageOpenExpense)) { _ in openRequestedExpense() }
         .onAppear { openRequestedExpense() }
     }
@@ -38,6 +39,8 @@ struct CarsView: View {
     private func openRequestedExpense() {
         guard UserDefaults.standard.bool(forKey: "garage.openExpenseRequested") else { return }
         UserDefaults.standard.removeObject(forKey: "garage.openExpenseRequested")
+        shortcutExpenseText = UserDefaults.standard.string(forKey: "garage.shortcutExpenseText")
+        UserDefaults.standard.removeObject(forKey: "garage.shortcutExpenseText")
         selectedTab = 0
         showExpenseFromShortcut = true
     }

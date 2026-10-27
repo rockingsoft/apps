@@ -7,10 +7,17 @@ extension Notification.Name {
 
 struct RegisterExpenseIntent: AppIntent {
     static var title: LocalizedStringResource = "Registrar gasto por voz"
-    static var description = IntentDescription("Abre Garage escuchando un gasto para revisarlo antes de guardar.")
+    static var description = IntentDescription("Siri pide el gasto y Garage lo interpreta para revisarlo antes de guardar.")
     static var openAppWhenRun = true
+    @Parameter(title: "Gasto", requestValueDialog: "¿Qué gasto querés registrar?")
+    var spokenExpense: String
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Registrar \(\.$spokenExpense) en Garage")
+    }
 
     @MainActor func perform() async throws -> some IntentResult {
+        UserDefaults.standard.set(spokenExpense, forKey: "garage.shortcutExpenseText")
         UserDefaults.standard.set(true, forKey: "garage.openExpenseRequested")
         NotificationCenter.default.post(name: .garageOpenExpense, object: nil)
         return .result()
