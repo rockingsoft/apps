@@ -259,10 +259,13 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
     }
 
     func interpret(_ transcript: String) async throws -> ExpenseInterpretation {
+        ExpenseVoiceDiagnostics.shared.record("OpenAI: obteniendo sesión")
         let token = try await accessToken()
+        ExpenseVoiceDiagnostics.shared.record("OpenAI: consultando modelos")
         var catalog = URLRequest(url: URL(string: "https://api.openai.com/v1/models")!)
         catalog.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         let (catalogData, catalogResponse) = try await URLSession.shared.data(for: catalog)
+        ExpenseVoiceDiagnostics.shared.record("OpenAI: modelos HTTP \((catalogResponse as? HTTPURLResponse)?.statusCode ?? 0)")
         guard (catalogResponse as? HTTPURLResponse)?.statusCode == 200,
               let modelList = try? JSONDecoder().decode(ModelCatalog.self, from: catalogData),
               let model = modelList.models.first(where: { $0.slug == "gpt-6.1-sol" && $0.visibility == "list" })?.slug
@@ -287,14 +290,18 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
+        ExpenseVoiceDiagnostics.shared.record("OpenAI: respuesta HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)")
         guard (response as? HTTPURLResponse)?.statusCode == 200 else {
             throw ChatGPTError.unavailable("OpenAI no pudo interpretar el gasto con esta cuenta.")
         }
         var output = ""
         var completed = false
+        var eventCount = 0
         for try await line in bytes.lines where line.hasPrefix("data: ") {
             guard let event = try? JSONSerialization.jsonObject(with: Data(line.dropFirst(6).utf8)) as? [String: Any],
                   let type = event["type"] as? String else { continue }
+            eventCount += 1
+            if eventCount == 1 { ExpenseVoiceDiagnostics.shared.record("OpenAI: primer evento \(type)") }
             if type == "response.output_text.delta" { output += event["delta"] as? String ?? "" }
             if type == "response.failed" {
                 let info = (event["response"] as? [String: Any])?["error"] as? [String: Any]
@@ -302,9 +309,11 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
             }
             if type == "response.completed" { completed = true }
         }
+        ExpenseVoiceDiagnostics.shared.record("OpenAI: flujo terminado (\(eventCount) eventos, \(output.count) caracteres, completo: \(completed))")
         guard completed, let start = output.firstIndex(of: "{"), let end = output.lastIndex(of: "}"),
               let result = try? JSONDecoder().decode(ExpenseInterpretation.self, from: Data(output[start...end].utf8)),
               result.category == nil || FamilyBudget.categories.contains(result.category!) else { throw ChatGPTError.invalidResponse }
+        ExpenseVoiceDiagnostics.shared.record("OpenAI: gasto interpretado")
         return result
     }
 

@@ -263,6 +263,7 @@ struct ExpenseEditorView: View {
     @EnvironmentObject private var cars: CloudStore
     @Environment(\.dismiss) private var dismiss
     @StateObject private var speech = ExpenseSpeechRecognizer()
+    @ObservedObject private var diagnostics = ExpenseVoiceDiagnostics.shared
     @StateObject private var location = CurrentExpenseLocation()
     let suggestion: ExpenseVisitSuggestion?
     @State private var date = Date()
@@ -286,6 +287,10 @@ struct ExpenseEditorView: View {
         NavigationStack {
             Form {
                 Section("Por voz") {
+                    #if DEBUG
+                    Text("Estado: \(diagnostics.stage)")
+                        .font(.footnote).foregroundStyle(.secondary)
+                    #endif
                     if !chatGPT.connected {
                         Text("Conectá ChatGPT desde el menú ⋯ de Inicio para dictar gastos.")
                             .font(.footnote).foregroundStyle(.secondary)
@@ -339,7 +344,9 @@ struct ExpenseEditorView: View {
             .disabled(saving)
             .onAppear { paidBy = cars.myPayerName ?? "Común" }
             .onReceive(speech.$completedTranscript.compactMap { $0 }) { spoken in
+                diagnostics.record("Formulario: texto recibido")
                 if chatGPT.connected { Task { await interpret(spoken) } }
+                else { diagnostics.record("Formulario: ChatGPT desconectado") }
             }
         }
     }
@@ -372,13 +379,14 @@ struct ExpenseEditorView: View {
     }
 
     private func interpret(_ spoken: String) async {
+        diagnostics.record("Formulario: iniciando interpretación")
         interpreting = true
         defer { interpreting = false }
         do {
             let result = try await chatGPT.interpret(spoken)
             amount = result.amount.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
             category = result.category.flatMap { FamilyBudget.categories.contains($0) ? $0 : nil } ?? ""
-            paidBy = result.paidBy.flatMap { cars.activePayers.contains($0) ? $0 : nil } ?? ""
+            if let payer = result.paidBy, cars.activePayers.contains(payer) { paidBy = payer }
             detail = result.detail ?? ""
             if let writtenDate = result.date {
                 let formatter = DateFormatter()
@@ -388,7 +396,11 @@ struct ExpenseEditorView: View {
                 if let parsed = formatter.date(from: writtenDate) { date = parsed }
             }
             error = nil
-        } catch { self.error = error.localizedDescription }
+            diagnostics.record("Formulario: campos actualizados")
+        } catch {
+            self.error = error.localizedDescription
+            diagnostics.record("Formulario: error \(type(of: error))")
+        }
     }
 }
 
