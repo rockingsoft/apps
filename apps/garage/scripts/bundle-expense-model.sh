@@ -23,4 +23,7 @@ if [ "$actual_sha256" != "$expected_sha256" ]; then
 fi
 
 mkdir -p "$(dirname "$destination")"
+for old_model in "$(dirname "$destination")"/qwen2.5-*.gguf; do
+  if [ "$old_model" != "$destination" ]; then rm -f "$old_model"; fi
+done
 cp "$model_path" "$destination"

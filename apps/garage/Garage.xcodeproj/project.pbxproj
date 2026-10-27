@@ -230,14 +230,15 @@
 /* Begin PBXShellScriptBuildPhase section */
 		D9EAF7A21C4B4031A6800500 /* Bundle Expense Model */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
+				"$(PROJECT_DIR)/scripts/bundle-expense-model.sh",
 			);
 			name = "Bundle Expense Model";
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/qwen2.5-1.5b-instruct-q4_k_m.gguf",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

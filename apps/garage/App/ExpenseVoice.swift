@@ -88,6 +88,13 @@ enum ExpenseModelError: LocalizedError {
 enum ExpenseModel {
     static let fileName = "qwen2.5-1.5b-instruct-q4_k_m.gguf"
     static var fileURL: URL? { Bundle.main.url(forResource: "qwen2.5-1.5b-instruct-q4_k_m", withExtension: "gguf") }
+    private static let inferenceLock = NSLock()
+    private static var cachedModel: OpaquePointer?
+    private static var cachedContext: OpaquePointer?
+
+    static func prepare() async {
+        _ = try? await Task.detached(priority: .utility) { try loadIfNeeded() }.value
+    }
 
     static func interpret(_ transcript: String) async throws -> ExpenseInterpretation {
         guard fileURL != nil else { throw ExpenseModelError.modelUnavailable }
@@ -101,18 +108,11 @@ enum ExpenseModel {
     }
 
     private static func generate(_ transcript: String) throws -> String {
-        guard let fileURL else { throw ExpenseModelError.modelUnavailable }
-        llama_backend_init()
-        defer { llama_backend_free() }
-        var modelParams = llama_model_default_params()
-        modelParams.n_gpu_layers = 99
-        guard let model = llama_model_load_from_file(fileURL.path, modelParams) else { throw ExpenseModelError.modelLoadFailed }
-        defer { llama_model_free(model) }
-        var contextParams = llama_context_default_params()
-        contextParams.n_ctx = 1536
-        contextParams.n_batch = 1024
-        guard let context = llama_init_from_model(model, contextParams) else { throw ExpenseModelError.modelLoadFailed }
-        defer { llama_free(context) }
+        inferenceLock.lock()
+        defer { inferenceLock.unlock() }
+        try loadIfNeededLocked()
+        guard let model = cachedModel, let context = cachedContext else { throw ExpenseModelError.modelLoadFailed }
+        llama_memory_clear(llama_get_memory(context), true)
         let vocab = llama_model_get_vocab(model)
         let categories = FamilyBudget.categories.joined(separator: ", ")
         let todayFormatter = DateFormatter()
@@ -135,7 +135,7 @@ enum ExpenseModel {
         """
         var tokens = [llama_token](repeating: 0, count: prompt.utf8.count + 1)
         let count = llama_tokenize(vocab, prompt, Int32(prompt.utf8.count), &tokens, Int32(tokens.count), true, true)
-        guard count > 0, count < 1024 else { throw ExpenseModelError.invalidResult }
+        guard count > 0, count < 900 else { throw ExpenseModelError.invalidResult }
         var batch = llama_batch_init(1024, 0, 1)
         defer { llama_batch_free(batch) }
         batch.n_tokens = count
@@ -149,7 +149,7 @@ enum ExpenseModel {
         guard llama_decode(context, batch) == 0 else { throw ExpenseModelError.invalidResult }
         var output = Data()
         var position = count
-        for _ in 0..<160 {
+        for _ in 0..<112 {
             guard let logits = llama_get_logits_ith(context, batch.n_tokens - 1) else { break }
             let vocabularySize = Int(llama_vocab_n_tokens(vocab))
             var best = 0
@@ -159,7 +159,10 @@ enum ExpenseModel {
             var buffer = [CChar](repeating: 0, count: 256)
             let length = llama_token_to_piece(vocab, next, &buffer, Int32(buffer.count), 0, false)
             if length > 0 { output.append(contentsOf: buffer.prefix(Int(length)).map { UInt8(bitPattern: $0) }) }
-            if let text = String(data: output, encoding: .utf8), text.contains("<|im_end|>") { break }
+            if let text = String(data: output, encoding: .utf8),
+               let start = text.firstIndex(of: "{"), let end = text.lastIndex(of: "}"),
+               let data = String(text[start...end]).data(using: .utf8),
+               (try? JSONDecoder().decode(ExpenseInterpretation.self, from: data)) != nil { break }
             batch.n_tokens = 1
             batch.token[0] = next
             batch.pos[0] = position
@@ -170,5 +173,29 @@ enum ExpenseModel {
             guard llama_decode(context, batch) == 0 else { break }
         }
         return String(data: output, encoding: .utf8) ?? ""
+    }
+
+    private static func loadIfNeeded() throws {
+        inferenceLock.lock()
+        defer { inferenceLock.unlock() }
+        try loadIfNeededLocked()
+    }
+
+    private static func loadIfNeededLocked() throws {
+        guard cachedContext == nil else { return }
+        guard let fileURL else { throw ExpenseModelError.modelUnavailable }
+        llama_backend_init()
+        var modelParams = llama_model_default_params()
+        modelParams.n_gpu_layers = 99
+        guard let model = llama_model_load_from_file(fileURL.path, modelParams) else { throw ExpenseModelError.modelLoadFailed }
+        var contextParams = llama_context_default_params()
+        contextParams.n_ctx = 1024
+        contextParams.n_batch = 1024
+        guard let context = llama_init_from_model(model, contextParams) else {
+            llama_model_free(model)
+            throw ExpenseModelError.modelLoadFailed
+        }
+        cachedModel = model
+        cachedContext = context
     }
 }

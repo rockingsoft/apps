@@ -42,6 +42,7 @@ assets = project.main_group.new_file('App/Assets.xcassets')
 target.resources_build_phase.add_file_reference(assets)
 bundle_model = target.new_shell_script_build_phase('Bundle Expense Model')
 bundle_model.shell_script = '"$PROJECT_DIR/scripts/bundle-expense-model.sh"'
-bundle_model.always_out_of_date = '1'
+bundle_model.input_paths = ['$(PROJECT_DIR)/scripts/bundle-expense-model.sh']
+bundle_model.output_paths = ['$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/qwen2.5-1.5b-instruct-q4_k_m.gguf']
 project.root_object.attributes['TargetAttributes'] = { target.uuid => { 'DevelopmentTeam' => '3SRDN9365G', 'SystemCapabilities' => { 'com.apple.iCloud' => { 'enabled' => 1 } } } }
 project.save

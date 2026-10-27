@@ -297,6 +297,7 @@ struct ExpenseEditorView: View {
             }
             .disabled(saving)
             .onAppear { paidBy = cars.myPayerName ?? "Común" }
+            .task { await ExpenseModel.prepare() }
         }
     }
 
