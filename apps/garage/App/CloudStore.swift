@@ -73,10 +73,11 @@ struct FamilyMember {
         return localPayerName
     }
     var activePayers: [String] {
-        FamilyBudget.payers.filter { name in
+        let available = FamilyBudget.payers.filter { name in
             name == "Común" || name == localPayerName ||
                 familyMembers.contains { activeMemberIDs.contains($0.userRecordName) && $0.payerName == name }
         }
+        return available.count == 1 ? FamilyBudget.payers : available
     }
     var familySpace: Car? {
         guard let familyZoneID else { return nil }
