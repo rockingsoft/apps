@@ -1,11 +1,6 @@
 require 'xcodeproj'
 project = Xcodeproj::Project.new('Garage.xcodeproj')
 target = project.new_target(:application, 'Garage', :ios, '17.0')
-llama_framework = project.main_group.new_file('build/llama.xcframework')
-target.frameworks_build_phase.add_file_reference(llama_framework)
-embed_frameworks = target.new_copy_files_build_phase('Embed Frameworks')
-embed_frameworks.dst_subfolder_spec = '10'
-embed_frameworks.add_file_reference(llama_framework).settings = { 'ATTRIBUTES' => ['CodeSignOnCopy', 'RemoveHeadersOnCopy'] }
 google_config = project.main_group.new_file('App/GoogleConfig.xcconfig')
 target.build_configuration_list.build_configurations.each { |config| config.base_configuration_reference = google_config }
 project.build_configuration_list.build_configurations.each do |config|
@@ -40,9 +35,5 @@ end
 end
 assets = project.main_group.new_file('App/Assets.xcassets')
 target.resources_build_phase.add_file_reference(assets)
-bundle_model = target.new_shell_script_build_phase('Bundle Expense Model')
-bundle_model.shell_script = '"$PROJECT_DIR/scripts/bundle-expense-model.sh"'
-bundle_model.input_paths = ['$(PROJECT_DIR)/scripts/bundle-expense-model.sh']
-bundle_model.output_paths = ['$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/qwen2.5-1.5b-instruct-q4_k_m.gguf']
 project.root_object.attributes['TargetAttributes'] = { target.uuid => { 'DevelopmentTeam' => '3SRDN9365G', 'SystemCapabilities' => { 'com.apple.iCloud' => { 'enabled' => 1 } } } }
 project.save

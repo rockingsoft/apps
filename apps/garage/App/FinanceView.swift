@@ -224,11 +224,17 @@ private struct ExpenseHistoryView: View {
     }
 }
 
+private struct BrowserDestination: Identifiable {
+    let url: URL
+    var id: String { url.absoluteString }
+}
+
 struct ExpenseEditorView: View {
     @EnvironmentObject private var finances: FinanceStore
     @EnvironmentObject private var cars: CloudStore
     @Environment(\.dismiss) private var dismiss
     @StateObject private var speech = ExpenseSpeechRecognizer()
+    @StateObject private var chatGPT = ChatGPTExpense()
     @StateObject private var location = CurrentExpenseLocation()
     let suggestion: ExpenseVisitSuggestion?
     @State private var date = Date()
@@ -252,6 +258,18 @@ struct ExpenseEditorView: View {
         NavigationStack {
             Form {
                 Section("Por voz") {
+                    if chatGPT.connected {
+                        HStack {
+                            Label(chatGPT.email ?? "ChatGPT conectado", systemImage: "checkmark.circle")
+                                .font(.footnote)
+                            Spacer()
+                            Button("Desconectar") { Task { await chatGPT.disconnect() } }
+                                .font(.footnote)
+                        }
+                    } else {
+                        Button("Continuar con ChatGPT") { Task { await chatGPT.connect() } }
+                            .disabled(chatGPT.connecting)
+                    }
                     HStack {
                         Button {
                             if speech.listening { speech.stop() }
@@ -262,14 +280,17 @@ struct ExpenseEditorView: View {
                         Spacer()
                         if !speech.transcript.isEmpty {
                             Button("Interpretar") { Task { await interpret() } }
-                                .disabled(interpreting || speech.listening)
+                                .disabled(interpreting || speech.listening || !chatGPT.connected)
                         }
                     }
                     if !speech.transcript.isEmpty {
                         Text(speech.transcript).font(.subheadline)
                     }
                     if let message = speech.errorMessage { Text(message).font(.footnote).foregroundStyle(.orange) }
+                    if let message = chatGPT.message { Text(message).font(.footnote).foregroundStyle(.orange) }
                     if interpreting { ProgressView() }
+                    Text("Garage transcribe en el iPhone y envía el texto a OpenAI para completar este gasto.")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
                 Section("Revisar antes de guardar") {
                 DatePicker("Fecha", selection: $date, displayedComponents: .date)
@@ -297,7 +318,11 @@ struct ExpenseEditorView: View {
             }
             .disabled(saving)
             .onAppear { paidBy = cars.myPayerName ?? "Común" }
-            .task { await ExpenseModel.prepare() }
+            .sheet(item: Binding(get: { chatGPT.browserURL.map { BrowserDestination(url: $0) } },
+                                 set: { if $0 == nil { chatGPT.cancelConnect() } })) { destination in
+                ChatGPTBrowser(url: destination.url)
+                    .ignoresSafeArea()
+            }
         }
     }
 
@@ -332,7 +357,7 @@ struct ExpenseEditorView: View {
         interpreting = true
         defer { interpreting = false }
         do {
-            let result = try await ExpenseModel.interpret(speech.transcript)
+            let result = try await chatGPT.interpret(speech.transcript)
             amount = result.amount.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
             category = result.category.flatMap { FamilyBudget.categories.contains($0) ? $0 : nil } ?? ""
             paidBy = result.paidBy.flatMap { cars.activePayers.contains($0) ? $0 : nil } ?? ""

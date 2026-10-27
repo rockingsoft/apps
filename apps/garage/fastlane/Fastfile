@@ -5,7 +5,6 @@ default_platform(:ios)
 platform :ios do
   desc "Archive Garage and upload the processed build to TestFlight"
   lane :testflight do
-    sh("./scripts/build-llama.sh")
     %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID GARAGE_ASC_KEY_ID GARAGE_ASC_ISSUER_ID GARAGE_ASC_KEY_P8_BASE64].each do |name|
       UI.user_error!("#{name} is required") if ENV[name].to_s.empty?
     end

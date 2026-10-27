@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		12845DDFDAD5FD22479A83E6 /* ExpenseShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */; };
-		290EA4F4B1EF41E42DF5842A /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B29070504DDDD05C50A2D46 /* llama.xcframework */; };
 		2B45D280A2563DDAD807C42F /* CloudStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86C0E0B16F3A60DE6BC2392 /* CloudStore.swift */; };
 		46BE4281CD9DDA30ACC90D59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4AB93AAED63A929AA70E442 /* Assets.xcassets */; };
 		4D885BCFBC8BAD3580E17A8C /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF16921D6A547B291E46BD9F /* Sharing.swift */; };
@@ -26,23 +25,12 @@
 		BE3004A1B91D198F898F9610 /* FinanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670273DFD9A74F841BE5C59C /* FinanceStore.swift */; };
 		D4D864CFA736F1FFAD1479CA /* FuelEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526781110ACC01A95E568A49 /* FuelEntryView.swift */; };
 		D6F029AFDF7A9D0B18899B2F /* ExpenseVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */; };
-		EB753F556855462EA4BCED47 /* llama.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8B29070504DDDD05C50A2D46 /* llama.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D6F029AFDF7A9D0B18899B30 /* ChatGPTExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F2B7A4A67A94B91AE7F80 /* ChatGPTExpense.swift */; };
 		ED399FC7357BC425EA79C632 /* ExpenseLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AFC47722568333C243C300 /* ExpenseLocation.swift */; };
 		EFD7575D73338525EC0620AE /* GarageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E235221586614BEFA0401672 /* GarageApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		F8DD0FCB78FF21597EAF1B50 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				EB753F556855462EA4BCED47 /* llama.xcframework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -53,10 +41,10 @@
 		526781110ACC01A95E568A49 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
 		670273DFD9A74F841BE5C59C /* FinanceStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceStore.swift; sourceTree = "<group>"; };
 		730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseVoice.swift; sourceTree = "<group>"; };
+		730F2B7A4A67A94B91AE7F80 /* ChatGPTExpense.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatGPTExpense.swift; sourceTree = "<group>"; };
 		8075ECD4F3A516753BE8E56F /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
 		822719C391DFB421310551C5 /* MaintenanceTemplateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceTemplateView.swift; sourceTree = "<group>"; };
 		851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseShortcut.swift; sourceTree = "<group>"; };
-		8B29070504DDDD05C50A2D46 /* llama.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = llama.xcframework; path = build/llama.xcframework; sourceTree = "<group>"; };
 		B5AFC47722568333C243C300 /* ExpenseLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseLocation.swift; sourceTree = "<group>"; };
 		B932856EC42AED7E30EA77D7 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
 		BF16921D6A547B291E46BD9F /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
@@ -77,7 +65,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5FBF15171B590250B606D163 /* Foundation.framework in Frameworks */,
-				290EA4F4B1EF41E42DF5842A /* llama.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +76,6 @@
 			children = (
 				3CBFDA3F9C3668C2929ECFA0 /* Products */,
 				3D50C65E2E8C0B42DEA54A11 /* Frameworks */,
-				8B29070504DDDD05C50A2D46 /* llama.xcframework */,
 				C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */,
 				8F5D4DBE81A9E3A94A408CAE /* App */,
 				781186EC9823E71A819EB646 /* Shared */,
@@ -137,6 +123,7 @@
 				B5AFC47722568333C243C300 /* ExpenseLocation.swift */,
 				851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */,
 				730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */,
+				730F2B7A4A67A94B91AE7F80 /* ChatGPTExpense.swift */,
 				670273DFD9A74F841BE5C59C /* FinanceStore.swift */,
 				F130BE228939DC19D491823C /* FinanceView.swift */,
 				526781110ACC01A95E568A49 /* FuelEntryView.swift */,
@@ -165,8 +152,6 @@
 				B50D75002C4745BA213D7EDA /* Sources */,
 				74E36196B858ADF2C1CAFDA1 /* Frameworks */,
 				34870295419FCBAA19E8D1B0 /* Resources */,
-				F8DD0FCB78FF21597EAF1B50 /* Embed Frameworks */,
-				D9EAF7A21C4B4031A6800500 /* Bundle Expense Model */,
 			);
 			buildRules = (
 			);
@@ -227,24 +212,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		D9EAF7A21C4B4031A6800500 /* Bundle Expense Model */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(PROJECT_DIR)/scripts/bundle-expense-model.sh",
-			);
-			name = "Bundle Expense Model";
-			outputPaths = (
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/qwen2.5-1.5b-instruct-q4_k_m.gguf",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"$PROJECT_DIR/scripts/bundle-expense-model.sh\"";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B50D75002C4745BA213D7EDA /* Sources */ = {
@@ -255,6 +222,7 @@
 				ED399FC7357BC425EA79C632 /* ExpenseLocation.swift in Sources */,
 				12845DDFDAD5FD22479A83E6 /* ExpenseShortcut.swift in Sources */,
 				D6F029AFDF7A9D0B18899B2F /* ExpenseVoice.swift in Sources */,
+				D6F029AFDF7A9D0B18899B30 /* ChatGPTExpense.swift in Sources */,
 				BE3004A1B91D198F898F9610 /* FinanceStore.swift in Sources */,
 				AFA3960D3EBB18EB3A4F13F4 /* FinanceView.swift in Sources */,
 				D4D864CFA736F1FFAD1479CA /* FuelEntryView.swift in Sources */,
