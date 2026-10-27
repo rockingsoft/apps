@@ -1,9 +1,11 @@
 import CoreLocation
 import Charts
+import Combine
 import SwiftUI
 
 struct FinanceDashboardView: View {
     @EnvironmentObject private var finances: FinanceStore
+    @EnvironmentObject private var chatGPT: ChatGPTExpense
     @EnvironmentObject private var cars: CloudStore
     @EnvironmentObject private var expenseMonitor: ExpenseVisitMonitor
     @State private var showingExpense = false
@@ -71,17 +73,32 @@ struct FinanceDashboardView: View {
             }
             .navigationTitle(monthName)
             .toolbar {
-                if finances.signedIn {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Menu {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        if finances.signedIn {
                             Button("Mi nombre en el presupuesto", systemImage: "person.crop.circle") { showingPayerProfile = true }
                             Button("Actualizar", systemImage: "arrow.clockwise") { Task { await finances.reload() } }
                             Button("Cerrar sesión de Google", systemImage: "rectangle.portrait.and.arrow.right") { finances.signOut() }
+                        } else {
+                            Button("Conectar Google", systemImage: "person.crop.circle.badge.checkmark") { Task { await finances.signIn() } }
+                        }
+                        if chatGPT.connected {
+                            Text("ChatGPT: \(chatGPT.email ?? "conectado")")
+                            Button("Desconectar ChatGPT", systemImage: "rectangle.portrait.and.arrow.right") {
+                                Task { await chatGPT.disconnect() }
+                            }
+                        } else {
+                            Button("Conectar ChatGPT", systemImage: "sparkles") { Task { await chatGPT.connect() } }
+                                .disabled(chatGPT.connecting)
+                        }
+                        if finances.signedIn {
                             Toggle("Sugerencias por ubicación", isOn: Binding(
                                 get: { expenseMonitor.enabled }, set: { expenseMonitor.setEnabled($0) }
                             ))
-                        } label: { Image(systemName: "ellipsis.circle") }
-                    }
+                        }
+                    } label: { Image(systemName: "ellipsis.circle") }
+                }
+                if finances.signedIn {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Gasto", systemImage: "plus") { suggestedExpense = nil; showingExpense = true }
                     }
@@ -96,6 +113,17 @@ struct FinanceDashboardView: View {
             }
             .sheet(isPresented: $showingExpense) { ExpenseEditorView(suggestion: suggestedExpense) }
             .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
+            .sheet(item: Binding(get: { chatGPT.browserURL.map { BrowserDestination(url: $0) } },
+                                 set: { if $0 == nil { chatGPT.cancelConnect() } })) { destination in
+                ChatGPTBrowser(url: destination.url)
+                    .ignoresSafeArea()
+            }
+            .alert("ChatGPT", isPresented: Binding(get: { chatGPT.message != nil },
+                                                    set: { if !$0 { chatGPT.message = nil } })) {
+                Button("Aceptar") { chatGPT.message = nil }
+            } message: {
+                Text(chatGPT.message ?? "")
+            }
             .refreshable { await finances.reload() }
             .overlay { if finances.loading { ProgressView().controlSize(.large) } }
         }
@@ -231,10 +259,10 @@ private struct BrowserDestination: Identifiable {
 
 struct ExpenseEditorView: View {
     @EnvironmentObject private var finances: FinanceStore
+    @EnvironmentObject private var chatGPT: ChatGPTExpense
     @EnvironmentObject private var cars: CloudStore
     @Environment(\.dismiss) private var dismiss
     @StateObject private var speech = ExpenseSpeechRecognizer()
-    @StateObject private var chatGPT = ChatGPTExpense()
     @StateObject private var location = CurrentExpenseLocation()
     let suggestion: ExpenseVisitSuggestion?
     @State private var date = Date()
@@ -258,17 +286,9 @@ struct ExpenseEditorView: View {
         NavigationStack {
             Form {
                 Section("Por voz") {
-                    if chatGPT.connected {
-                        HStack {
-                            Label(chatGPT.email ?? "ChatGPT conectado", systemImage: "checkmark.circle")
-                                .font(.footnote)
-                            Spacer()
-                            Button("Desconectar") { Task { await chatGPT.disconnect() } }
-                                .font(.footnote)
-                        }
-                    } else {
-                        Button("Continuar con ChatGPT") { Task { await chatGPT.connect() } }
-                            .disabled(chatGPT.connecting)
+                    if !chatGPT.connected {
+                        Text("Conectá ChatGPT desde el menú ⋯ de Inicio para dictar gastos.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                     HStack {
                         Button {
@@ -277,9 +297,10 @@ struct ExpenseEditorView: View {
                         } label: {
                             Label(speech.listening ? "Detener" : "Dictar gasto", systemImage: speech.listening ? "stop.circle" : "mic")
                         }
+                        .disabled(!chatGPT.connected)
                         Spacer()
                         if !speech.transcript.isEmpty {
-                            Button("Interpretar") { Task { await interpret() } }
+                            Button("Interpretar") { Task { await interpret(speech.transcript) } }
                                 .disabled(interpreting || speech.listening || !chatGPT.connected)
                         }
                     }
@@ -287,8 +308,8 @@ struct ExpenseEditorView: View {
                         Text(speech.transcript).font(.subheadline)
                     }
                     if let message = speech.errorMessage { Text(message).font(.footnote).foregroundStyle(.orange) }
-                    if let message = chatGPT.message { Text(message).font(.footnote).foregroundStyle(.orange) }
                     if interpreting { ProgressView() }
+                    if let error { Text(error).font(.footnote).foregroundStyle(.red) }
                     Text("Garage transcribe en el iPhone y envía el texto a OpenAI para completar este gasto.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
@@ -306,7 +327,6 @@ struct ExpenseEditorView: View {
                 TextField("Monto en pesos", text: $amount).keyboardType(.decimalPad)
                 Toggle("Recordar este lugar para futuras sugerencias", isOn: $rememberPlace)
                 }
-                if let error { Text(error).foregroundStyle(.red).font(.footnote) }
             }
             .navigationTitle("Nuevo gasto")
             .toolbar {
@@ -318,10 +338,8 @@ struct ExpenseEditorView: View {
             }
             .disabled(saving)
             .onAppear { paidBy = cars.myPayerName ?? "Común" }
-            .sheet(item: Binding(get: { chatGPT.browserURL.map { BrowserDestination(url: $0) } },
-                                 set: { if $0 == nil { chatGPT.cancelConnect() } })) { destination in
-                ChatGPTBrowser(url: destination.url)
-                    .ignoresSafeArea()
+            .onReceive(speech.$completedTranscript.compactMap { $0 }) { spoken in
+                if chatGPT.connected { Task { await interpret(spoken) } }
             }
         }
     }
@@ -353,11 +371,11 @@ struct ExpenseEditorView: View {
         }
     }
 
-    private func interpret() async {
+    private func interpret(_ spoken: String) async {
         interpreting = true
         defer { interpreting = false }
         do {
-            let result = try await chatGPT.interpret(speech.transcript)
+            let result = try await chatGPT.interpret(spoken)
             amount = result.amount.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
             category = result.category.flatMap { FamilyBudget.categories.contains($0) ? $0 : nil } ?? ""
             paidBy = result.paidBy.flatMap { cars.activePayers.contains($0) ? $0 : nil } ?? ""

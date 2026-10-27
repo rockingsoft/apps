@@ -48,6 +48,7 @@ final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
     @UIApplicationDelegateAdaptor(ShareAcceptanceDelegate.self) private var shareDelegate
     @StateObject private var store = CloudStore()
     @StateObject private var finances = FinanceStore()
+    @StateObject private var chatGPT = ChatGPTExpense()
     @StateObject private var fuelMonitor = FuelVisitMonitor.shared
     @StateObject private var expenseMonitor = ExpenseVisitMonitor.shared
     @Environment(\.scenePhase) private var scenePhase
@@ -56,6 +57,7 @@ final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
             CarsView()
                 .environmentObject(store)
                 .environmentObject(finances)
+                .environmentObject(chatGPT)
                 .environmentObject(fuelMonitor)
                 .environmentObject(expenseMonitor)
                 .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await store.reload() } } }

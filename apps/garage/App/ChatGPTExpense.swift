@@ -347,7 +347,11 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.httpBody = parameters.map { "\($0.key.formEncoded)=\($0.value.formEncoded)" }.joined(separator: "&").data(using: .utf8)
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw ChatGPTError.invalidToken }
+        guard let status = (response as? HTTPURLResponse)?.statusCode else { throw ChatGPTError.invalidToken }
+        guard status == 200 else {
+            let code = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
+            throw ChatGPTError.unavailable("OpenAI rechazó la autorización (HTTP \(status)\(code.map { ", \($0)" } ?? "")).")
+        }
         return try JSONDecoder().decode(TokenResponse.self, from: data)
     }
 
@@ -371,11 +375,16 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
               let publicKey = Self.rsaKey(modulus: n, exponent: e),
               SecKeyVerifySignature(publicKey, .rsaSignatureMessagePKCS1v15SHA256,
                                     Data("\(parts[0]).\(parts[1])".utf8) as CFData, signature as CFData, nil),
-              payload["iss"] as? String == "https://auth.openai.com",
-              payload["aud"] as? String == clientID,
-              (payload["exp"] as? TimeInterval ?? 0) > Date().timeIntervalSince1970,
-              payload["nonce"] as? String == nonce,
               let subject = payload["sub"] as? String else { throw ChatGPTError.invalidToken }
+        guard payload["iss"] as? String == "https://auth.openai.com",
+              (payload["exp"] as? TimeInterval ?? 0) > Date().timeIntervalSince1970 else { throw ChatGPTError.invalidToken }
+        guard ((payload["aud"] as? String) == clientID ||
+               (payload["aud"] as? [String])?.contains(clientID) == true) else {
+            throw ChatGPTError.unavailable("La sesión de ChatGPT llegó con una audiencia inesperada.")
+        }
+        guard payload["nonce"] as? String == nonce else {
+            throw ChatGPTError.unavailable("La sesión de ChatGPT llegó con un código de seguridad inesperado.")
+        }
         return Identity(subject: subject, email: payload["email"] as? String)
     }
 
