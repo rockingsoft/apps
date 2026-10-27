@@ -7,149 +7,165 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		008279F2F6E809D4CBD7250A /* ExpenseShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8AB955BC4FC512378FC275E /* ExpenseShortcut.swift */; };
-		084FC4AEFCE975B69DDE7206 /* ExpenseVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53254E2C9549C42CC414609C /* ExpenseVoice.swift */; };
-		08A8359AEDD77FEBE73A9E6B /* GoogleSheetsAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F0FC08CC3C34654635916B /* GoogleSheetsAccess.swift */; };
-		0E6EA130AD599A8DCE75109B /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 088966C1B0435B85942750D0 /* llama.xcframework */; };
-		0FFF7189E8B61320E0023165 /* FuelEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CE6C63691EB3A69468B412 /* FuelEntryView.swift */; };
-		1E63818D57134C802AC47DFE /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34229764B23A123A819676E /* Sharing.swift */; };
-		2DA1F19648C1247C8EEEADFA /* VehicleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66E1981D3F9BDA84604B9C4 /* VehicleCatalog.swift */; };
-		2EDC4FC881D54F37895977C2 /* GarageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE11F0D3F41197D7CA8FAA9 /* GarageApp.swift */; };
-		45D981DE7126911F8FC4D1F0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBAAD2338787EEC3DB75D5B3 /* Foundation.framework */; };
-		60C89D62C4828B1C5F12E5D7 /* NotificationPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC80FA2E5CFEE6E3C95DB208 /* NotificationPlanner.swift */; };
-		79A233C7C006899E02306A2A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8197F038775AA4339338D63C /* Assets.xcassets */; };
-		899055991D4544D61A5858C6 /* ServiceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A381A0F92A9EB09267100C2 /* ServiceModels.swift */; };
-		965006AC7526A8BF263F1475 /* LocalSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64620AF7125BE3295FCDB0A1 /* LocalSnapshot.swift */; };
-		A51D34B097DE19324E194C72 /* FinanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEF504EA055F550BED564BA /* FinanceView.swift */; };
-		AB7F173AA3C08FA5B343EF59 /* FuelLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA32D48FBF38FCC745308DB4 /* FuelLocation.swift */; };
-		AF77700C13D922B3E56F7675 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A4505BD92C331BD33CBD31F /* Views.swift */; };
-		AFFC925E8464F18899EA5435 /* CloudStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24AD3B54582D0CCECD77325C /* CloudStore.swift */; };
-		BBA2EEB30C4466D9844FAE19 /* FinanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6850D4DFD138DC545A100182 /* FinanceStore.swift */; };
-		C424A61D54A8B782292D521E /* MaintenanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210B723A230A961917818FD8 /* MaintenanceCatalog.swift */; };
-		C9D407E3167E808AAAF983D1 /* MaintenanceTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C974A41FF1A981680ED938 /* MaintenanceTemplateView.swift */; };
-		EE7B9F8AC6868687EAA66530 /* ExpenseLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194F2972BEFED2539604F913 /* ExpenseLocation.swift */; };
+		12845DDFDAD5FD22479A83E6 /* ExpenseShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */; };
+		290EA4F4B1EF41E42DF5842A /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B29070504DDDD05C50A2D46 /* llama.xcframework */; };
+		2B45D280A2563DDAD807C42F /* CloudStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86C0E0B16F3A60DE6BC2392 /* CloudStore.swift */; };
+		46BE4281CD9DDA30ACC90D59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4AB93AAED63A929AA70E442 /* Assets.xcassets */; };
+		4D885BCFBC8BAD3580E17A8C /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF16921D6A547B291E46BD9F /* Sharing.swift */; };
+		4E4205F4B77DD91E8B8C8566 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8075ECD4F3A516753BE8E56F /* Views.swift */; };
+		5897232DAD2F72FB2DACE795 /* NotificationPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09FC0B33674B140655D7D0C /* NotificationPlanner.swift */; };
+		5FBF15171B590250B606D163 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F72B6123E2064A5E43F25789 /* Foundation.framework */; };
+		7581C4E110019A6155A70B2A /* ServiceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C06A8CF4EA789C6285A8FBF3 /* ServiceModels.swift */; };
+		7C5C5CD1B7D3905164181650 /* LocalSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B932856EC42AED7E30EA77D7 /* LocalSnapshot.swift */; };
+		7D8CB2AE9C18C987E1A4DBC8 /* GoogleSheetsAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBA75A6EE504E48ABBC52FA /* GoogleSheetsAccess.swift */; };
+		808FF0E7289AF3ED312C679A /* MaintenanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B306258542613F457949B4 /* MaintenanceCatalog.swift */; };
+		A22B3F29C512B81D98CC04D5 /* MaintenanceTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822719C391DFB421310551C5 /* MaintenanceTemplateView.swift */; };
+		A45AAA03B6B53081E7F405AD /* FuelLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C935C42DDC27DC98BCE6128B /* FuelLocation.swift */; };
+		ADC1B1353846BB8ACDD2A134 /* VehicleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B1CA545A41004BD1512864 /* VehicleCatalog.swift */; };
+		AFA3960D3EBB18EB3A4F13F4 /* FinanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F130BE228939DC19D491823C /* FinanceView.swift */; };
+		BE3004A1B91D198F898F9610 /* FinanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670273DFD9A74F841BE5C59C /* FinanceStore.swift */; };
+		D4D864CFA736F1FFAD1479CA /* FuelEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526781110ACC01A95E568A49 /* FuelEntryView.swift */; };
+		D6F029AFDF7A9D0B18899B2F /* ExpenseVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */; };
+		EB753F556855462EA4BCED47 /* llama.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8B29070504DDDD05C50A2D46 /* llama.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		ED399FC7357BC425EA79C632 /* ExpenseLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AFC47722568333C243C300 /* ExpenseLocation.swift */; };
+		EFD7575D73338525EC0620AE /* GarageApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E235221586614BEFA0401672 /* GarageApp.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		F8DD0FCB78FF21597EAF1B50 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				EB753F556855462EA4BCED47 /* llama.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		088966C1B0435B85942750D0 /* llama.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = llama.xcframework; path = build/llama.xcframework; sourceTree = "<group>"; };
-		10FDDBDE8517AA8CAFDA6C53 /* Garage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Garage.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		194F2972BEFED2539604F913 /* ExpenseLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseLocation.swift; sourceTree = "<group>"; };
-		210B723A230A961917818FD8 /* MaintenanceCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceCatalog.swift; sourceTree = "<group>"; };
-		24AD3B54582D0CCECD77325C /* CloudStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudStore.swift; sourceTree = "<group>"; };
-		2A4505BD92C331BD33CBD31F /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
-		30C974A41FF1A981680ED938 /* MaintenanceTemplateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceTemplateView.swift; sourceTree = "<group>"; };
-		470D46FE7751E1CE07D12D26 /* GoogleConfig.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = GoogleConfig.xcconfig; path = App/GoogleConfig.xcconfig; sourceTree = "<group>"; };
-		4A381A0F92A9EB09267100C2 /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
-		53254E2C9549C42CC414609C /* ExpenseVoice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseVoice.swift; sourceTree = "<group>"; };
-		64620AF7125BE3295FCDB0A1 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
-		6850D4DFD138DC545A100182 /* FinanceStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceStore.swift; sourceTree = "<group>"; };
-		78F0FC08CC3C34654635916B /* GoogleSheetsAccess.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GoogleSheetsAccess.swift; sourceTree = "<group>"; };
-		7DEF504EA055F550BED564BA /* FinanceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceView.swift; sourceTree = "<group>"; };
-		8197F038775AA4339338D63C /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = App/Assets.xcassets; sourceTree = "<group>"; };
-		89CE6C63691EB3A69468B412 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
-		B66E1981D3F9BDA84604B9C4 /* VehicleCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VehicleCatalog.swift; sourceTree = "<group>"; };
-		B8AB955BC4FC512378FC275E /* ExpenseShortcut.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseShortcut.swift; sourceTree = "<group>"; };
-		CC80FA2E5CFEE6E3C95DB208 /* NotificationPlanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPlanner.swift; sourceTree = "<group>"; };
-		D34229764B23A123A819676E /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
-		DBAAD2338787EEC3DB75D5B3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		DBE11F0D3F41197D7CA8FAA9 /* GarageApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GarageApp.swift; sourceTree = "<group>"; };
-		EA32D48FBF38FCC745308DB4 /* FuelLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelLocation.swift; sourceTree = "<group>"; };
+		0FBA75A6EE504E48ABBC52FA /* GoogleSheetsAccess.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GoogleSheetsAccess.swift; sourceTree = "<group>"; };
+		23B1CA545A41004BD1512864 /* VehicleCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VehicleCatalog.swift; sourceTree = "<group>"; };
+		25B306258542613F457949B4 /* MaintenanceCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceCatalog.swift; sourceTree = "<group>"; };
+		346F3520C2A23CF1EEDAE8B2 /* Garage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Garage.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		526781110ACC01A95E568A49 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
+		670273DFD9A74F841BE5C59C /* FinanceStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceStore.swift; sourceTree = "<group>"; };
+		730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseVoice.swift; sourceTree = "<group>"; };
+		8075ECD4F3A516753BE8E56F /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
+		822719C391DFB421310551C5 /* MaintenanceTemplateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceTemplateView.swift; sourceTree = "<group>"; };
+		851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseShortcut.swift; sourceTree = "<group>"; };
+		8B29070504DDDD05C50A2D46 /* llama.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = llama.xcframework; path = build/llama.xcframework; sourceTree = "<group>"; };
+		B5AFC47722568333C243C300 /* ExpenseLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseLocation.swift; sourceTree = "<group>"; };
+		B932856EC42AED7E30EA77D7 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
+		BF16921D6A547B291E46BD9F /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
+		C06A8CF4EA789C6285A8FBF3 /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
+		C935C42DDC27DC98BCE6128B /* FuelLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelLocation.swift; sourceTree = "<group>"; };
+		C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = GoogleConfig.xcconfig; path = App/GoogleConfig.xcconfig; sourceTree = "<group>"; };
+		D4AB93AAED63A929AA70E442 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = App/Assets.xcassets; sourceTree = "<group>"; };
+		E09FC0B33674B140655D7D0C /* NotificationPlanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPlanner.swift; sourceTree = "<group>"; };
+		E235221586614BEFA0401672 /* GarageApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GarageApp.swift; sourceTree = "<group>"; };
+		F130BE228939DC19D491823C /* FinanceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceView.swift; sourceTree = "<group>"; };
+		F72B6123E2064A5E43F25789 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		F86C0E0B16F3A60DE6BC2392 /* CloudStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6A2733BC5E4E5850AFF3BCC1 /* Frameworks */ = {
+		74E36196B858ADF2C1CAFDA1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				45D981DE7126911F8FC4D1F0 /* Foundation.framework in Frameworks */,
-				0E6EA130AD599A8DCE75109B /* llama.xcframework in Frameworks */,
+				5FBF15171B590250B606D163 /* Foundation.framework in Frameworks */,
+				290EA4F4B1EF41E42DF5842A /* llama.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		836E6D1B512A3C9047A6BD01 /* iOS */ = {
+		0F391382E6A01E36155A2DCA = {
 			isa = PBXGroup;
 			children = (
-				DBAAD2338787EEC3DB75D5B3 /* Foundation.framework */,
+				3CBFDA3F9C3668C2929ECFA0 /* Products */,
+				3D50C65E2E8C0B42DEA54A11 /* Frameworks */,
+				8B29070504DDDD05C50A2D46 /* llama.xcframework */,
+				C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */,
+				8F5D4DBE81A9E3A94A408CAE /* App */,
+				781186EC9823E71A819EB646 /* Shared */,
+				D4AB93AAED63A929AA70E442 /* Assets.xcassets */,
+			);
+			sourceTree = "<group>";
+		};
+		34616C25501F93FE788353EC /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				F72B6123E2064A5E43F25789 /* Foundation.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		97767369DD6C9381F17211EF /* App */ = {
+		3CBFDA3F9C3668C2929ECFA0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				24AD3B54582D0CCECD77325C /* CloudStore.swift */,
-				194F2972BEFED2539604F913 /* ExpenseLocation.swift */,
-				B8AB955BC4FC512378FC275E /* ExpenseShortcut.swift */,
-				53254E2C9549C42CC414609C /* ExpenseVoice.swift */,
-				6850D4DFD138DC545A100182 /* FinanceStore.swift */,
-				7DEF504EA055F550BED564BA /* FinanceView.swift */,
-				89CE6C63691EB3A69468B412 /* FuelEntryView.swift */,
-				EA32D48FBF38FCC745308DB4 /* FuelLocation.swift */,
-				DBE11F0D3F41197D7CA8FAA9 /* GarageApp.swift */,
-				78F0FC08CC3C34654635916B /* GoogleSheetsAccess.swift */,
-				64620AF7125BE3295FCDB0A1 /* LocalSnapshot.swift */,
-				210B723A230A961917818FD8 /* MaintenanceCatalog.swift */,
-				30C974A41FF1A981680ED938 /* MaintenanceTemplateView.swift */,
-				CC80FA2E5CFEE6E3C95DB208 /* NotificationPlanner.swift */,
-				D34229764B23A123A819676E /* Sharing.swift */,
-				B66E1981D3F9BDA84604B9C4 /* VehicleCatalog.swift */,
-				2A4505BD92C331BD33CBD31F /* Views.swift */,
+				346F3520C2A23CF1EEDAE8B2 /* Garage.app */,
 			);
-			name = App;
-			path = App;
+			name = Products;
 			sourceTree = "<group>";
 		};
-		BCB6CBEC55488E8FAA27E609 /* Frameworks */ = {
+		3D50C65E2E8C0B42DEA54A11 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				836E6D1B512A3C9047A6BD01 /* iOS */,
+				34616C25501F93FE788353EC /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		DECD00DB08C3103ECC8E4C4B /* Shared */ = {
+		781186EC9823E71A819EB646 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				4A381A0F92A9EB09267100C2 /* ServiceModels.swift */,
+				C06A8CF4EA789C6285A8FBF3 /* ServiceModels.swift */,
 			);
 			name = Shared;
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		E4A95A085A4F10B21325BC38 = {
+		8F5D4DBE81A9E3A94A408CAE /* App */ = {
 			isa = PBXGroup;
 			children = (
-				EC900D55BFDB87C1F4F2FCB7 /* Products */,
-				BCB6CBEC55488E8FAA27E609 /* Frameworks */,
-				088966C1B0435B85942750D0 /* llama.xcframework */,
-				470D46FE7751E1CE07D12D26 /* GoogleConfig.xcconfig */,
-				97767369DD6C9381F17211EF /* App */,
-				DECD00DB08C3103ECC8E4C4B /* Shared */,
-				8197F038775AA4339338D63C /* Assets.xcassets */,
+				F86C0E0B16F3A60DE6BC2392 /* CloudStore.swift */,
+				B5AFC47722568333C243C300 /* ExpenseLocation.swift */,
+				851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */,
+				730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */,
+				670273DFD9A74F841BE5C59C /* FinanceStore.swift */,
+				F130BE228939DC19D491823C /* FinanceView.swift */,
+				526781110ACC01A95E568A49 /* FuelEntryView.swift */,
+				C935C42DDC27DC98BCE6128B /* FuelLocation.swift */,
+				E235221586614BEFA0401672 /* GarageApp.swift */,
+				0FBA75A6EE504E48ABBC52FA /* GoogleSheetsAccess.swift */,
+				B932856EC42AED7E30EA77D7 /* LocalSnapshot.swift */,
+				25B306258542613F457949B4 /* MaintenanceCatalog.swift */,
+				822719C391DFB421310551C5 /* MaintenanceTemplateView.swift */,
+				E09FC0B33674B140655D7D0C /* NotificationPlanner.swift */,
+				BF16921D6A547B291E46BD9F /* Sharing.swift */,
+				23B1CA545A41004BD1512864 /* VehicleCatalog.swift */,
+				8075ECD4F3A516753BE8E56F /* Views.swift */,
 			);
-			sourceTree = "<group>";
-		};
-		EC900D55BFDB87C1F4F2FCB7 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				10FDDBDE8517AA8CAFDA6C53 /* Garage.app */,
-			);
-			name = Products;
+			name = App;
+			path = App;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C5D8C59107F7624B78AA58CB /* Garage */ = {
+		7B1B5905AAE29DCD87CD49CB /* Garage */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C25BE2C42E66D903A0B8AE4A /* Build configuration list for PBXNativeTarget "Garage" */;
+			buildConfigurationList = B6D279EA0A951B64467C677D /* Build configuration list for PBXNativeTarget "Garage" */;
 			buildPhases = (
-				B1D59243DE34ECD725438A1A /* Sources */,
-				6A2733BC5E4E5850AFF3BCC1 /* Frameworks */,
-				CAF870DE8D7F11D11B434BCE /* Resources */,
+				B50D75002C4745BA213D7EDA /* Sources */,
+				74E36196B858ADF2C1CAFDA1 /* Frameworks */,
+				34870295419FCBAA19E8D1B0 /* Resources */,
+				F8DD0FCB78FF21597EAF1B50 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -157,19 +173,19 @@
 			);
 			name = Garage;
 			productName = Garage;
-			productReference = 10FDDBDE8517AA8CAFDA6C53 /* Garage.app */;
+			productReference = 346F3520C2A23CF1EEDAE8B2 /* Garage.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		8E8ED245C1F17FC71A5B6A1E /* Project object */ = {
+		24FFCE1942C8855861A83C4A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
-					C5D8C59107F7624B78AA58CB = {
+					7B1B5905AAE29DCD87CD49CB = {
 						DevelopmentTeam = 3SRDN9365G;
 						SystemCapabilities = {
 							com.apple.iCloud = {
@@ -179,7 +195,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7569361929B551A2478BD288 /* Build configuration list for PBXProject "Garage" */;
+			buildConfigurationList = D8DC867191F49B48C538A9D1 /* Build configuration list for PBXProject "Garage" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -187,59 +203,111 @@
 				en,
 				Base,
 			);
-			mainGroup = E4A95A085A4F10B21325BC38;
+			mainGroup = 0F391382E6A01E36155A2DCA;
 			minimizedProjectReferenceProxies = 0;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = EC900D55BFDB87C1F4F2FCB7 /* Products */;
+			productRefGroup = 3CBFDA3F9C3668C2929ECFA0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C5D8C59107F7624B78AA58CB /* Garage */,
+				7B1B5905AAE29DCD87CD49CB /* Garage */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		CAF870DE8D7F11D11B434BCE /* Resources */ = {
+		34870295419FCBAA19E8D1B0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				79A233C7C006899E02306A2A /* Assets.xcassets in Resources */,
+				46BE4281CD9DDA30ACC90D59 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B1D59243DE34ECD725438A1A /* Sources */ = {
+		B50D75002C4745BA213D7EDA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AFFC925E8464F18899EA5435 /* CloudStore.swift in Sources */,
-				EE7B9F8AC6868687EAA66530 /* ExpenseLocation.swift in Sources */,
-				008279F2F6E809D4CBD7250A /* ExpenseShortcut.swift in Sources */,
-				084FC4AEFCE975B69DDE7206 /* ExpenseVoice.swift in Sources */,
-				BBA2EEB30C4466D9844FAE19 /* FinanceStore.swift in Sources */,
-				A51D34B097DE19324E194C72 /* FinanceView.swift in Sources */,
-				0FFF7189E8B61320E0023165 /* FuelEntryView.swift in Sources */,
-				AB7F173AA3C08FA5B343EF59 /* FuelLocation.swift in Sources */,
-				2EDC4FC881D54F37895977C2 /* GarageApp.swift in Sources */,
-				08A8359AEDD77FEBE73A9E6B /* GoogleSheetsAccess.swift in Sources */,
-				965006AC7526A8BF263F1475 /* LocalSnapshot.swift in Sources */,
-				C424A61D54A8B782292D521E /* MaintenanceCatalog.swift in Sources */,
-				C9D407E3167E808AAAF983D1 /* MaintenanceTemplateView.swift in Sources */,
-				60C89D62C4828B1C5F12E5D7 /* NotificationPlanner.swift in Sources */,
-				1E63818D57134C802AC47DFE /* Sharing.swift in Sources */,
-				2DA1F19648C1247C8EEEADFA /* VehicleCatalog.swift in Sources */,
-				AF77700C13D922B3E56F7675 /* Views.swift in Sources */,
-				899055991D4544D61A5858C6 /* ServiceModels.swift in Sources */,
+				2B45D280A2563DDAD807C42F /* CloudStore.swift in Sources */,
+				ED399FC7357BC425EA79C632 /* ExpenseLocation.swift in Sources */,
+				12845DDFDAD5FD22479A83E6 /* ExpenseShortcut.swift in Sources */,
+				D6F029AFDF7A9D0B18899B2F /* ExpenseVoice.swift in Sources */,
+				BE3004A1B91D198F898F9610 /* FinanceStore.swift in Sources */,
+				AFA3960D3EBB18EB3A4F13F4 /* FinanceView.swift in Sources */,
+				D4D864CFA736F1FFAD1479CA /* FuelEntryView.swift in Sources */,
+				A45AAA03B6B53081E7F405AD /* FuelLocation.swift in Sources */,
+				EFD7575D73338525EC0620AE /* GarageApp.swift in Sources */,
+				7D8CB2AE9C18C987E1A4DBC8 /* GoogleSheetsAccess.swift in Sources */,
+				7C5C5CD1B7D3905164181650 /* LocalSnapshot.swift in Sources */,
+				808FF0E7289AF3ED312C679A /* MaintenanceCatalog.swift in Sources */,
+				A22B3F29C512B81D98CC04D5 /* MaintenanceTemplateView.swift in Sources */,
+				5897232DAD2F72FB2DACE795 /* NotificationPlanner.swift in Sources */,
+				4D885BCFBC8BAD3580E17A8C /* Sharing.swift in Sources */,
+				ADC1B1353846BB8ACDD2A134 /* VehicleCatalog.swift in Sources */,
+				4E4205F4B77DD91E8B8C8566 /* Views.swift in Sources */,
+				7581C4E110019A6155A70B2A /* ServiceModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		137EE41465D9CC369DC0F7B6 /* Debug */ = {
+		531B22E876330EA17B5165D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = App/Garage.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3SRDN9365G;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.garage;
+				PRODUCT_NAME = Garage;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		56883A5F442F52363237EBD0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = "App/Garage-Release.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3SRDN9365G;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.garage;
+				PRODUCT_NAME = Garage;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		B810C660B06B8492175C947F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -301,59 +369,7 @@
 			};
 			name = Debug;
 		};
-		30673E7B2502946651EA6810 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 470D46FE7751E1CE07D12D26 /* GoogleConfig.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = App/Garage.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3SRDN9365G;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.garage;
-				PRODUCT_NAME = Garage;
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Debug;
-		};
-		47F0E143C69DA0CF7FB644B6 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 470D46FE7751E1CE07D12D26 /* GoogleConfig.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = "App/Garage-Release.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3SRDN9365G;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.garage;
-				PRODUCT_NAME = Garage;
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Release;
-		};
-		DF7610C8BE7449385A8D827D /* Release */ = {
+		BA10A5E43927ADA2C609615C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -411,25 +427,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7569361929B551A2478BD288 /* Build configuration list for PBXProject "Garage" */ = {
+		B6D279EA0A951B64467C677D /* Build configuration list for PBXNativeTarget "Garage" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				137EE41465D9CC369DC0F7B6 /* Debug */,
-				DF7610C8BE7449385A8D827D /* Release */,
+				56883A5F442F52363237EBD0 /* Release */,
+				531B22E876330EA17B5165D8 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C25BE2C42E66D903A0B8AE4A /* Build configuration list for PBXNativeTarget "Garage" */ = {
+		D8DC867191F49B48C538A9D1 /* Build configuration list for PBXProject "Garage" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				47F0E143C69DA0CF7FB644B6 /* Release */,
-				30673E7B2502946651EA6810 /* Debug */,
+				B810C660B06B8492175C947F /* Debug */,
+				BA10A5E43927ADA2C609615C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 8E8ED245C1F17FC71A5B6A1E /* Project object */;
+	rootObject = 24FFCE1942C8855861A83C4A /* Project object */;
 }

@@ -3,6 +3,9 @@ project = Xcodeproj::Project.new('Garage.xcodeproj')
 target = project.new_target(:application, 'Garage', :ios, '17.0')
 llama_framework = project.main_group.new_file('build/llama.xcframework')
 target.frameworks_build_phase.add_file_reference(llama_framework)
+embed_frameworks = target.new_copy_files_build_phase('Embed Frameworks')
+embed_frameworks.dst_subfolder_spec = '10'
+embed_frameworks.add_file_reference(llama_framework).settings = { 'ATTRIBUTES' => ['CodeSignOnCopy', 'RemoveHeadersOnCopy'] }
 google_config = project.main_group.new_file('App/GoogleConfig.xcconfig')
 target.build_configuration_list.build_configurations.each { |config| config.base_configuration_reference = google_config }
 project.build_configuration_list.build_configurations.each do |config|
