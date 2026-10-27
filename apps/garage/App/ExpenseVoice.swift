@@ -33,7 +33,9 @@ import Speech
 @MainActor final class ExpenseSpeechRecognizer: ObservableObject {
     @Published var transcript = ""
     @Published var listening = false
+    @Published var starting = false
     @Published var completedTranscript: String?
+    @Published var finishedWithoutTranscript = false
     @Published var errorMessage: String?
 
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "es-AR"))
@@ -46,28 +48,33 @@ import Speech
     private var finishing = false
 
     func start() async {
-        guard !listening, !finishing else { return }
+        guard !listening, !finishing, !starting else { return }
+        sessionID = UUID()
+        let currentSession = sessionID
+        starting = true
+        defer { starting = false }
+        transcript = ""
+        completedTranscript = nil
+        finishedWithoutTranscript = false
+        errorMessage = nil
         ExpenseVoiceDiagnostics.shared.record("Dictado: solicitando permisos")
         let authorized = await withCheckedContinuation { continuation in
             SFSpeechRecognizer.requestAuthorization { status in continuation.resume(returning: status == .authorized) }
         }
+        guard sessionID == currentSession else { return }
         guard authorized, await AVAudioApplication.requestRecordPermission() else {
             errorMessage = "Permití micrófono y reconocimiento de voz en Configuración."
             ExpenseVoiceDiagnostics.shared.record("Dictado: permisos denegados")
             return
         }
+        guard sessionID == currentSession else { return }
         guard let recognizer, recognizer.isAvailable, recognizer.supportsOnDeviceRecognition else {
             errorMessage = "El dictado en español sin conexión no está disponible en este iPhone."
             ExpenseVoiceDiagnostics.shared.record("Dictado: reconocimiento local no disponible")
             return
         }
         do {
-            sessionID = UUID()
-            let currentSession = sessionID
-            transcript = ""
-            completedTranscript = nil
             finishing = false
-            errorMessage = nil
             let request = SFSpeechAudioBufferRecognitionRequest()
             request.requiresOnDeviceRecognition = true
             request.shouldReportPartialResults = true
@@ -119,6 +126,23 @@ import Speech
         finish()
     }
 
+    func cancel() {
+        sessionID = UUID()
+        silenceTask?.cancel()
+        finalizationTask?.cancel()
+        if engine.isRunning { engine.stop(); engine.inputNode.removeTap(onBus: 0) }
+        request?.endAudio()
+        task?.cancel()
+        request = nil
+        task = nil
+        transcript = ""
+        completedTranscript = nil
+        listening = false
+        finishing = false
+        try? AVAudioSession.sharedInstance().setActive(false)
+        ExpenseVoiceDiagnostics.shared.record("Dictado: cancelado")
+    }
+
     private func scheduleSilence(for id: UUID) {
         silenceTask?.cancel()
         silenceTask = Task { @MainActor in
@@ -162,6 +186,7 @@ import Speech
             completedTranscript = transcript
             ExpenseVoiceDiagnostics.shared.record("Dictado: texto entregado (\(transcript.count) caracteres)")
         } else {
+            if errorMessage == nil { finishedWithoutTranscript = true }
             ExpenseVoiceDiagnostics.shared.record("Dictado: sin texto utilizable")
         }
     }

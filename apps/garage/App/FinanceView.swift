@@ -257,6 +257,106 @@ private struct BrowserDestination: Identifiable {
     var id: String { url.absoluteString }
 }
 
+private enum VoiceFlowPhase {
+    case listening
+    case processing
+    case failed(String)
+}
+
+private struct ExpenseVoiceFlowView: View {
+    @ObservedObject var speech: ExpenseSpeechRecognizer
+    @Binding var phase: VoiceFlowPhase
+    let onCancel: () -> Void
+    let onRetry: () -> Void
+    @State private var pulsing = false
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(red: 0.07, green: 0.12, blue: 0.24),
+                                    Color(red: 0.04, green: 0.06, blue: 0.12)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button("Cancelar", action: onCancel)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .padding(20)
+                }
+                Spacer()
+                ZStack {
+                    Circle()
+                        .fill(.cyan.opacity(0.1))
+                        .frame(width: 280, height: 280)
+                        .scaleEffect(pulsing ? 1.13 : 0.85)
+                        .opacity(pulsing ? 0.3 : 0.75)
+                    Circle()
+                        .fill(.cyan.opacity(0.17))
+                        .frame(width: 215, height: 215)
+                        .scaleEffect(pulsing ? 0.94 : 1.07)
+                    Circle()
+                        .fill(LinearGradient(colors: [.cyan.opacity(0.85), .blue.opacity(0.9)],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 155, height: 155)
+                        .shadow(color: .cyan.opacity(0.4), radius: 32)
+                    if case .processing = phase {
+                        ProgressView().tint(.white).scaleEffect(1.6)
+                    } else {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 45, weight: .medium))
+                            .foregroundStyle(.white)
+                            .symbolEffect(.variableColor.iterative, options: .repeating)
+                    }
+                }
+                .accessibilityHidden(true)
+                .padding(.bottom, 46)
+                Text(title)
+                    .font(.system(size: 30, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(subtitle)
+                    .font(.body)
+                    .foregroundStyle(.white.opacity(0.68))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 34)
+                    .padding(.top, 12)
+                if case .failed = phase {
+                    Button("Volver a intentar", action: onRetry)
+                        .buttonStyle(.borderedProminent)
+                        .tint(.cyan)
+                        .padding(.top, 30)
+                }
+                Spacer()
+                if case .listening = phase {
+                    Text(speech.listening ? "Se envía al terminar de hablar" : "Preparando el micrófono…")
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.48))
+                        .padding(.bottom, 30)
+                }
+            }
+        }
+        .onAppear { pulsing = true }
+        .animation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true), value: pulsing)
+        .interactiveDismissDisabled()
+    }
+
+    private var title: String {
+        switch phase {
+        case .listening: speech.listening ? "Escuchando" : "Preparando"
+        case .processing: "Preparando tu gasto"
+        case .failed: "No se pudo completar"
+        }
+    }
+
+    private var subtitle: String {
+        switch phase {
+        case .listening: "Decí el gasto en una frase. Garage terminará cuando hagas una pausa."
+        case .processing: "Estamos completando los datos para que los revises."
+        case .failed(let message): message
+        }
+    }
+}
+
 struct ExpenseEditorView: View {
     @EnvironmentObject private var finances: FinanceStore
     @EnvironmentObject private var chatGPT: ChatGPTExpense
@@ -273,6 +373,9 @@ struct ExpenseEditorView: View {
     @State private var amount = ""
     @State private var saving = false
     @State private var interpreting = false
+    @State private var showingVoiceFlow = false
+    @State private var voicePhase: VoiceFlowPhase = .listening
+    @State private var interpretationTask: Task<Void, Never>?
     @State private var rememberPlace = true
     @State private var error: String?
 
@@ -287,36 +390,17 @@ struct ExpenseEditorView: View {
         NavigationStack {
             Form {
                 Section("Por voz") {
-                    #if DEBUG
-                    Text("Estado: \(diagnostics.stage)")
-                        .font(.footnote).foregroundStyle(.secondary)
-                    #endif
                     if !chatGPT.connected {
                         Text("Conectá ChatGPT desde el menú ⋯ de Inicio para dictar gastos.")
                             .font(.footnote).foregroundStyle(.secondary)
                     }
-                    HStack {
-                        Button {
-                            if speech.listening { speech.stop() }
-                            else { Task { await speech.start() } }
-                        } label: {
-                            Label(speech.listening ? "Detener" : "Dictar gasto", systemImage: speech.listening ? "stop.circle" : "mic")
-                        }
-                        .disabled(!chatGPT.connected)
-                        Spacer()
-                        if !speech.transcript.isEmpty {
-                            Button("Interpretar") { Task { await interpret(speech.transcript) } }
-                                .disabled(interpreting || speech.listening || !chatGPT.connected)
-                        }
+                    Button {
+                        beginVoiceFlow()
+                    } label: {
+                        Label("Hablar", systemImage: "mic.fill")
+                            .frame(maxWidth: .infinity, minHeight: 42)
                     }
-                    if !speech.transcript.isEmpty {
-                        Text(speech.transcript).font(.subheadline)
-                    }
-                    if let message = speech.errorMessage { Text(message).font(.footnote).foregroundStyle(.orange) }
-                    if interpreting { ProgressView() }
-                    if let error { Text(error).font(.footnote).foregroundStyle(.red) }
-                    Text("Garage transcribe en el iPhone y envía el texto a OpenAI para completar este gasto.")
-                        .font(.caption).foregroundStyle(.secondary)
+                    .disabled(!chatGPT.connected || interpreting)
                 }
                 Section("Revisar antes de guardar") {
                 DatePicker("Fecha", selection: $date, displayedComponents: .date)
@@ -343,12 +427,49 @@ struct ExpenseEditorView: View {
             }
             .disabled(saving)
             .onAppear { paidBy = cars.myPayerName ?? "Común" }
+            .fullScreenCover(isPresented: $showingVoiceFlow) {
+                ExpenseVoiceFlowView(speech: speech, phase: $voicePhase,
+                                     onCancel: cancelVoiceFlow, onRetry: retryVoiceFlow)
+            }
             .onReceive(speech.$completedTranscript.compactMap { $0 }) { spoken in
+                guard showingVoiceFlow else { return }
                 diagnostics.record("Formulario: texto recibido")
-                if chatGPT.connected { Task { await interpret(spoken) } }
-                else { diagnostics.record("Formulario: ChatGPT desconectado") }
+                voicePhase = .processing
+                if chatGPT.connected { interpretationTask = Task { await interpret(spoken) } }
+                else { voicePhase = .failed("Conectá ChatGPT desde el menú de Inicio y volvé a intentar.") }
+            }
+            .onChange(of: speech.errorMessage) { _, message in
+                if showingVoiceFlow, let message { voicePhase = .failed(message) }
+            }
+            .onChange(of: speech.listening) { _, listening in
+                if showingVoiceFlow, !listening, !speech.transcript.isEmpty { voicePhase = .processing }
+            }
+            .onChange(of: speech.finishedWithoutTranscript) { _, finished in
+                if showingVoiceFlow, finished { voicePhase = .failed("No llegué a escuchar un gasto. Probá otra vez.") }
             }
         }
+    }
+
+    private func beginVoiceFlow() {
+        error = nil
+        voicePhase = .listening
+        showingVoiceFlow = true
+        Task { await speech.start() }
+    }
+
+    private func retryVoiceFlow() {
+        interpretationTask?.cancel()
+        interpretationTask = nil
+        speech.cancel()
+        voicePhase = .listening
+        Task { await speech.start() }
+    }
+
+    private func cancelVoiceFlow() {
+        interpretationTask?.cancel()
+        interpretationTask = nil
+        speech.cancel()
+        showingVoiceFlow = false
     }
 
     private var decimalAmount: Decimal? {
@@ -384,6 +505,7 @@ struct ExpenseEditorView: View {
         defer { interpreting = false }
         do {
             let result = try await chatGPT.interpret(spoken)
+            try Task.checkCancellation()
             amount = result.amount.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
             category = result.category.flatMap { FamilyBudget.categories.contains($0) ? $0 : nil } ?? ""
             if let payer = result.paidBy, cars.activePayers.contains(payer) { paidBy = payer }
@@ -397,8 +519,10 @@ struct ExpenseEditorView: View {
             }
             error = nil
             diagnostics.record("Formulario: campos actualizados")
+            showingVoiceFlow = false
         } catch {
-            self.error = error.localizedDescription
+            guard !Task.isCancelled, showingVoiceFlow else { return }
+            voicePhase = .failed(error.localizedDescription)
             diagnostics.record("Formulario: error \(type(of: error))")
         }
     }
