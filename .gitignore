@@ -4,5 +4,5 @@
 DerivedData/
 *.xcuserstate
 xcuserdata/
-apps/garage/build-llama.log
-apps/garage/Garage.xcodeproj/project.xcworkspace/
+apps/nido/build-llama.log
+apps/nido/Nido.xcodeproj/project.xcworkspace/

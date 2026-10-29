@@ -1,0 +1,110 @@
+opt_out_usage
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Archive Nido and upload the processed build to TestFlight"
+  lane :testflight do
+    %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID GARAGE_ASC_KEY_ID GARAGE_ASC_ISSUER_ID GARAGE_ASC_KEY_P8_BASE64].each do |name|
+      UI.user_error!("#{name} is required") if ENV[name].to_s.empty?
+    end
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("GARAGE_ASC_KEY_ID"),
+      issuer_id: ENV.fetch("GARAGE_ASC_ISSUER_ID"),
+      key_content: ENV.fetch("GARAGE_ASC_KEY_P8_BASE64"),
+      is_key_content_base64: true
+    )
+
+    build_app(
+      project: "Nido.xcodeproj",
+      scheme: "Nido",
+      configuration: "Release",
+      clean: true,
+      export_method: "app-store",
+      export_team_id: "3SRDN9365G",
+      export_options: {
+        signingStyle: "manual",
+        signingCertificate: "Apple Distribution",
+        provisioningProfiles: { "com.schoren.garage" => ENV.fetch("GARAGE_PROFILE_UUID") }
+      },
+      xcargs: [
+        "DEVELOPMENT_TEAM=3SRDN9365G",
+        "CODE_SIGN_STYLE=Manual",
+        "PROVISIONING_PROFILE_SPECIFIER=#{ENV.fetch('GARAGE_PROFILE_UUID')}",
+        "MARKETING_VERSION=#{ENV.fetch('GARAGE_VERSION')}",
+        "CURRENT_PROJECT_VERSION=#{ENV.fetch('GARAGE_BUILD_NUMBER')}"
+      ].join(" "),
+      output_directory: "build/testflight",
+      output_name: "Nido.ipa"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: "build/testflight/Nido.ipa",
+      skip_waiting_for_build_processing: false,
+      distribute_external: false,
+      changelog: "Nido #{ENV.fetch('GARAGE_VERSION')}"
+    )
+
+    app = Spaceship::ConnectAPI::App.find("com.schoren.garage")
+    UI.user_error!("Nido is not registered in App Store Connect") if app.nil?
+    version_name = ENV.fetch("GARAGE_VERSION")
+    build_number = ENV.fetch("GARAGE_BUILD_NUMBER")
+    platform = Spaceship::ConnectAPI::Platform::IOS
+    version = app.get_app_store_versions(filter: { platform: platform }, limit: 50).find do |candidate|
+      candidate.version_string == version_name
+    end
+    if version.nil?
+      editable_states = %w[PREPARE_FOR_SUBMISSION READY_FOR_REVIEW DEVELOPER_REJECTED REJECTED METADATA_REJECTED INVALID_BINARY]
+      editable = app.get_app_store_versions(filter: { platform: platform }, limit: 50).select do |candidate|
+        editable_states.include?(candidate.app_version_state)
+      end
+      UI.user_error!("Multiple editable App Store versions exist") if editable.length > 1
+      if editable.empty?
+        app.ensure_version!(version_name, platform: platform)
+      else
+        previous = editable.first
+        if Gem::Version.new(version_name) < Gem::Version.new(previous.version_string)
+          UI.user_error!("#{version_name} must be newer than editable version #{previous.version_string}")
+        end
+        previous.update(attributes: { versionString: version_name })
+      end
+      version = app.get_app_store_versions(filter: { platform: platform }, limit: 50).find do |candidate|
+        candidate.version_string == version_name
+      end
+    end
+    UI.user_error!("App Store version #{version_name} was not created") if version.nil?
+
+    editable_info = app.fetch_edit_app_info
+    UI.user_error!("Nido has no editable App Store Connect app information") if editable_info.nil?
+    localizations = editable_info.get_app_info_localizations
+    UI.user_error!("Nido has no App Store Connect localization to rename") if localizations.empty?
+    localizations.each do |localization|
+      localization.update(attributes: { name: "Nido" }) unless localization.name == "Nido"
+    end
+    UI.user_error!("App Store Connect did not retain the Nido name") unless
+      editable_info.get_app_info_localizations.all? { |localization| localization.name == "Nido" }
+
+    build = Spaceship::ConnectAPI::Build.all(
+      app_id: app.id,
+      version: version_name,
+      build_number: build_number,
+      platform: platform
+    ).first
+    UI.user_error!("Processed Nido build #{version_name} (#{build_number}) was not found") if build.nil?
+    UI.user_error!("Nido build is #{build.processing_state}") unless build.processing_state == "VALID"
+    version.select_build(build_id: build.id)
+    selected = nil
+    5.times do |attempt|
+      begin
+        selected = version.get_build
+      rescue => error
+        raise unless error.message.match?(/No data|not found|404/i)
+      end
+      break if selected&.id == build.id
+      sleep(2**attempt) if attempt < 4
+    end
+    UI.user_error!("App Store Connect did not retain the selected build") unless selected&.id == build.id
+  end
+end

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleDevelopmentRegion</key><string>$(DEVELOPMENT_LANGUAGE)</string>
+<key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
+<key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+<key>CFBundleDisplayName</key><string>Nido</string>
+<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+<key>CFBundleName</key><string>$(PRODUCT_NAME)</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>$(MARKETING_VERSION)</string>
+<key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
+<key>CKSharingSupported</key><true/>
+<key>NidoGoogleClientID</key><string>$(GARAGE_GOOGLE_CLIENT_ID)</string>
+<key>CFBundleURLTypes</key><array><dict><key>CFBundleURLSchemes</key><array><string>$(GARAGE_GOOGLE_REDIRECT_SCHEME)</string></array></dict></array>
+<key>NSLocationWhenInUseUsageDescription</key><string>Nido usa tu ubicación para asociar gastos a lugares y sugerir cargas de nafta.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key><string>Si activás sugerencias por ubicación, Nido detecta visitas a lugares incluso con la app cerrada.</string>
+<key>NSMicrophoneUsageDescription</key><string>Nido usa el micrófono para registrar gastos por voz.</string>
+<key>NSSpeechRecognitionUsageDescription</key><string>Nido transcribe el gasto que dictás para completar el formulario.</string>
+<key>UILaunchScreen</key><dict/>
+<key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string><string>UIInterfaceOrientationPortraitUpsideDown</string><string>UIInterfaceOrientationLandscapeLeft</string><string>UIInterfaceOrientationLandscapeRight</string></array>
+</dict></plist>
