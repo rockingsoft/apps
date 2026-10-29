@@ -80,11 +80,12 @@ platform :ios do
     UI.user_error!("Nido has no editable App Store Connect app information") if editable_info.nil?
     localizations = editable_info.get_app_info_localizations
     UI.user_error!("Nido has no App Store Connect localization to rename") if localizations.empty?
+    store_name = "Nido: Finanzas y Autos"
     localizations.each do |localization|
-      localization.update(attributes: { name: "Nido" }) unless localization.name == "Nido"
+      localization.update(attributes: { name: store_name }) unless localization.name == store_name
     end
-    UI.user_error!("App Store Connect did not retain the Nido name") unless
-      editable_info.get_app_info_localizations.all? { |localization| localization.name == "Nido" }
+    UI.user_error!("App Store Connect did not retain the #{store_name} name") unless
+      editable_info.get_app_info_localizations.all? { |localization| localization.name == store_name }
 
     build = Spaceship::ConnectAPI::Build.all(
       app_id: app.id,
