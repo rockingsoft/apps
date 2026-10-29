@@ -3,7 +3,7 @@ opt_out_usage
 default_platform(:ios)
 
 platform :ios do
-  desc "Archive Garage and upload the processed build to TestFlight"
+  desc "Archive Nido and upload the processed build to TestFlight"
   lane :testflight do
     %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID GARAGE_ASC_KEY_ID GARAGE_ASC_ISSUER_ID GARAGE_ASC_KEY_P8_BASE64].each do |name|
       UI.user_error!("#{name} is required") if ENV[name].to_s.empty?
@@ -17,8 +17,8 @@ platform :ios do
     )
 
     build_app(
-      project: "Garage.xcodeproj",
-      scheme: "Garage",
+      project: "Nido.xcodeproj",
+      scheme: "Nido",
       configuration: "Release",
       clean: true,
       export_method: "app-store",
@@ -36,19 +36,19 @@ platform :ios do
         "CURRENT_PROJECT_VERSION=#{ENV.fetch('GARAGE_BUILD_NUMBER')}"
       ].join(" "),
       output_directory: "build/testflight",
-      output_name: "Garage.ipa"
+      output_name: "Nido.ipa"
     )
 
     upload_to_testflight(
       api_key: api_key,
-      ipa: "build/testflight/Garage.ipa",
+      ipa: "build/testflight/Nido.ipa",
       skip_waiting_for_build_processing: false,
       distribute_external: false,
-      changelog: "Garage #{ENV.fetch('GARAGE_VERSION')}"
+      changelog: "Nido #{ENV.fetch('GARAGE_VERSION')}"
     )
 
     app = Spaceship::ConnectAPI::App.find("com.schoren.garage")
-    UI.user_error!("Garage is not registered in App Store Connect") if app.nil?
+    UI.user_error!("Nido is not registered in App Store Connect") if app.nil?
     version_name = ENV.fetch("GARAGE_VERSION")
     build_number = ENV.fetch("GARAGE_BUILD_NUMBER")
     platform = Spaceship::ConnectAPI::Platform::IOS
@@ -76,14 +76,24 @@ platform :ios do
     end
     UI.user_error!("App Store version #{version_name} was not created") if version.nil?
 
+    editable_info = app.fetch_edit_app_info
+    UI.user_error!("Nido has no editable App Store Connect app information") if editable_info.nil?
+    localizations = editable_info.get_app_info_localizations
+    UI.user_error!("Nido has no App Store Connect localization to rename") if localizations.empty?
+    localizations.each do |localization|
+      localization.update(attributes: { name: "Nido" }) unless localization.name == "Nido"
+    end
+    UI.user_error!("App Store Connect did not retain the Nido name") unless
+      editable_info.get_app_info_localizations.all? { |localization| localization.name == "Nido" }
+
     build = Spaceship::ConnectAPI::Build.all(
       app_id: app.id,
       version: version_name,
       build_number: build_number,
       platform: platform
     ).first
-    UI.user_error!("Processed Garage build #{version_name} (#{build_number}) was not found") if build.nil?
-    UI.user_error!("Garage build is #{build.processing_state}") unless build.processing_state == "VALID"
+    UI.user_error!("Processed Nido build #{version_name} (#{build_number}) was not found") if build.nil?
+    UI.user_error!("Nido build is #{build.processing_state}") unless build.processing_state == "VALID"
     version.select_build(build_id: build.id)
     selected = nil
     5.times do |attempt|

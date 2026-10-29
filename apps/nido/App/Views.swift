@@ -1,22 +1,31 @@
 import SwiftUI
 import UIKit
 
+private struct ShortcutExpenseRequest: Identifiable {
+    let id = UUID()
+    let transcript: String?
+}
+
 struct CarsView: View {
     @EnvironmentObject private var store: CloudStore
-    @AppStorage("garage.selectedCarZone") private var selectedCarZone = ""
+    @AppStorage("garage.selectedCarID") private var selectedCarID = ""
     @State private var selectedTab = 0
+    @State private var shortcutExpenseRequest: ShortcutExpenseRequest?
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView(selectedCarZone: $selectedCarZone, showCars: { selectedTab = 1 })
+            FinanceDashboardView()
                 .tabItem { Label("Inicio", systemImage: "house.fill") }
                 .tag(0)
+            HomeView(selectedCarID: $selectedCarID, showCars: { selectedTab = 2 })
+                .tabItem { Label("Autos", systemImage: "car.side.fill") }
+                .tag(1)
             ManageCarsView(onSelectCar: { car in
-                selectedCarZone = car.id.zoneID.zoneName
-                selectedTab = 0
+                selectedCarID = car.id.recordName
+                selectedTab = 1
             })
                 .tabItem { Label("Mis autos", systemImage: "car.side.fill") }
-                .tag(1)
+                .tag(2)
         }
         .alert("No se pudo aceptar el auto compartido", isPresented: Binding(
             get: { store.shareError != nil },
@@ -26,18 +35,33 @@ struct CarsView: View {
         } message: {
             Text(store.shareError ?? "Intentá abrir la invitación de nuevo.")
         }
+        .sheet(item: $shortcutExpenseRequest) { request in
+            ExpenseEditorView(initialTranscript: request.transcript, startListeningWhenEmpty: true)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .garageOpenExpense)) { _ in openRequestedExpense() }
+        .onAppear { openRequestedExpense() }
+    }
+
+    private func openRequestedExpense() {
+        guard UserDefaults.standard.bool(forKey: "garage.openExpenseRequested") else { return }
+        UserDefaults.standard.removeObject(forKey: "garage.openExpenseRequested")
+        let transcript = UserDefaults.standard.string(forKey: "garage.shortcutExpenseText")
+        UserDefaults.standard.removeObject(forKey: "garage.shortcutExpenseText")
+        ExpenseVoiceDiagnostics.shared.record("Atajo: texto recibido (\(transcript?.count ?? 0) caracteres)")
+        selectedTab = 0
+        shortcutExpenseRequest = ShortcutExpenseRequest(transcript: transcript)
     }
 }
 
 private struct HomeView: View {
     @EnvironmentObject private var store: CloudStore
     @EnvironmentObject private var fuelMonitor: FuelVisitMonitor
-    @Binding var selectedCarZone: String
+    @Binding var selectedCarID: String
     let showCars: () -> Void
     @State private var suggestedFuelCar: Car?
 
     private var selectedCar: Car? {
-        if let chosen = store.cars.first(where: { $0.id.zoneID.zoneName == selectedCarZone }) { return chosen }
+        if let chosen = store.cars.first(where: { $0.id.recordName == selectedCarID }) { return chosen }
         return store.cars.max { lhs, rhs in
             store.fuelEntries.filter { $0.carID == lhs.id }.count < store.fuelEntries.filter { $0.carID == rhs.id }.count
         }
@@ -50,7 +74,7 @@ private struct HomeView: View {
                     Menu {
                         ForEach(store.cars) { option in
                             Button {
-                                selectedCarZone = option.id.zoneID.zoneName
+                                selectedCarID = option.id.recordName
                             } label: {
                                 if option.id == car.id {
                                     Label(option.name, systemImage: "checkmark")
@@ -94,7 +118,7 @@ private struct HomeView: View {
                         .padding(.vertical, 8)
                     }
                     CarView(car: car)
-                        .id(car.id.zoneID.zoneName)
+                        .id(car.id.recordName)
                 }
                 .sheet(item: $suggestedFuelCar) { chosen in
                     FuelEntryView(car: chosen, suggestion: fuelMonitor.suggestion)
@@ -154,10 +178,10 @@ private struct ManageCarsView: View {
                             if enabled { Task { await NotificationPlanner.requestPermission() } }
                         }
                     ))
-                    Text("Garage usa visitas de iOS y busca estaciones cercanas. Si detecta una parada de al menos 5 minutos, puede sugerir una carga. La detección no es instantánea ni exacta.")
+                    Text("Nido usa visitas de iOS y busca estaciones cercanas. Si detecta una parada de al menos 5 minutos, puede sugerir una carga. La detección no es instantánea ni exacta.")
                         .font(.footnote).foregroundStyle(.secondary)
                     if fuelMonitor.enabled && fuelMonitor.authorization != .authorizedAlways {
-                        Text("Para recibir avisos con Garage cerrada, permití ubicación ‘Siempre’ en Configuración.")
+                        Text("Para recibir avisos con Nido cerrada, permití ubicación ‘Siempre’ en Configuración.")
                             .font(.footnote).foregroundStyle(.orange)
                         Link("Abrir Configuración", destination: URL(string: UIApplication.openSettingsURLString)!)
                     }
@@ -194,12 +218,12 @@ struct AddCarView: View {
     private struct SuggestedPlan: Identifiable {
         let car: Car
         let template: MaintenanceTemplate
-        var id: String { car.id.zoneID.zoneName }
+        var id: String { car.id.recordName }
     }
 
     @EnvironmentObject private var store: CloudStore
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("garage.selectedCarZone") private var selectedCarZone = ""
+    @AppStorage("garage.selectedCarID") private var selectedCarID = ""
     @State private var plate = ""
     @State private var odometerText = ""
     @State private var brands: [CatalogOption] = []
@@ -290,7 +314,7 @@ struct AddCarView: View {
                         saving = true
                         Task {
                             let car = await store.addCar(name: name, plate: plate, odometer: odometer)
-                            selectedCarZone = car.id.zoneID.zoneName
+                            selectedCarID = car.id.recordName
                             if let template = MaintenanceCatalog.template(for: car) {
                                 suggestedPlan = SuggestedPlan(car: car, template: template)
                             }
@@ -443,13 +467,6 @@ struct CarView: View {
         }
         .navigationTitle(current.name)
         .refreshable { await store.reload() }
-        .toolbar {
-            NavigationLink {
-                CarAccessView(car: current, store: store)
-            } label: {
-                Label("Acceso", systemImage: "person.2")
-            }
-        }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
         .sheet(isPresented: $addFuel) { FuelEntryView(car: current) }
         .fuelDeletionAlert(entry: $fuelEntryToDelete, store: store)
@@ -606,19 +623,36 @@ struct PlanView: View {
 
 struct CompleteServiceView: View {
     @EnvironmentObject private var store: CloudStore
+    @EnvironmentObject private var finances: FinanceStore
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var location = CurrentExpenseLocation()
     let plan: ServicePlan
     let car: Car
     @State private var date = Date()
     @State private var kilometers = 0
     @State private var notes = ""
+    @State private var amount = ""
+    @State private var paidBy = ""
+    @State private var showingPayerProfile = false
     @State private var saving = false
+    private var serviceCost: Decimal? {
+        guard let value = Decimal(string: amount.replacingOccurrences(of: ",", with: ".")), value > 0 else { return nil }
+        return value
+    }
     var body: some View {
         NavigationStack {
             Form {
                 DatePicker("Fecha", selection: $date, displayedComponents: .date)
                 TextField("Kilometraje", value: $kilometers, format: .number).keyboardType(.numberPad)
                 TextField("Notas, repuestos, taller…", text: $notes, axis: .vertical)
+                TextField("Costo en pesos", text: $amount).keyboardType(.decimalPad)
+                Picker("Pagado por", selection: $paidBy) {
+                    if paidBy.isEmpty { Text("Elegir persona").tag("") }
+                    ForEach(store.activePayers, id: \.self) { Text($0) }
+                }
+                if store.myPayerName == nil {
+                    Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
+                }
             }
             .disabled(saving)
             .navigationTitle("Registrar service")
@@ -628,16 +662,33 @@ struct CompleteServiceView: View {
                     Button {
                         guard !saving else { return }
                         saving = true
-                        Task { await store.complete(plan, car: car, date: date, kilometers: kilometers, notes: notes); dismiss() }
+                        Task {
+                            guard let cost = serviceCost else { saving = false; return }
+                            let locationTask = Task { try? await location.capture() }
+                            let entryID = await store.complete(plan, car: car, date: date, kilometers: kilometers, notes: notes)
+                            let expense = FamilyExpense(id: "service-\(entryID)", date: date, category: "Auto",
+                                                        paidBy: paidBy, detail: "\(plan.title) · \(car.name)",
+                                                        amount: cost, row: nil)
+                            try? await finances.add(expense)
+                            if let coordinate = await locationTask.value?.coordinate {
+                                await store.addExpensePlace(expense: expense, latitude: coordinate.latitude,
+                                                            longitude: coordinate.longitude)
+                            }
+                            dismiss()
+                        }
                     } label: {
                         if saving { ProgressView().accessibilityLabel("Guardando service") }
                         else { Text("Guardar") }
                     }
-                    .disabled(saving)
+                    .disabled(saving || serviceCost == nil || paidBy.isEmpty)
                 }
             }
             .interactiveDismissDisabled(saving)
         }
-        .onAppear { kilometers = car.odometer }
+        .onAppear { kilometers = car.odometer; if paidBy.isEmpty { paidBy = store.myPayerName ?? "" } }
+        .onChange(of: store.myPayerName) { _, name in
+            if paidBy.isEmpty, let name { paidBy = name }
+        }
+        .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
     }
 }

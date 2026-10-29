@@ -110,7 +110,7 @@ enum FuelStationFinder {
         UserDefaults.standard.set(Date(), forKey: Self.lastPromptKey)
         let content = UNMutableNotificationContent()
         content.title = "¿Cargaste nafta en \(station.name)?"
-        content.body = "Abrí Garage para registrar kilómetros, litros y precio."
+        content.body = "Abrí Nido para registrar kilómetros, litros y precio."
         content.sound = .default
         let request = UNNotificationRequest(identifier: "garage.fuel.\(found.id)", content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(request)

@@ -21,7 +21,7 @@ import UserNotifications
             let status = plan.status(odometer: car.odometer)
             let content = UNMutableNotificationContent()
             content.title = "\(car.name): \(plan.title)"
-            content.body = plan.details.isEmpty ? "Revisá este servicio en Garage." : plan.details
+            content.body = plan.details.isEmpty ? "Revisá este servicio en Nido." : plan.details
             content.sound = .default
             if status != .ok {
                 let key = "garage.alerted.\(plan.id.recordName).\(plan.lastDate.timeIntervalSince1970).\(plan.lastKilometers)"

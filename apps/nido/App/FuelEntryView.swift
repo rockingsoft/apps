@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FuelEntryView: View {
     @EnvironmentObject private var store: CloudStore
+    @EnvironmentObject private var finances: FinanceStore
     @Environment(\.dismiss) private var dismiss
     @StateObject private var locator = CurrentFuelStation()
 
@@ -18,6 +19,8 @@ struct FuelEntryView: View {
     @State private var manualStation = false
     @State private var stationWasChosen = false
     @State private var saving = false
+    @State private var paidBy = ""
+    @State private var showingPayerProfile = false
 
     init(car: Car, suggestion: FuelVisitSuggestion? = nil) {
         self.car = car
@@ -40,7 +43,7 @@ struct FuelEntryView: View {
     private var kilometers: Int? { Int(kilometersText) }
     private var canSave: Bool {
         !stationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        (kilometers.map { $0 >= 0 } ?? false) && liters != nil && price != nil
+        (kilometers.map { $0 >= 0 } ?? false) && liters != nil && price != nil && !paidBy.isEmpty
     }
 
     private func currency(_ value: Decimal) -> String {
@@ -149,6 +152,15 @@ struct FuelEntryView: View {
                     .padding(18)
                     .foregroundStyle(.white)
                     .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 18))
+                    Picker("Pagado por", selection: $paidBy) {
+                        if paidBy.isEmpty { Text("Elegir persona").tag("") }
+                        ForEach(store.activePayers, id: \.self) { Text($0) }
+                    }
+                    .padding(10)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+                    if store.myPayerName == nil {
+                        Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
+                    }
                 }
                 .padding(16)
             }
@@ -156,7 +168,14 @@ struct FuelEntryView: View {
             .disabled(saving)
             .navigationTitle("Cargar nafta")
             .navigationBarTitleDisplayMode(.inline)
-            .task { if suggestion == nil { await detectStation() } }
+            .task {
+                if paidBy.isEmpty { paidBy = store.myPayerName ?? "" }
+                if suggestion == nil { await detectStation() }
+            }
+            .onChange(of: store.myPayerName) { _, name in
+                if paidBy.isEmpty, let name { paidBy = name }
+            }
+            .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
             }
@@ -195,9 +214,18 @@ struct FuelEntryView: View {
         guard !saving, canSave, let kilometers, let liters, let price else { return }
         saving = true
         Task {
-            await store.addFuelEntry(car: car, date: date, kilometers: kilometers, liters: liters,
+            let entryID = await store.addFuelEntry(car: car, date: date, kilometers: kilometers, liters: liters,
                                      pricePerLiter: price, stationName: stationName.trimmingCharacters(in: .whitespacesAndNewlines),
                                      latitude: latitude, longitude: longitude)
+            if let entryID {
+                let expense = FamilyExpense(id: "fuel-\(entryID)", date: date, category: "Auto",
+                                            paidBy: paidBy, detail: "Nafta · \(stationName) · \(car.name)",
+                                            amount: liters * price, row: nil)
+                try? await finances.add(expense)
+                if let latitude, let longitude {
+                    await store.addExpensePlace(expense: expense, latitude: latitude, longitude: longitude)
+                }
+            }
             if suggestion != nil { FuelVisitMonitor.shared.clearSuggestion() }
             dismiss()
         }

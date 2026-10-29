@@ -1,6 +1,8 @@
 require 'xcodeproj'
-project = Xcodeproj::Project.new('Garage.xcodeproj')
-target = project.new_target(:application, 'Garage', :ios, '17.0')
+project = Xcodeproj::Project.new('Nido.xcodeproj')
+target = project.new_target(:application, 'Nido', :ios, '17.0')
+google_config = project.main_group.new_file('App/GoogleConfig.xcconfig')
+target.build_configuration_list.build_configurations.each { |config| config.base_configuration_reference = google_config }
 project.build_configuration_list.build_configurations.each do |config|
   config.build_settings['SWIFT_VERSION'] = '5.0'
   config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
@@ -10,16 +12,12 @@ target.build_configurations.each do |config|
   config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
   config.build_settings['DEVELOPMENT_TEAM'] = '3SRDN9365G'
   config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.schoren.garage'
-  config.build_settings['PRODUCT_NAME'] = 'Garage'
-  config.build_settings['GENERATE_INFOPLIST_FILE'] = 'YES'
-  config.build_settings['INFOPLIST_KEY_UILaunchScreen_Generation'] = 'YES'
-  config.build_settings['INFOPLIST_KEY_UISupportedInterfaceOrientations'] = 'UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight'
-  config.build_settings['INFOPLIST_KEY_CKSharingSupported'] = 'YES'
-  config.build_settings['INFOPLIST_KEY_NSLocationWhenInUseUsageDescription'] = 'Garage usa tu ubicación para sugerir la estación al registrar una carga de nafta.'
-  config.build_settings['INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription'] = 'Si activás los avisos de cargas, Garage detecta paradas en estaciones incluso con la app cerrada.'
-  config.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/Garage.entitlements'
+  config.build_settings['PRODUCT_NAME'] = 'Nido'
+  config.build_settings['GENERATE_INFOPLIST_FILE'] = 'NO'
+  config.build_settings['INFOPLIST_FILE'] = 'App/Info.plist'
+  config.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/Nido.entitlements'
   if config.name == 'Release'
-    config.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/Garage-Release.entitlements'
+    config.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/Nido-Release.entitlements'
     config.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution'
   end
   config.build_settings['MARKETING_VERSION'] = '1.0.0'

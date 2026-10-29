@@ -22,6 +22,10 @@ struct LocalSnapshot: Codable {
         let entry: RecordKey
         let sharedWithMe: Bool
     }
+    struct PendingExpensePlaceDeletion: Codable, Hashable {
+        let place: RecordKey
+        let sharedWithMe: Bool
+    }
     struct CarData: Codable {
         let id: RecordKey
         var name: String
@@ -85,6 +89,36 @@ struct LocalSnapshot: Codable {
                       pricePerLiter: pricePerLiter, stationName: stationName, latitude: latitude, longitude: longitude)
         }
     }
+    struct ExpensePlaceData: Codable {
+        let id: RecordKey
+        let expenseID: String
+        let category: String
+        let detail: String
+        let latitude: Double
+        let longitude: Double
+        let recordedAt: Date
+        init(_ place: ExpensePlace) {
+            id = RecordKey(place.id); expenseID = place.expenseID; category = place.category
+            detail = place.detail; latitude = place.latitude; longitude = place.longitude; recordedAt = place.recordedAt
+        }
+        var place: ExpensePlace {
+            ExpensePlace(id: id.id, expenseID: expenseID, category: category, detail: detail,
+                         latitude: latitude, longitude: longitude, recordedAt: recordedAt)
+        }
+    }
+    struct FamilyMemberData: Codable {
+        let id: RecordKey
+        let userRecordName: String
+        let payerName: String
+        let updatedAt: Date
+        init(_ member: FamilyMember) {
+            id = RecordKey(member.id); userRecordName = member.userRecordName
+            payerName = member.payerName; updatedAt = member.updatedAt
+        }
+        var member: FamilyMember {
+            FamilyMember(id: id.id, userRecordName: userRecordName, payerName: payerName, updatedAt: updatedAt)
+        }
+    }
     var cars: [CarData] = []
     var plans: [PlanData] = []
     var entries: [EntryData] = []
@@ -97,6 +131,11 @@ struct LocalSnapshot: Codable {
     var fuelEntries: [FuelData]? = nil
     var pendingFuelEntries: Set<RecordKey>? = nil
     var pendingFuelDeletions: Set<PendingFuelDeletion>? = nil
+    var expensePlaces: [ExpensePlaceData]? = nil
+    var pendingExpensePlaces: Set<RecordKey>? = nil
+    var pendingExpensePlaceDeletions: Set<PendingExpensePlaceDeletion>? = nil
+    var familyMembers: [FamilyMemberData]? = nil
+    var pendingFamilyMembers: Set<RecordKey>? = nil
 
     static func load() -> LocalSnapshot {
         guard let data = UserDefaults.standard.data(forKey: "garage.localSnapshot"),

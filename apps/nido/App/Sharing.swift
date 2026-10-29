@@ -159,7 +159,7 @@ struct CarAccessView: View {
     var body: some View {
         List {
             Section {
-                LabeledContent("Auto", value: car.name)
+                LabeledContent("Espacio", value: car.name)
                 LabeledContent("Tu acceso", value: car.isSharedWithMe ? "Colaborador" : "Propietario")
             }
 
@@ -173,7 +173,7 @@ struct CarAccessView: View {
                 Section { ProgressView("Consultando iCloud…") }
             } else if share == nil {
                 Section("Personas") {
-                    Text(car.isSharedWithMe ? "No se pudo cargar la invitación." : "Solo vos tenés acceso a este auto.")
+                    Text(car.isSharedWithMe ? "No se pudo cargar la invitación." : "Solo vos tenés acceso a Nido.")
                         .foregroundStyle(.secondary)
                 }
             } else {
@@ -208,8 +208,8 @@ struct CarAccessView: View {
                     Button("Invitar a colaborar", systemImage: "person.crop.circle.badge.plus") {
                         inviting = true
                     }
-                    .disabled(!store.canShare(car) || loading || removing)
-                    Text("Las personas invitadas pueden editar este auto, sus cargas y servicios. La invitación se envía desde Mensajes u otra app que elijas.")
+                    .disabled(!store.canShareFamily || loading || removing)
+                    Text("Las personas invitadas pueden editar los autos, sus cargas, servicios y lugares de gasto. También necesitan acceso a la planilla de Google.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
@@ -236,7 +236,7 @@ struct CarAccessView: View {
             }
             Button("Cancelar", role: .cancel) { participantToRemove = nil }
         } message: {
-            Text("Esa persona dejará de ver y editar este auto.")
+            Text("Esa persona dejará de ver y editar los datos compartidos de Nido.")
         }
     }
 

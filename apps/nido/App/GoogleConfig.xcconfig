@@ -1,0 +1,3 @@
+// Cliente OAuth de tipo iOS para com.schoren.garage. Los IDs de cliente no son secretos.
+GARAGE_GOOGLE_CLIENT_ID = 432987194086-pek5e1ars88q980lk1vc24hi5f2jdlnr.apps.googleusercontent.com
+GARAGE_GOOGLE_REDIRECT_SCHEME = com.googleusercontent.apps.432987194086-pek5e1ars88q980lk1vc24hi5f2jdlnr

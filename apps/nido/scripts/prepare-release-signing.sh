@@ -40,7 +40,7 @@ team=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$profile_plist")
 app_id=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$profile_plist")
 cloudkit=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.icloud-container-environment:0' "$profile_plist" 2>/dev/null || true)
 [[ "$team" == 3SRDN9365G && "$app_id" == 3SRDN9365G.com.schoren.garage ]] || {
-  echo 'The App Store profile does not belong to Garage and team 3SRDN9365G.' >&2
+  echo 'The App Store profile does not belong to Nido and team 3SRDN9365G.' >&2
   exit 1
 }
 [[ "$cloudkit" == Production ]] || {
