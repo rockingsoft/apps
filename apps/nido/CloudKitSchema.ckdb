@@ -7,6 +7,7 @@ DEFINE SCHEMA
         "___modTime"    TIMESTAMP,
         "___modifiedBy" REFERENCE,
         "___recordID"   REFERENCE,
+        legacyZone      STRING,
         name            STRING QUERYABLE SEARCHABLE SORTABLE,
         odometer        INT64 QUERYABLE SORTABLE,
         plate           STRING QUERYABLE SEARCHABLE SORTABLE,
