@@ -7,7 +7,7 @@ extension Notification.Name {
 
 struct RegisterExpenseIntent: AppIntent {
     static var title: LocalizedStringResource = "Registrar gasto por voz"
-    static var description = IntentDescription("Siri pide el gasto y Nido lo interpreta para revisarlo antes de guardar.")
+    static var description = IntentDescription("Nido pide el gasto y lo interpreta para revisarlo antes de guardar.")
     static var openAppWhenRun = true
     @Parameter(title: "Gasto", requestValueDialog: "¿Qué gasto querés registrar?")
     var spokenExpense: String
