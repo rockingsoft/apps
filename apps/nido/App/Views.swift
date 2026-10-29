@@ -148,6 +148,10 @@ private struct ManageCarsView: View {
                 if let message = store.syncMessage {
                     Section { Label(message, systemImage: "icloud.slash").font(.footnote).foregroundStyle(.orange) }
                 }
+                if store.cars.isEmpty && !store.loading {
+                    ContentUnavailableView("Agregá tu primer auto", systemImage: "car", description: Text("Guardá sus services y recibí avisos cuando se acerquen."))
+                        .listRowBackground(Color.clear)
+                }
                 ForEach(store.cars) { car in
                     Button { onSelectCar(car) } label: {
                         VStack(alignment: .leading, spacing: 4) {
@@ -208,7 +212,6 @@ private struct ManageCarsView: View {
                          : "Se eliminarán el auto, su plan de servicios y su historial para todos los que lo comparten.")
                 }
             }
-            .overlay { if store.cars.isEmpty && !store.loading { ContentUnavailableView("Agregá tu primer auto", systemImage: "car", description: Text("Guardá sus services y recibí avisos cuando se acerquen.")) } }
             .refreshable { await store.reload() }
         }
     }

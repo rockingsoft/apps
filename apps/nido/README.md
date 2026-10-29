@@ -51,7 +51,7 @@ El script de build firma el simulador con el equipo por defecto `3SRDN9365G` (se
 
 El workflow manual **Nido TestFlight** compila la configuración Release, sube el IPA con Fastlane, espera el procesamiento de TestFlight y selecciona el build en la versión editable de App Store Connect. No ejecuta pruebas. `rebuild` conserva la versión actual y usa un número de build nuevo; `major` y `minor` incrementan el componente indicado y reinician los siguientes a cero. La primera ejecución con `rebuild` usa `1.0.0`. Después de una subida exitosa, el workflow guarda un tag `nido-vX.Y.Z`; la primera versión de Nido toma como base el último tag de Garage para conservar la secuencia.
 
-La configuración Release usa CloudKit Production. Antes del primer upload, el esquema del contenedor `iCloud.com.schoren.garage` debe estar desplegado a producción en CloudKit Console.
+La configuración Release usa CloudKit Production. El esquema versionado está en [`CloudKitSchema.ckdb`](CloudKitSchema.ckdb): importarlo en Development desde CloudKit Console, revisar el diff y ejecutar **Deploy Schema Changes** para Production antes de distribuir una versión que agregue tipos o campos. La zona compartida `garage-family-v1` representa todo Nido; `FamilyMember`, `ExpensePlace`, autos, cargas y services pertenecen a esa zona, no a shares individuales por auto.
 
 Las credenciales **exclusivas de Nido** se guardan en Infisical, proyecto `CLI General`, entorno `prod`, carpeta `/garage-ios-appstore`. GitHub Actions guarda solamente `GARAGE_INFISICAL_TOKEN`, un token de Infisical con acceso de lectura a esa carpeta. El workflow instala Infisical CLI y carga las credenciales en cada ejecución.
 
