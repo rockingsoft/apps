@@ -1,0 +1,152 @@
+DEFINE SCHEMA
+
+    RECORD TYPE Car (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        name            STRING QUERYABLE SEARCHABLE SORTABLE,
+        odometer        INT64 QUERYABLE SORTABLE,
+        plate           STRING QUERYABLE SEARCHABLE SORTABLE,
+        updatedAt       TIMESTAMP QUERYABLE SORTABLE,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE FuelEntry (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        car             REFERENCE,
+        date            TIMESTAMP QUERYABLE SORTABLE,
+        kilometers      INT64 QUERYABLE SORTABLE,
+        latitude        DOUBLE QUERYABLE SORTABLE,
+        liters          STRING QUERYABLE SEARCHABLE SORTABLE,
+        longitude       DOUBLE QUERYABLE SORTABLE,
+        pricePerLiter   STRING QUERYABLE SEARCHABLE SORTABLE,
+        stationName     STRING QUERYABLE SEARCHABLE SORTABLE,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE ExpensePlace (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        category        STRING,
+        detail          STRING,
+        expenseID       STRING,
+        latitude        DOUBLE,
+        longitude       DOUBLE,
+        recordedAt      TIMESTAMP,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE FamilyMember (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        payerName       STRING,
+        updatedAt       TIMESTAMP,
+        userRecordName  STRING,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE LegacyMigration (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        sourceOwner     STRING,
+        sourceZone      STRING,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE ServiceEntry (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        car             REFERENCE,
+        date            TIMESTAMP,
+        kilometers      INT64,
+        notes           STRING,
+        plan            REFERENCE,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE ServicePlan (
+        "___createTime"    TIMESTAMP,
+        "___createdBy"     REFERENCE,
+        "___etag"          STRING,
+        "___modTime"       TIMESTAMP,
+        "___modifiedBy"    REFERENCE,
+        "___recordID"      REFERENCE,
+        baselineUnknown    INT64 QUERYABLE SORTABLE,
+        car                REFERENCE,
+        details            STRING QUERYABLE SEARCHABLE SORTABLE,
+        intervalKilometers INT64 QUERYABLE SORTABLE,
+        intervalMonths     INT64 QUERYABLE SORTABLE,
+        lastDate           TIMESTAMP QUERYABLE SORTABLE,
+        lastKilometers     INT64 QUERYABLE SORTABLE,
+        noticeDays         INT64 QUERYABLE SORTABLE,
+        noticeKilometers   INT64 QUERYABLE SORTABLE,
+        sourceURL          STRING QUERYABLE SEARCHABLE SORTABLE,
+        templateRuleID     STRING QUERYABLE SEARCHABLE SORTABLE,
+        title              STRING QUERYABLE SEARCHABLE SORTABLE,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE Users (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        roles           LIST<INT64>,
+        GRANT WRITE TO "_creator",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE "cloudkit.share" (
+        "___createTime"               TIMESTAMP,
+        "___createdBy"                REFERENCE,
+        "___etag"                     STRING,
+        "___modTime"                  TIMESTAMP,
+        "___modifiedBy"               REFERENCE,
+        "___recordID"                 REFERENCE,
+        "cloudkit.thumbnailImageData" BYTES,
+        "cloudkit.title"              STRING,
+        "cloudkit.type"               STRING,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
