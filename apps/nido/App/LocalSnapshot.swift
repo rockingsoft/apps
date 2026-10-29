@@ -33,8 +33,9 @@ struct LocalSnapshot: Codable {
         var odometer: Int
         var updatedAt: Date
         var shared: Bool
-        init(_ car: Car) { id = RecordKey(car.id); name = car.name; plate = car.plate; odometer = car.odometer; updatedAt = car.updatedAt; shared = car.isSharedWithMe }
-        var car: Car { Car(id: id.id, name: name, plate: plate, odometer: odometer, updatedAt: updatedAt, isSharedWithMe: shared) }
+        var details: [CarDetail]?
+        init(_ car: Car) { id = RecordKey(car.id); name = car.name; plate = car.plate; odometer = car.odometer; updatedAt = car.updatedAt; shared = car.isSharedWithMe; details = car.details }
+        var car: Car { Car(id: id.id, name: name, plate: plate, odometer: odometer, updatedAt: updatedAt, isSharedWithMe: shared, details: details ?? []) }
     }
     struct PlanData: Codable {
         let id: RecordKey

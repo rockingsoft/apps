@@ -138,7 +138,14 @@ struct FamilyMember {
                                                 payerName: payerName, updatedAt: record["updatedAt"] as? Date ?? .distantPast)
                         }
                     }
-                    let zoneCars = carRecords.map { Car(id: $0.recordID, name: $0["name"] as? String ?? "Auto", plate: $0["plate"] as? String ?? "", odometer: $0["odometer"] as? Int ?? 0, updatedAt: $0["updatedAt"] as? Date ?? .distantPast, isSharedWithMe: shared) }
+                    let zoneCars = carRecords.map { record in
+                        let details = (record["detailsJSON"] as? String).flatMap { $0.data(using: .utf8) }
+                            .flatMap { try? JSONDecoder().decode([CarDetail].self, from: $0) } ?? []
+                        return Car(id: record.recordID, name: record["name"] as? String ?? "Auto",
+                                   plate: record["plate"] as? String ?? "", odometer: record["odometer"] as? Int ?? 0,
+                                   updatedAt: record["updatedAt"] as? Date ?? .distantPast,
+                                   isSharedWithMe: shared, details: details)
+                    }
                     remoteCars += zoneCars
                     remotePlans += planRecords.compactMap { record in
                         guard let car = (record["car"] as? CKRecord.Reference).flatMap({ ref in zoneCars.first { $0.id == ref.recordID } }) ?? zoneCars.first else { return nil }
@@ -386,6 +393,7 @@ struct FamilyMember {
             record["plate"] = car.plate as CKRecordValue
             record["odometer"] = car.odometer as CKRecordValue
             record["updatedAt"] = car.updatedAt as CKRecordValue
+            record["detailsJSON"] = String(decoding: try JSONEncoder().encode(car.details), as: UTF8.self) as CKRecordValue
             _ = try await db.save(record)
             snapshot.pendingCars.remove(key)
             persist()
@@ -534,6 +542,26 @@ struct FamilyMember {
     func updateOdometer(_ car: Car, kilometers: Int) async {
         guard let index = cars.firstIndex(where: { $0.id == car.id }) else { return }
         cars[index].odometer = kilometers
+        cars[index].updatedAt = .now
+        snapshot.pendingCars.insert(RecordKey(car.id))
+        await saveLocallyAndSync()
+    }
+
+    func saveCarDetail(_ detail: CarDetail, for car: Car) async {
+        guard let index = cars.firstIndex(where: { $0.id == car.id }) else { return }
+        if let detailIndex = cars[index].details.firstIndex(where: { $0.id == detail.id }) {
+            cars[index].details[detailIndex] = detail
+        } else {
+            cars[index].details.append(detail)
+        }
+        cars[index].updatedAt = .now
+        snapshot.pendingCars.insert(RecordKey(car.id))
+        await saveLocallyAndSync()
+    }
+
+    func deleteCarDetail(_ detail: CarDetail, from car: Car) async {
+        guard let index = cars.firstIndex(where: { $0.id == car.id }) else { return }
+        cars[index].details.removeAll { $0.id == detail.id }
         cars[index].updatedAt = .now
         snapshot.pendingCars.insert(RecordKey(car.id))
         await saveLocallyAndSync()

@@ -421,6 +421,8 @@ struct CarView: View {
     @State private var fuelEntryToDelete: FuelEntry?
     @State private var templateToReview: MaintenanceTemplate?
     @State private var editOdometer = false
+    @State private var editingDetail: CarDetail?
+    @State private var addDetail = false
     @State private var kilometers = 0
     private var current: Car { store.cars.first(where: { $0.id == car.id }) ?? car }
     private var recentFuelEntries: [FuelEntry] {
@@ -437,6 +439,20 @@ struct CarView: View {
             Section {
                 LabeledContent("Patente", value: current.plate.uppercased())
                 Button("Kilometraje: \(current.odometer) km") { kilometers = current.odometer; editOdometer = true }
+            }
+            Section("Datos para tener a mano") {
+                ForEach(current.details) { detail in
+                    Button { editingDetail = detail } label: {
+                        LabeledContent(detail.name, value: detail.value)
+                            .foregroundStyle(.primary)
+                    }
+                    .swipeActions {
+                        Button("Eliminar", systemImage: "trash", role: .destructive) {
+                            Task { await store.deleteCarDetail(detail, from: current) }
+                        }
+                    }
+                }
+                Button("Agregar dato", systemImage: "plus") { addDetail = true }
             }
             Section("Cargas de nafta") {
                 ForEach(recentFuelEntries.prefix(3)) { entry in
@@ -472,6 +488,8 @@ struct CarView: View {
         .refreshable { await store.reload() }
         .sheet(isPresented: $addPlan) { AddPlanView(car: current) }
         .sheet(isPresented: $addFuel) { FuelEntryView(car: current) }
+        .sheet(isPresented: $addDetail) { CarDetailEditor(car: current) }
+        .sheet(item: $editingDetail) { CarDetailEditor(car: current, detail: $0) }
         .fuelDeletionAlert(entry: $fuelEntryToDelete, store: store)
         .sheet(item: $templateToReview) { template in MaintenanceTemplateView(car: current, template: template) }
         .alert("Actualizar kilometraje", isPresented: $editOdometer) {
@@ -479,6 +497,43 @@ struct CarView: View {
             Button("Guardar") { Task { await store.updateOdometer(current, kilometers: kilometers) } }
             Button("Cancelar", role: .cancel) {}
         } message: { Text("Las alertas por kilometraje se recalculan con esta lectura.") }
+    }
+}
+
+private struct CarDetailEditor: View {
+    @EnvironmentObject private var store: CloudStore
+    @Environment(\.dismiss) private var dismiss
+    let car: Car
+    var detail: CarDetail? = nil
+    @State private var name = ""
+    @State private var value = ""
+    @State private var saving = false
+
+    private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var trimmedValue: String { value.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Dato (ej. Aceite)", text: $name)
+                TextField("Valor (ej. Shell Helix 5W-40)", text: $value, axis: .vertical)
+                    .lineLimit(2...5)
+            }
+            .navigationTitle(detail == nil ? "Agregar dato" : "Editar dato")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Guardar") {
+                        guard !saving else { return }
+                        saving = true
+                        let updated = CarDetail(id: detail?.id ?? UUID(), name: trimmedName, value: trimmedValue)
+                        Task { await store.saveCarDetail(updated, for: car); dismiss() }
+                    }
+                    .disabled(saving || trimmedName.isEmpty || trimmedValue.isEmpty)
+                }
+            }
+            .onAppear { name = detail?.name ?? ""; value = detail?.value ?? "" }
+        }
     }
 }
 

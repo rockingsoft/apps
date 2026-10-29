@@ -1,6 +1,12 @@
 import Foundation
 import CloudKit
 
+struct CarDetail: Identifiable, Codable, Hashable {
+    var id: UUID = UUID()
+    var name: String
+    var value: String
+}
+
 struct Car: Identifiable, Hashable {
     let id: CKRecord.ID
     var name: String
@@ -8,6 +14,7 @@ struct Car: Identifiable, Hashable {
     var odometer: Int
     var updatedAt: Date
     var isSharedWithMe: Bool
+    var details: [CarDetail] = []
 }
 
 struct ServicePlan: Identifiable, Hashable {
