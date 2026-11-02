@@ -43,7 +43,7 @@ struct FuelEntryView: View {
     private var kilometers: Int? { Int(kilometersText) }
     private var canSave: Bool {
         !stationName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        (kilometers.map { $0 >= 0 } ?? false) && liters != nil && price != nil && !paidBy.isEmpty
+        (kilometers.map { $0 >= 0 } ?? false) && liters != nil && price != nil && finances.payers.contains(paidBy) && finances.vehicleCategory != nil
     }
 
     private func currency(_ value: Decimal) -> String {
@@ -154,7 +154,7 @@ struct FuelEntryView: View {
                     .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 18))
                     Picker("Pagado por", selection: $paidBy) {
                         if paidBy.isEmpty { Text("Elegir persona").tag("") }
-                        ForEach(store.activePayers, id: \.self) { Text($0) }
+                        ForEach(finances.payers, id: \.self) { Text($0) }
                     }
                     .padding(10)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
@@ -169,11 +169,11 @@ struct FuelEntryView: View {
             .navigationTitle("Cargar nafta")
             .navigationBarTitleDisplayMode(.inline)
             .task {
-                if paidBy.isEmpty { paidBy = store.myPayerName ?? "" }
+                if paidBy.isEmpty { paidBy = store.myPayerName.flatMap { finances.payers.contains($0) ? $0 : nil } ?? "" }
                 if suggestion == nil { await detectStation() }
             }
             .onChange(of: store.myPayerName) { _, name in
-                if paidBy.isEmpty, let name { paidBy = name }
+                if paidBy.isEmpty, let name, finances.payers.contains(name) { paidBy = name }
             }
             .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
             .toolbar {
@@ -211,14 +211,14 @@ struct FuelEntryView: View {
     }
 
     private func save() {
-        guard !saving, canSave, let kilometers, let liters, let price else { return }
+        guard !saving, canSave, let kilometers, let liters, let price, let vehicleCategory = finances.vehicleCategory else { return }
         saving = true
         Task {
             let entryID = await store.addFuelEntry(car: car, date: date, kilometers: kilometers, liters: liters,
                                      pricePerLiter: price, stationName: stationName.trimmingCharacters(in: .whitespacesAndNewlines),
                                      latitude: latitude, longitude: longitude)
             if let entryID {
-                let expense = FamilyExpense(id: "fuel-\(entryID)", date: date, category: "Auto",
+                let expense = FamilyExpense(id: "fuel-\(entryID)", date: date, category: vehicleCategory,
                                             paidBy: paidBy, detail: "Nafta · \(stationName) · \(car.name)",
                                             amount: liters * price, row: nil)
                 try? await finances.add(expense)

@@ -22,6 +22,7 @@
 		A45AAA03B6B53081E7F405AD /* FuelLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C935C42DDC27DC98BCE6128B /* FuelLocation.swift */; };
 		ADC1B1353846BB8ACDD2A134 /* VehicleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B1CA545A41004BD1512864 /* VehicleCatalog.swift */; };
 		AFA3960D3EBB18EB3A4F13F4 /* FinanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F130BE228939DC19D491823C /* FinanceView.swift */; };
+		BADEB00A50EBE8A9FB973E13 /* FinanceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF313C0D7041E23A849E71A /* FinanceSheet.swift */; };
 		BE3004A1B91D198F898F9610 /* FinanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670273DFD9A74F841BE5C59C /* FinanceStore.swift */; };
 		D4D864CFA736F1FFAD1479CA /* FuelEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526781110ACC01A95E568A49 /* FuelEntryView.swift */; };
 		D6F029AFDF7A9D0B18899B2F /* ExpenseVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */; };
@@ -30,14 +31,12 @@
 		EFD7575D73338525EC0620AE /* NidoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E235221586614BEFA0401672 /* NidoApp.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		0FBA75A6EE504E48ABBC52FA /* GoogleSheetsAccess.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GoogleSheetsAccess.swift; sourceTree = "<group>"; };
 		23B1CA545A41004BD1512864 /* VehicleCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VehicleCatalog.swift; sourceTree = "<group>"; };
 		25B306258542613F457949B4 /* MaintenanceCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceCatalog.swift; sourceTree = "<group>"; };
 		346F3520C2A23CF1EEDAE8B2 /* Nido.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nido.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4EF313C0D7041E23A849E71A /* FinanceSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceSheet.swift; sourceTree = "<group>"; };
 		526781110ACC01A95E568A49 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
 		670273DFD9A74F841BE5C59C /* FinanceStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceStore.swift; sourceTree = "<group>"; };
 		730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseVoice.swift; sourceTree = "<group>"; };
@@ -111,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				C06A8CF4EA789C6285A8FBF3 /* ServiceModels.swift */,
+				4EF313C0D7041E23A849E71A /* FinanceSheet.swift */,
 			);
 			name = Shared;
 			path = Shared;
@@ -212,7 +212,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-
 /* Begin PBXSourcesBuildPhase section */
 		B50D75002C4745BA213D7EDA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -237,6 +236,7 @@
 				ADC1B1353846BB8ACDD2A134 /* VehicleCatalog.swift in Sources */,
 				4E4205F4B77DD91E8B8C8566 /* Views.swift in Sources */,
 				7581C4E110019A6155A70B2A /* ServiceModels.swift in Sources */,
+				BADEB00A50EBE8A9FB973E13 /* FinanceSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

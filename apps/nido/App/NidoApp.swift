@@ -64,7 +64,7 @@ final class ShareAcceptanceDelegate: NSObject, UIApplicationDelegate {
                 .environmentObject(chatGPT)
                 .environmentObject(fuelMonitor)
                 .environmentObject(expenseMonitor)
-                .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await store.reload() } } }
+                .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await finances.reload(); await store.reload() } } }
                 .onReceive(NotificationCenter.default.publisher(for: .garageShareAccepted)) { _ in
                     Task {
                         await store.reload()
