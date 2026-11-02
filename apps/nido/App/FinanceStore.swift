@@ -10,37 +10,17 @@ struct FamilyExpense: Identifiable, Hashable, Codable {
     var row: Int?
 }
 
-enum FamilyBudget {
-    static let spreadsheetID = "1U0yGuLsn2UfWi309xsY7gW-_IJCd5nh1nJ1NQ6Ip654"
-    static let categories = ["Hipoteca", "Servicios", "Impuestos", "Prepaga", "Super", "Salidas", "Auto", "Moto - Seguro ATM", "Seguro de vida - Zurich", "Colegio", "Suscripciones", "Delia - Empleada doméstica", "Adelanto Hipoteca (Extraordinario SAC)", "Vacaciones", "Reserva / Contingencias", "Devoluciones Familiares", "Bolucompras", "Bolucompras Misha", "Animales", "Otros"]
-    static let payers = ["Sebastián", "Misha", "Común"]
-    static let calendar: Calendar = {
-        var value = Calendar(identifier: .gregorian)
-        value.timeZone = TimeZone(identifier: "America/Argentina/Buenos_Aires")!
-        return value
-    }()
-
-    static func date(from serial: Double) -> Date {
-        let origin = calendar.date(from: DateComponents(year: 1899, month: 12, day: 30))!
-        return calendar.date(byAdding: .day, value: Int(serial), to: origin) ?? origin
-    }
-
-    static func serial(from date: Date) -> Int {
-        let origin = calendar.date(from: DateComponents(year: 1899, month: 12, day: 30))!
-        let day = calendar.startOfDay(for: date)
-        return calendar.dateComponents([.day], from: origin, to: day).day ?? 0
-    }
-
-    static func money(_ amount: Decimal) -> String {
-        amount.formatted(.currency(code: "ARS").locale(Locale(identifier: "es_AR")))
-    }
-}
-
 @MainActor final class FinanceStore: ObservableObject {
     @Published private(set) var expenses: [FamilyExpense] = []
     @Published private(set) var budgets: [String: Decimal] = [:]
     @Published private(set) var monthlyIncome: Decimal = 0
-    @Published private(set) var semiannualBonus: Decimal = 0
+    @Published private(set) var budgetDate: Date = .now
+    @Published private(set) var catalog: FinanceSheetCatalog?
+
+    var categories: [String] { catalog?.categoryNames ?? [] }
+    var payers: [String] { catalog?.payers ?? [] }
+    var vehicleCategory: String? { catalog?.vehicleCategory }
+    var personalPayers: [String] { payers.filter { $0 != catalog?.sharedPayer } }
     @Published private(set) var loading = false
     @Published var message: String?
     @Published var signedIn = false
@@ -82,7 +62,8 @@ enum FamilyBudget {
         expenses = []
         budgets = [:]
         monthlyIncome = 0
-        semiannualBonus = 0
+        catalog = nil
+        ExpenseVisitMonitor.shared.configure(categories: [], vehicleCategory: nil)
     }
 
     func reload() async {
@@ -97,10 +78,10 @@ enum FamilyBudget {
             }
         }
         do {
-            let rows = try await google.values("'Registro de Gastos'!B4:G1000")
-            expenses = rows.enumerated().compactMap { offset, row in
+            let rows = try await google.values("'Registro de Gastos'!B4:G")
+            let nextExpenses: [FamilyExpense] = rows.enumerated().compactMap { offset, row in
                 guard row.count >= 5,
-                      let serial = Double(row[0]),
+                      let serial = Double(row[0]), serial.isFinite, serial > 0, serial < 2958466,
                       let amount = Decimal(string: row[4], locale: Locale(identifier: "en_US_POSIX")),
                       !row[1].isEmpty else { return nil }
                 return FamilyExpense(id: row.count > 5 && !row[5].isEmpty ? row[5] : "sheet-row-\(offset + 4)",
@@ -108,17 +89,19 @@ enum FamilyBudget {
                                      paidBy: row[2], detail: row[3], amount: amount, row: offset + 4)
             }.sorted { $0.date > $1.date }
 
-            let budgetRows = try await google.values("'Control Mensual'!B12:D34")
-            var nextBudgets: [String: Decimal] = [:]
-            for row in budgetRows where row.count > 2 {
-                if let amount = Decimal(string: row[2], locale: Locale(identifier: "en_US_POSIX")),
-                   FamilyBudget.categories.contains(row[0]) { nextBudgets[row[0]] = amount }
+            let nextCatalog = try await google.budgetCatalog()
+            let period = try await google.values("NidoPeriodo")
+            let income = try await google.values("NidoIngreso")
+            guard let serial = period.first?.first.flatMap(Double.init), serial.isFinite, serial > 0, serial < 2958466,
+                  let value = income.first?.first.flatMap({ Decimal(string: $0, locale: Locale(identifier: "en_US_POSIX")) }) else {
+                throw FinanceSheetError.invalidBudget
             }
-            budgets = nextBudgets
-            let incomeRows = try await google.values("'Presupuesto y Balance'!D8")
-            monthlyIncome = Decimal(string: incomeRows.first?.first ?? "0", locale: Locale(identifier: "en_US_POSIX")) ?? 0
-            let bonusRows = try await google.values("'Presupuesto y Balance'!D7")
-            semiannualBonus = Decimal(string: bonusRows.first?.first ?? "0", locale: Locale(identifier: "en_US_POSIX")) ?? 0
+            expenses = nextExpenses
+            catalog = nextCatalog
+            ExpenseVisitMonitor.shared.configure(categories: nextCatalog.categoryNames, vehicleCategory: nextCatalog.vehicleCategory)
+            budgets = nextCatalog.budgets
+            budgetDate = FamilyBudget.date(from: serial)
+            monthlyIncome = value
             message = nil
             await flushPending()
         } catch {
@@ -129,8 +112,8 @@ enum FamilyBudget {
     func add(_ expense: FamilyExpense) async throws {
         if expenses.contains(where: { $0.id == expense.id }) || pending.contains(where: { $0.id == expense.id }) { return }
         guard expense.amount > 0,
-              FamilyBudget.categories.contains(expense.category),
-              FamilyBudget.payers.contains(expense.paidBy),
+              categories.contains(expense.category),
+              payers.contains(expense.paidBy),
               !expense.detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw FinanceError.invalidExpense
         }
@@ -150,7 +133,7 @@ enum FamilyBudget {
         try validate(edited)
         guard edited.id == original.id else { throw FinanceError.invalidExpense }
         let row = try await verifiedRow(for: original)
-        try await google.update(sheetValues(for: edited), in: "'Registro de Gastos'!B\(row):G\(row)")
+        try await google.updateExpense(sheetValues(for: edited), row: row)
         pending.removeAll { $0.id == original.id }
         persistPending()
         if let index = expenses.firstIndex(where: { $0.id == original.id }) {
@@ -173,20 +156,20 @@ enum FamilyBudget {
 
     private func validate(_ expense: FamilyExpense) throws {
         guard expense.amount > 0,
-              FamilyBudget.categories.contains(expense.category),
-              FamilyBudget.payers.contains(expense.paidBy),
+              categories.contains(expense.category),
+              payers.contains(expense.paidBy),
               !expense.detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw FinanceError.invalidExpense
         }
     }
 
-    private func sheetValues(for expense: FamilyExpense) -> [String] {
-        [String(FamilyBudget.serial(from: expense.date)), expense.category, expense.paidBy,
-         expense.detail, NSDecimalNumber(decimal: expense.amount).stringValue, expense.id]
+    private func sheetValues(for expense: FamilyExpense) -> [SheetInputValue] {
+        [.number(Decimal(FamilyBudget.serial(from: expense.date))), .text(expense.category), .text(expense.paidBy),
+         .text(expense.detail), .number(expense.amount), .text(expense.id)]
     }
 
     private func verifiedRow(for expense: FamilyExpense) async throws -> Int {
-        let rows = try await google.values("'Registro de Gastos'!B4:G1000")
+        let rows = try await google.values("'Registro de Gastos'!B4:G")
         let matches = rows.enumerated().filter { offset, values in
             let rowNumber = offset + 4
             let stableID = values.count > 5 ? values[5] : ""
@@ -196,7 +179,7 @@ enum FamilyBudget {
         guard matches.count == 1, let match = matches.first else { throw FinanceError.expenseMissing }
         let values = match.element
         guard values.count >= 5,
-              let serial = Double(values[0]),
+              let serial = Double(values[0]), serial.isFinite, serial > 0, serial < 2958466,
               let amount = Decimal(string: values[4], locale: Locale(identifier: "en_US_POSIX")),
               Int(serial) == FamilyBudget.serial(from: expense.date),
               values[1] == expense.category,
@@ -216,47 +199,40 @@ enum FamilyBudget {
                 }
                 pending.removeAll { $0.id == expense.id }
                 persistPending()
-            } catch { break }
+            } catch {
+                message = "Hay gastos pendientes: \(error.localizedDescription)"
+                break
+            }
         }
     }
 
     private func write(_ expense: FamilyExpense) async throws {
         // Column G is a stable client ID. A read before retry avoids duplicate rows after an ambiguous response.
-        let rows = try await google.values("'Registro de Gastos'!G4:G1000")
-        if rows.contains(where: { $0.first == expense.id }) { return }
-        let dates = try await google.values("'Registro de Gastos'!B4:B1000")
-        guard dates.count < 997 else { throw FinanceError.sheetFull }
-        try await google.append([String(FamilyBudget.serial(from: expense.date)), expense.category,
-                                 expense.paidBy, expense.detail,
-                                 NSDecimalNumber(decimal: expense.amount).stringValue, expense.id],
-                                to: "'Registro de Gastos'!B:G")
+        let rows = try await google.values("'Registro de Gastos'!G4:G")
+        if let index = rows.firstIndex(where: { $0.first == expense.id }) {
+            try await google.formatExpenseDate(row: index + 4)
+            return
+        }
+        try validate(expense)
+        try await google.appendExpense(sheetValues(for: expense))
     }
 
     var currentMonthExpenses: [FamilyExpense] {
-        expenses.filter { FamilyBudget.calendar.isDate($0.date, equalTo: .now, toGranularity: .month) }
+        expenses.filter { FamilyBudget.calendar.isDate($0.date, equalTo: budgetDate, toGranularity: .month) }
     }
 
     var currentMonthTotal: Decimal { currentMonthExpenses.reduce(0) { $0 + $1.amount } }
 
-    var currentMonthBudgets: [String: Decimal] {
-        var result = budgets
-        let month = FamilyBudget.calendar.component(.month, from: .now)
-        if month != 6 && month != 12 { result["Adelanto Hipoteca (Extraordinario SAC)"] = 0 }
-        return result
-    }
+    var currentMonthBudgets: [String: Decimal] { budgets }
 
-    var currentMonthIncome: Decimal {
-        let month = FamilyBudget.calendar.component(.month, from: .now)
-        return monthlyIncome + ((month == 6 || month == 12) ? semiannualBonus / 2 : 0)
-    }
+    var currentMonthIncome: Decimal { monthlyIncome }
 }
 
 private enum FinanceError: LocalizedError {
-    case invalidExpense, sheetFull, expenseMissing, expenseChanged
+    case invalidExpense, expenseMissing, expenseChanged
     var errorDescription: String? {
         switch self {
         case .invalidExpense: "Revisá monto, categoría, pagador y detalle antes de guardar."
-        case .sheetFull: "La planilla llegó a la fila 1000. Hay que extender sus fórmulas antes de agregar más gastos."
         case .expenseMissing: "Este gasto ya no está en la planilla. Actualizá la lista."
         case .expenseChanged: "El gasto cambió en la planilla desde que lo abriste. Actualizá la lista antes de editarlo."
         }

@@ -706,7 +706,7 @@ struct CompleteServiceView: View {
                 TextField("Costo en pesos", text: $amount).keyboardType(.decimalPad)
                 Picker("Pagado por", selection: $paidBy) {
                     if paidBy.isEmpty { Text("Elegir persona").tag("") }
-                    ForEach(store.activePayers, id: \.self) { Text($0) }
+                    ForEach(finances.payers, id: \.self) { Text($0) }
                 }
                 if store.myPayerName == nil {
                     Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
@@ -721,10 +721,10 @@ struct CompleteServiceView: View {
                         guard !saving else { return }
                         saving = true
                         Task {
-                            guard let cost = serviceCost else { saving = false; return }
+                            guard let cost = serviceCost, let vehicleCategory = finances.vehicleCategory else { saving = false; return }
                             let locationTask = Task { try? await location.capture() }
                             let entryID = await store.complete(plan, car: car, date: date, kilometers: kilometers, notes: notes)
-                            let expense = FamilyExpense(id: "service-\(entryID)", date: date, category: "Auto",
+                            let expense = FamilyExpense(id: "service-\(entryID)", date: date, category: vehicleCategory,
                                                         paidBy: paidBy, detail: "\(plan.title) · \(car.name)",
                                                         amount: cost, row: nil)
                             try? await finances.add(expense)
@@ -738,14 +738,14 @@ struct CompleteServiceView: View {
                         if saving { ProgressView().accessibilityLabel("Guardando service") }
                         else { Text("Guardar") }
                     }
-                    .disabled(saving || serviceCost == nil || paidBy.isEmpty)
+                    .disabled(saving || serviceCost == nil || !finances.payers.contains(paidBy) || finances.vehicleCategory == nil)
                 }
             }
             .interactiveDismissDisabled(saving)
         }
-        .onAppear { kilometers = car.odometer; if paidBy.isEmpty { paidBy = store.myPayerName ?? "" } }
+        .onAppear { kilometers = car.odometer; if paidBy.isEmpty { paidBy = store.myPayerName.flatMap { finances.payers.contains($0) ? $0 : nil } ?? "" } }
         .onChange(of: store.myPayerName) { _, name in
-            if paidBy.isEmpty, let name { paidBy = name }
+            if paidBy.isEmpty, let name, finances.payers.contains(name) { paidBy = name }
         }
         .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
     }

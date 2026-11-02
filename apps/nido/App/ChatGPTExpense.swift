@@ -258,13 +258,13 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
         listener = nil
     }
 
-    func interpret(_ transcript: String) async throws -> ExpenseInterpretation {
+    func interpret(_ transcript: String, catalog: FinanceSheetCatalog) async throws -> ExpenseInterpretation {
         ExpenseVoiceDiagnostics.shared.record("OpenAI: obteniendo sesión")
         let token = try await accessToken()
         ExpenseVoiceDiagnostics.shared.record("OpenAI: consultando modelos")
-        var catalog = URLRequest(url: URL(string: "https://api.openai.com/v1/models")!)
-        catalog.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        let (catalogData, catalogResponse) = try await URLSession.shared.data(for: catalog)
+        var modelCatalog = URLRequest(url: URL(string: "https://api.openai.com/v1/models")!)
+        modelCatalog.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (catalogData, catalogResponse) = try await URLSession.shared.data(for: modelCatalog)
         ExpenseVoiceDiagnostics.shared.record("OpenAI: modelos HTTP \((catalogResponse as? HTTPURLResponse)?.statusCode ?? 0)")
         guard (catalogResponse as? HTTPURLResponse)?.statusCode == 200,
               let modelList = try? JSONDecoder().decode(ModelCatalog.self, from: catalogData),
@@ -272,14 +272,12 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
                 ?? modelList.models.first(where: { $0.visibility == "list" })?.slug else {
             throw ChatGPTError.unavailable("No hay modelos disponibles para esta cuenta de ChatGPT.")
         }
-        let categories = FamilyBudget.categories.joined(separator: ", ")
-        let definitions = """
-        Hipoteca: cuota del crédito de vivienda. Servicios: luz, gas, agua, internet y teléfono del hogar. Impuestos: tributos y tasas. Prepaga: cobertura médica, consultas, farmacia y medicamentos. Super: alimentos, ingredientes y productos para abastecer el hogar. Salidas: comida preparada, restaurantes, bares, ocio y actividades recreativas. Auto: combustible, mantenimiento, peajes y automóvil. Moto - Seguro ATM: seguro de la moto. Seguro de vida - Zurich: póliza de vida. Colegio: cuotas y gastos escolares. Suscripciones: plataformas y servicios de pago periódico. Delia - Empleada doméstica: remuneración de Delia. Adelanto Hipoteca (Extraordinario SAC): pago extraordinario adelantado del crédito. Vacaciones: transporte, alojamiento y gastos de viaje. Reserva / Contingencias: ahorro de emergencia e imprevistos. Devoluciones Familiares: reintegros y préstamos entre familiares. Bolucompras: compras personales discrecionales. Bolucompras Misha: compras personales de Misha. Animales: alimento, veterinaria, medicamentos, accesorios y cuidados de las mascotas. Otros: gastos que no corresponden a ninguna de las demás categorías; usar solo cuando el concepto esté claro y no encaje en otra categoría.
-        """
-        let today = Date.now.formatted(.iso8601.year().month().day().dateSeparator(.dash))
+        let categories = catalog.categoryNames.joined(separator: ", ")
+        let definitions = catalog.voiceDefinitions
+        let today = FamilyBudget.dateString(from: .now)
         let instructions = """
         Extraé un gasto familiar argentino dicho en voz alta. Hoy es \(today). Inferí la categoría por el significado del gasto, con estas definiciones del presupuesto: \(definitions)
-        Las únicas categorías válidas son \(categories). Pagadores posibles: \(FamilyBudget.payers.joined(separator: ", ")). No inventes pagador ni fecha. «Mil» y «lucas» indican miles de pesos. Respondé solamente un objeto JSON con amount (número en pesos o null), category (nombre exacto o null si es ambiguo), paidBy (nombre exacto o null si no se mencionó), detail (descripción breve) y date (AAAA-MM-DD o null). No agregues texto fuera del JSON.
+        Las únicas categorías válidas son \(categories). Pagadores posibles: \(catalog.payers.joined(separator: ", ")). No inventes pagador ni fecha. «Mil» y «lucas» indican miles de pesos. Respondé solamente un objeto JSON con amount (número en pesos o null), category (nombre exacto o null si es ambiguo), paidBy (nombre exacto o null si no se mencionó), detail (descripción breve) y date (AAAA-MM-DD o null). No agregues texto fuera del JSON.
         """
         let body: [String: Any] = ["model": model, "instructions": instructions,
                                    "input": [["role": "user", "content": transcript]],
@@ -312,7 +310,8 @@ struct ChatGPTBrowser: UIViewControllerRepresentable {
         ExpenseVoiceDiagnostics.shared.record("OpenAI: flujo terminado (\(eventCount) eventos, \(output.count) caracteres, completo: \(completed))")
         guard completed, let start = output.firstIndex(of: "{"), let end = output.lastIndex(of: "}"),
               let result = try? JSONDecoder().decode(ExpenseInterpretation.self, from: Data(output[start...end].utf8)),
-              result.category == nil || FamilyBudget.categories.contains(result.category!) else { throw ChatGPTError.invalidResponse }
+              (result.category == nil || catalog.categoryNames.contains(result.category!)),
+              (result.paidBy == nil || catalog.payers.contains(result.paidBy!)) else { throw ChatGPTError.invalidResponse }
         ExpenseVoiceDiagnostics.shared.record("OpenAI: gasto interpretado")
         return result
     }

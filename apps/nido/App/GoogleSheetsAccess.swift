@@ -82,21 +82,54 @@ import UIKit
         return (object["values"] as? [[Any]] ?? []).map { row in row.map { String(describing: $0) } }
     }
 
-    func append(_ row: [String], to range: String) async throws {
-        let encoded = range.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
-        var url = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/\(FamilyBudget.spreadsheetID)/values/\(encoded):append")!
-        url.queryItems = [URLQueryItem(name: "valueInputOption", value: "USER_ENTERED"),
-                          URLQueryItem(name: "insertDataOption", value: "INSERT_ROWS")]
-        let body = try JSONEncoder().encode(ValuesResponse(values: [row]))
-        _ = try await request(url.url!, method: "POST", body: body)
+    func budgetCatalog() async throws -> FinanceSheetCatalog {
+        let budget = try await values("NidoCatalogo")
+        let payers = try await values("NidoPagadores")
+        let vehicle = try await values("NidoCategoriaAuto")
+        let shared = try await values("NidoPagadorComun")
+        return try FinanceSheetCatalog(budgetRows: budget, payerRows: payers,
+                                       vehicleCategory: vehicle.first?.first ?? "",
+                                       sharedPayer: shared.first?.first ?? "")
     }
 
-    func update(_ row: [String], in range: String) async throws {
-        let encoded = range.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
-        var url = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/\(FamilyBudget.spreadsheetID)/values/\(encoded)")!
-        url.queryItems = [URLQueryItem(name: "valueInputOption", value: "USER_ENTERED")]
-        let body = try JSONEncoder().encode(ValuesResponse(values: [row]))
-        _ = try await request(url.url!, method: "PUT", body: body)
+    func appendExpense(_ row: [SheetInputValue]) async throws {
+        let range = "'Registro de Gastos'!B:G".addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+        var url = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/\(FamilyBudget.spreadsheetID)/values/\(range):append")!
+        url.queryItems = [URLQueryItem(name: "valueInputOption", value: "RAW"),
+                          URLQueryItem(name: "insertDataOption", value: "INSERT_ROWS")]
+        let data = try await request(url.url!, method: "POST", body: JSONEncoder().encode(ExpenseValues(values: [row])))
+        let result = try JSONDecoder().decode(AppendedValues.self, from: data)
+        guard let cell = result.updates.updatedRange.split(separator: "!").last?.split(separator: ":").first,
+              cell.first == "B", let rowNumber = Int(cell.dropFirst()), rowNumber >= 4 else { throw SheetsError.invalidResponse }
+        // Also repeated on the deduplication path if the append succeeded but formatting was interrupted.
+        try await formatExpenseDate(row: rowNumber)
+    }
+
+    func updateExpense(_ row: [SheetInputValue], row rowNumber: Int) async throws {
+        let sheetID = try await expenseSheetID()
+        let body = try JSONEncoder().encode(ExpenseSheetUpdate(values: row, sheetID: sheetID, row: rowNumber))
+        _ = try await request(batchUpdateURL, method: "POST", body: body)
+    }
+
+    func formatExpenseDate(row: Int) async throws {
+        let sheetID = try await expenseSheetID()
+        let body = try JSONEncoder().encode(ExpenseSheetFormat(sheetID: sheetID, row: row))
+        _ = try await request(batchUpdateURL, method: "POST", body: body)
+    }
+
+    private var batchUpdateURL: URL {
+        URL(string: "https://sheets.googleapis.com/v4/spreadsheets/\(FamilyBudget.spreadsheetID):batchUpdate")!
+    }
+
+    private func expenseSheetID() async throws -> Int {
+        var url = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/\(FamilyBudget.spreadsheetID)")!
+        url.queryItems = [URLQueryItem(name: "fields", value: "sheets(properties(sheetId,title))")]
+        let data = try await request(url.url!, method: "GET", body: nil)
+        let response = try JSONDecoder().decode(SheetsMetadata.self, from: data)
+        guard let sheet = response.sheets.first(where: { $0.properties.title == "Registro de Gastos" }) else {
+            throw SheetsError.invalidResponse
+        }
+        return sheet.properties.sheetId
     }
 
     func clear(_ range: String) async throws {
@@ -166,8 +199,17 @@ import UIKit
     }
 }
 
-private struct ValuesResponse: Codable {
-    var values: [[String]]?
+private struct ExpenseValues: Encodable { let values: [[SheetInputValue]] }
+private struct AppendedValues: Decodable {
+    let updates: Updates
+    struct Updates: Decodable { let updatedRange: String }
+}
+private struct SheetsMetadata: Decodable {
+    let sheets: [Sheet]
+    struct Sheet: Decodable {
+        let properties: Properties
+        struct Properties: Decodable { let sheetId: Int; let title: String }
+    }
 }
 
 private struct OAuthResponse: Decodable {

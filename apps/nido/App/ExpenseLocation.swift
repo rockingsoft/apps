@@ -80,6 +80,8 @@ struct ExpenseVisitSuggestion: Codable, Identifiable {
     @Published private(set) var authorization: CLAuthorizationStatus
     private let manager = CLLocationManager()
     private var places: [ExpensePlace] = []
+    private var categories = Set<String>()
+    private var vehicleCategory: String?
     private let enabledKey = "garage.expenseVisitsEnabled"
     private let suggestionKey = "garage.expenseVisitSuggestion"
     private let lastPromptKey = "garage.expenseVisitLastPrompt"
@@ -92,6 +94,12 @@ struct ExpenseVisitSuggestion: Codable, Identifiable {
         super.init()
         manager.delegate = self
         places = (LocalSnapshot.load().expensePlaces ?? []).map(\.place)
+    }
+
+    func configure(categories: [String], vehicleCategory: String?) {
+        self.categories = Set(categories)
+        self.vehicleCategory = vehicleCategory
+        if let suggestion, !self.categories.contains(suggestion.category) { clearSuggestion() }
     }
 
     func updatePlaces(_ places: [ExpensePlace]) { self.places = places }
@@ -137,7 +145,7 @@ struct ExpenseVisitSuggestion: Codable, Identifiable {
         let position = CLLocation(latitude: visit.coordinate.latitude, longitude: visit.coordinate.longitude)
         guard let nearest = places.map({ place in
             (place, position.distance(from: CLLocation(latitude: place.latitude, longitude: place.longitude)))
-        }).filter({ $0.0.category != "Auto" && $0.1 <= max(100, visit.horizontalAccuracy) }).min(by: { $0.1 < $1.1 })?.0 else { return }
+        }).filter({ categories.contains($0.0.category) && $0.0.category != vehicleCategory && $0.1 <= max(100, visit.horizontalAccuracy) }).min(by: { $0.1 < $1.1 })?.0 else { return }
         let previous = UserDefaults.standard.object(forKey: lastPromptKey) as? Date ?? .distantPast
         guard Date().timeIntervalSince(previous) > 6 * 60 * 60 else { return }
         let found = ExpenseVisitSuggestion(id: UUID(), category: nearest.category, detail: nearest.detail,

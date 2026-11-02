@@ -12,7 +12,7 @@ struct FinanceDashboardView: View {
     @State private var showingPayerProfile = false
     @State private var suggestedExpense: ExpenseVisitSuggestion?
 
-    private var monthName: String { Date.now.formatted(.dateTime.month(.wide).year().locale(Locale(identifier: "es_AR"))).capitalized }
+    private var monthName: String { finances.budgetDate.formatted(.dateTime.month(.wide).year().locale(Locale(identifier: "es_AR"))).capitalized }
     private var planned: Decimal { finances.currentMonthBudgets.values.reduce(0, +) }
     private var remaining: Decimal { planned - finances.currentMonthTotal }
 
@@ -157,7 +157,7 @@ struct FinanceDashboardView: View {
     private var categories: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Presupuesto por categoría").font(.headline)
-            ForEach(FamilyBudget.categories.filter { finances.currentMonthBudgets[$0] != nil }, id: \.self) { category in
+            ForEach(finances.categories.filter { finances.currentMonthBudgets[$0] != nil }, id: \.self) { category in
                 let budget = finances.currentMonthBudgets[category] ?? 0
                 let spent = finances.currentMonthExpenses.filter { $0.category == category }.reduce(Decimal.zero) { $0 + $1.amount }
                 VStack(alignment: .leading, spacing: 4) {
@@ -183,7 +183,8 @@ struct FinanceDashboardView: View {
     }
 
     private var spendingChart: some View {
-        let slices = FamilyBudget.categories.compactMap { category -> (String, Double)? in
+        let expenseCategories = Set(finances.currentMonthExpenses.map(\.category)).sorted()
+        let slices = expenseCategories.compactMap { category -> (String, Double)? in
             let spent = finances.currentMonthExpenses.filter { $0.category == category }.reduce(Decimal.zero) { $0 + $1.amount }
             return spent > 0 ? (category, NSDecimalNumber(decimal: spent).doubleValue) : nil
         }
@@ -330,10 +331,10 @@ private struct ExpenseEditView: View {
             Form {
                 DatePicker("Fecha", selection: $date, displayedComponents: .date)
                 Picker("Categoría", selection: $category) {
-                    ForEach(FamilyBudget.categories, id: \.self) { Text($0) }
+                    ForEach(finances.categories, id: \.self) { Text($0) }
                 }
                 Picker("Pagado por", selection: $paidBy) {
-                    ForEach(FamilyBudget.payers, id: \.self) { Text($0) }
+                    ForEach(finances.payers, id: \.self) { Text($0) }
                 }
                 TextField("Detalle", text: $detail)
                 TextField("Monto en pesos", text: $amount).keyboardType(.decimalPad)
@@ -348,7 +349,7 @@ private struct ExpenseEditView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Guardar") { Task { await save() } }
-                        .disabled(saving || parsedAmount == nil || detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(saving || parsedAmount == nil || !finances.categories.contains(category) || !finances.payers.contains(paidBy) || detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .disabled(saving)
@@ -496,7 +497,7 @@ struct ExpenseEditorView: View {
     let initialTranscript: String?
     let startListeningWhenEmpty: Bool
     @State private var date = Date()
-    @State private var category = "Super"
+    @State private var category = ""
     @State private var paidBy = ""
     @State private var showingPayerProfile = false
     @State private var detail = ""
@@ -514,7 +515,7 @@ struct ExpenseEditorView: View {
         self.suggestion = suggestion
         self.initialTranscript = initialTranscript
         self.startListeningWhenEmpty = startListeningWhenEmpty
-        _category = State(initialValue: suggestion?.category ?? "Super")
+        _category = State(initialValue: suggestion?.category ?? "")
         _detail = State(initialValue: suggestion?.detail ?? "")
         _date = State(initialValue: suggestion?.arrivedAt ?? .now)
     }
@@ -533,17 +534,17 @@ struct ExpenseEditorView: View {
                         Label("Hablar", systemImage: "mic.fill")
                             .frame(maxWidth: .infinity, minHeight: 42)
                     }
-                    .disabled(!chatGPT.connected || interpreting)
+                    .disabled(!chatGPT.connected || interpreting || finances.catalog == nil)
                 }
                 Section("Revisar antes de guardar") {
                 DatePicker("Fecha", selection: $date, displayedComponents: .date)
                 Picker("Categoría", selection: $category) {
                     if category.isEmpty { Text("Elegir categoría").tag("") }
-                    ForEach(FamilyBudget.categories, id: \.self) { Text($0) }
+                    ForEach(finances.categories, id: \.self) { Text($0) }
                 }
                 Picker("Pagado por", selection: $paidBy) {
                     if paidBy.isEmpty { Text("Elegir persona").tag("") }
-                    ForEach(cars.activePayers, id: \.self) { Text($0) }
+                    ForEach(finances.payers, id: \.self) { Text($0) }
                 }
                 if cars.myPayerName == nil {
                     Button("Elegir mi nombre para los gastos") { showingPayerProfile = true }
@@ -558,11 +559,11 @@ struct ExpenseEditorView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Guardar") { Task { await save() } }
-                        .disabled(saving || decimalAmount == nil || category.isEmpty || paidBy.isEmpty || detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(saving || decimalAmount == nil || !finances.categories.contains(category) || !finances.payers.contains(paidBy) || detail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .disabled(saving)
-            .onAppear { if paidBy.isEmpty { paidBy = cars.myPayerName ?? "" } }
+            .onAppear { if paidBy.isEmpty { paidBy = cars.myPayerName.flatMap { finances.payers.contains($0) ? $0 : nil } ?? "" } }
             .task {
                 guard let initialTranscript, !initialTranscript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                     if startListeningWhenEmpty {
@@ -577,7 +578,7 @@ struct ExpenseEditorView: View {
                 interpretationTask = Task { await interpret(initialTranscript) }
             }
             .onChange(of: cars.myPayerName) { _, name in
-                if paidBy.isEmpty, let name { paidBy = name }
+                if paidBy.isEmpty, let name, finances.payers.contains(name) { paidBy = name }
             }
             .sheet(isPresented: $showingPayerProfile) { MyPayerProfileView() }
             .overlay {
@@ -659,11 +660,12 @@ struct ExpenseEditorView: View {
         interpreting = true
         defer { interpreting = false }
         do {
-            let result = try await chatGPT.interpret(spoken)
+            guard let catalog = finances.catalog else { throw FinanceSheetError.invalidBudget }
+            let result = try await chatGPT.interpret(spoken, catalog: catalog)
             try Task.checkCancellation()
             amount = result.amount.map { NSDecimalNumber(decimal: $0).stringValue } ?? ""
-            category = result.category.flatMap { FamilyBudget.categories.contains($0) ? $0 : nil } ?? ""
-            if let payer = result.paidBy, cars.activePayers.contains(payer) { paidBy = payer }
+            category = result.category.flatMap { finances.categories.contains($0) ? $0 : nil } ?? ""
+            if let payer = result.paidBy, finances.payers.contains(payer) { paidBy = payer }
             detail = result.detail ?? ""
             if let writtenDate = result.date {
                 let formatter = DateFormatter()
@@ -684,15 +686,16 @@ struct ExpenseEditorView: View {
 }
 
 struct MyPayerProfileView: View {
+    @EnvironmentObject private var finances: FinanceStore
     @EnvironmentObject private var cars: CloudStore
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(FamilyBudget.payers.filter { $0 != "Común" }, id: \.self) { name in
+                    ForEach(finances.personalPayers, id: \.self) { name in
                         Button {
-                            Task { await cars.setMyPayerName(name); dismiss() }
+                            Task { await cars.setMyPayerName(name, allowedPayers: finances.personalPayers); dismiss() }
                         } label: {
                             HStack {
                                 Text(name)

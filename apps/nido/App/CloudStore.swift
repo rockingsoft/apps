@@ -72,13 +72,6 @@ struct FamilyMember {
         }
         return localPayerName
     }
-    var activePayers: [String] {
-        let available = FamilyBudget.payers.filter { name in
-            name == "Común" || name == localPayerName ||
-                familyMembers.contains { activeMemberIDs.contains($0.userRecordName) && $0.payerName == name }
-        }
-        return available.count == 1 ? FamilyBudget.payers : available
-    }
     var familySpace: Car? {
         guard let familyZoneID else { return nil }
         return Car(id: CKRecord.ID(recordName: "family-space", zoneID: familyZoneID), name: "Nido familiar",
@@ -489,8 +482,8 @@ struct FamilyMember {
             .compactMap { $0.userIdentity.userRecordID?.recordName })
     }
 
-    func setMyPayerName(_ name: String) async {
-        guard FamilyBudget.payers.contains(name), name != "Común" else { return }
+    func setMyPayerName(_ name: String, allowedPayers: [String]) async {
+        guard allowedPayers.contains(name) else { return }
         localPayerName = name
         UserDefaults.standard.set(name, forKey: "garage.myPayerName")
         guard let familyZoneID, let myUserRecordName else { return }

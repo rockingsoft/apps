@@ -10,7 +10,15 @@ App nativa SwiftUI para iPhone (iOS 17+) con dashboard del mes, finanzas familia
 4. Compartí [la planilla familiar](https://docs.google.com/spreadsheets/d/1U0yGuLsn2UfWi309xsY7gW-_IJCd5nh1nJ1NQ6Ip654/edit) con permiso de edición a cada cuenta que vaya a iniciar sesión en Nido.
 5. Si rotás el cliente principal, ejecutá `./apps/nido/scripts/configure-google-oauth.sh '<ID-del-cliente-iOS>'` desde la raíz del repositorio y recompilá. El script configura el esquema de retorno de OAuth en `App/GoogleConfig.xcconfig`.
 
-Nido usa el acceso OAuth directamente desde cada iPhone; no hay servidor intermedio. El ID de cliente puede versionarse, pero cada integrante debe autorizar Google Sheets en su teléfono. Las escrituras fallidas quedan pendientes localmente con un ID estable para evitar duplicados al reintentar. La app lee las filas B:G de `Registro de Gastos`, los presupuestos de `Control Mensual` y los ingresos de `Presupuesto y Balance`; la columna G de gastos contiene el ID de Nido y está oculta. Las fórmulas actuales llegan a la fila 1000, por lo que se debe extender esa plantilla antes de superar ese límite.
+Nido usa el acceso OAuth directamente desde cada iPhone; no hay servidor intermedio. Cada integrante autoriza Google Sheets. La planilla es la única fuente de categorías, descripciones, presupuestos, pagadores, período e ingresos. La app vuelve a leerla al iniciar, al recuperar el primer plano y al actualizar manualmente. Si no puede leer un catálogo válido, informa el error y no inventa categorías ni importes.
+
+En **Presupuesto y Balance**, las tablas de gastos fijos y fondos son las entradas del presupuesto. Para agregar una categoría, insertá una fila antes del total de su tabla y completá nombre, descripción e importe mensual (y meses para gastos fijos). Los rangos con nombre `PresupuestoFijos` y `PresupuestoFondos` incluyen el total como límite para extenderse al insertar filas; las fórmulas matriciales calculan automáticamente gasto real y saldo. `PresupuestoExtraordinario` identifica la partida del adelanto de hipoteca. No se copian filas al control mensual.
+
+El rango `NidoCatalogo`, en la misma pestaña del presupuesto, es una fórmula que reúne esas partidas: categoría, descripción, presupuesto del mes, presupuesto anual y grupo. **Control Mensual**, **Planificación Dinámica** y los desplegables de gastos dependen de ese catálogo. Las fórmulas de gasto usan las columnas completas de **Registro de Gastos**, por categoría y fecha. El control mensual y el dashboard de Nido muestran el mismo período seleccionado en la planilla.
+
+Los pagadores se editan en `NidoPagadores`, dentro de **Presupuesto y Balance**; los desplegables los toman desde ahí. `NidoCategoriaAuto` referencia la categoría usada para nafta y services, y `NidoPagadorComun` identifica el pagador compartido. `NidoPeriodo` y `NidoIngreso` exponen los resultados calculados por la planilla para el período y sus ingresos, sin repetir reglas de SAC en la app.
+
+Los gastos se leen de B:G de **Registro de Gastos**. La columna G contiene el ID estable de Nido. Las escrituras envían fechas y montos como números, con entrada `RAW`, y aplican formato de fecha `dd/mm/yyyy` a la fila escrita. La edición modifica valores y formato en una sola operación. Si una creación se interrumpe después de insertar la fila, el reintento localiza su ID, repara el formato y evita duplicarla. Los gastos fallidos quedan pendientes en el iPhone.
 
 ## Gastos por voz con ChatGPT
 
@@ -20,7 +28,7 @@ Cada integrante conecta o desconecta su cuenta de ChatGPT desde el menú **⋯**
 
 ## Funciones
 
-- Inicio muestra un dashboard gráfico del mes actual con ingresos, gastos, balance, comparación por categoría y últimos movimientos. La pestaña «Autos» conserva las cargas y el plan del auto seleccionado; «Mis autos» concentra agregar, seleccionar y eliminar autos.
+- Inicio muestra un dashboard gráfico del mes seleccionado en la planilla con ingresos, gastos, balance, comparación por categoría y últimos movimientos. La pestaña «Autos» conserva las cargas y el plan del auto seleccionado; «Mis autos» concentra agregar, seleccionar y eliminar autos.
 - En «Ver todos» los gastos, deslizar hacia la derecha permite editar fecha, categoría, pagador, detalle e importe; deslizar hacia la izquierda permite eliminarlos con confirmación. Los cambios se escriben en la planilla y actualizan o quitan el lugar asociado en iCloud. Los registros de autos vinculados se conservan.
 - Autos con marca, modelo, versión y año elegidos del catálogo de [ArgAutos](https://argautos.com/docs/api), más patente y kilometraje. Las versiones se agrupan por nombre ignorando el año final, para todas las marcas y modelos. El selector de años reúne los años explícitos de esas versiones y las valuaciones de la versión base; si la consulta de valuaciones falla, se puede ingresar solo el año. Las consultas se guardan en caché durante siete días. La patente se guarda en mayúsculas y el kilometraje comienza vacío y es obligatorio para guardar. Los cambios se guardan en el iPhone aunque iCloud no esté disponible y quedan pendientes de sincronización.
 - Cada auto tiene una ficha editable de datos para tener a mano, como aceite, presión de cubiertas o medidas de repuestos. Se guarda junto al auto en la zona familiar de CloudKit y admite agregar, editar y eliminar datos.
@@ -35,7 +43,7 @@ Cada integrante conecta o desconecta su cuenta de ChatGPT desde el menú **⋯**
 - Notificaciones locales por fecha, al acercarse el vencimiento, y por kilometraje al ingresar una nueva lectura. Cada iPhone calcula sus propias notificaciones.
 - Invitar a colaborar en el espacio familiar completo vía iCloud: la zona incluye todos los autos y lugares guardados para sugerir gastos. Los gastos y presupuestos de la planilla requieren además acceso de Google a ese archivo. Al abrir la nueva versión, Nido copia los registros de las zonas antiguas por auto a la zona familiar con IDs estables; conserva las zonas originales como respaldo.
 - La pantalla «Acceso familiar» consulta iCloud para mostrar colaboradores y si la invitación está pendiente o aceptada. El propietario puede quitar el acceso de una persona; el cambio se guarda en CloudKit. Los nombres pueden no estar disponibles si iCloud no comparte la identidad del participante.
-- Cada integrante elige una vez su nombre de la columna «Pagado por» en «Mi nombre en el presupuesto». Nido guarda esa elección en el dispositivo y la sincroniza con la zona familiar de CloudKit cuando está disponible. Ese nombre aparece por defecto en gastos, nafta y services. Si aún no eligió su nombre, debe seleccionar un pagador antes de guardar; «Común» sigue disponible como elección manual. Nido ofrece como pagadores a integrantes activos más «Común» y, mientras iCloud aún no identifica a ninguno, muestra todos los nombres válidos de la planilla para no bloquear la carga. Los nombres disponibles deben existir antes en la lista de pagadores de la planilla (`FamilyBudget.payers`).
+- Cada integrante elige su nombre en «Mi nombre en el presupuesto». Esa preferencia se guarda en el dispositivo y se sincroniza con CloudKit; las opciones válidas siempre se leen de `NidoPagadores`. El pagador compartido, definido en `NidoPagadorComun`, permanece disponible para cargar gastos y no se ofrece como identidad personal.
 
 ## Abrir y compilar
 
@@ -44,6 +52,7 @@ Desde la raíz:
 ```sh
 ./scripts/workspace.sh open nido
 ./scripts/workspace.sh build nido
+./scripts/workspace.sh test nido
 ```
 
 El script de build firma el simulador con el equipo por defecto `3SRDN9365G` (se puede reemplazar con `DEVELOPMENT_TEAM=...`). CloudKit y las notificaciones se deben probar además en iPhone firmado con un Apple Developer Team. En Xcode, asignar el equipo a `Nido`, habilitar **iCloud > CloudKit**, asociar `iCloud.com.schoren.garage` (o cambiar identificadores para el equipo propio), y activar **Background Modes > Remote notifications** si se agregan suscripciones de cambios. El contenedor debe existir en CloudKit Dashboard y el esquema debe desplegarse a producción antes de distribuir la app. Ambos participantes necesitan iCloud activo.
