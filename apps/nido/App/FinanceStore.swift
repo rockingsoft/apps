@@ -12,7 +12,7 @@ struct FamilyExpense: Identifiable, Hashable, Codable {
 
 enum FamilyBudget {
     static let spreadsheetID = "1U0yGuLsn2UfWi309xsY7gW-_IJCd5nh1nJ1NQ6Ip654"
-    static let categories = ["Hipoteca", "Servicios", "Impuestos", "Prepaga", "Super", "Salidas", "Auto", "Moto - Seguro ATM", "Seguro de vida - Zurich", "Colegio", "Suscripciones", "Delia - Empleada doméstica", "Adelanto Hipoteca (Extraordinario SAC)", "Vacaciones", "Reserva / Contingencias", "Devoluciones Familiares", "Bolucompras", "Bolucompras Misha"]
+    static let categories = ["Hipoteca", "Servicios", "Impuestos", "Prepaga", "Super", "Salidas", "Auto", "Moto - Seguro ATM", "Seguro de vida - Zurich", "Colegio", "Suscripciones", "Delia - Empleada doméstica", "Adelanto Hipoteca (Extraordinario SAC)", "Vacaciones", "Reserva / Contingencias", "Devoluciones Familiares", "Bolucompras", "Bolucompras Misha", "Animales", "Otros"]
     static let payers = ["Sebastián", "Misha", "Común"]
     static let calendar: Calendar = {
         var value = Calendar(identifier: .gregorian)
