@@ -385,17 +385,20 @@ private struct BrowserDestination: Identifiable {
     var id: String { url.absoluteString }
 }
 
-private enum VoiceFlowPhase {
+enum VoiceFlowPhase {
     case listening
     case processing
+    case saving
+    case saved(FamilyExpense, pending: Bool)
     case failed(String)
 }
 
-private struct ExpenseVoiceFlowView: View {
+struct ExpenseVoiceFlowView: View {
     @ObservedObject var speech: ExpenseSpeechRecognizer
     @Binding var phase: VoiceFlowPhase
     let onCancel: () -> Void
     let onRetry: () -> Void
+    var automaticSave = false
     @State private var pulsing = false
 
     var body: some View {
@@ -407,10 +410,12 @@ private struct ExpenseVoiceFlowView: View {
             VStack(spacing: 0) {
                 HStack {
                     Spacer()
-                    Button("Cancelar", action: onCancel)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.white.opacity(0.8))
-                        .padding(20)
+                    if case .saving = phase {} else {
+                        Button(closeTitle, action: onCancel)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.8))
+                            .padding(20)
+                    }
                 }
                 Spacer()
                 ZStack {
@@ -428,7 +433,9 @@ private struct ExpenseVoiceFlowView: View {
                                              startPoint: .topLeading, endPoint: .bottomTrailing))
                         .frame(width: 155, height: 155)
                         .shadow(color: .cyan.opacity(0.4), radius: 32)
-                    if case .processing = phase {
+                    if case .saved = phase {
+                        Image(systemName: "checkmark").font(.system(size: 45, weight: .medium)).foregroundStyle(.white)
+                    } else if isBusy {
                         ProgressView().tint(.white).scaleEffect(1.6)
                     } else {
                         Image(systemName: "waveform")
@@ -468,10 +475,24 @@ private struct ExpenseVoiceFlowView: View {
         .interactiveDismissDisabled()
     }
 
+    private var closeTitle: String {
+        if case .saved = phase { return "Cerrar" }
+        return "Cancelar"
+    }
+
+    private var isBusy: Bool {
+        switch phase {
+        case .processing, .saving: true
+        default: false
+        }
+    }
+
     private var title: String {
         switch phase {
         case .listening: speech.listening ? "Escuchando" : "Preparando"
         case .processing: "Preparando tu gasto"
+        case .saving: "Guardando gasto"
+        case .saved(_, let pending): pending ? "Gasto pendiente" : "Gasto registrado"
         case .failed: "No se pudo completar"
         }
     }
@@ -479,7 +500,11 @@ private struct ExpenseVoiceFlowView: View {
     private var subtitle: String {
         switch phase {
         case .listening: "Decí el gasto en una frase. Nido terminará cuando hagas una pausa."
-        case .processing: "Estamos completando los datos para que los revises."
+        case .processing: automaticSave ? "Interpretando lo que dijiste para registrar el gasto." : "Estamos completando los datos para que los revises."
+        case .saving: "Guardando los datos que detectamos."
+        case .saved(let expense, let pending):
+            "\(expense.detail) · \(FamilyBudget.money(expense.amount))\n\(expense.category) · \(expense.paidBy) · \(expense.date.formatted(date: .abbreviated, time: .omitted))" +
+            (pending ? "\nQuedó guardado en este iPhone y se enviará a la planilla cuando se pueda sincronizar." : "")
         case .failed(let message): message
         }
     }

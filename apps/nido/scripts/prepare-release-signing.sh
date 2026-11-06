@@ -5,6 +5,7 @@ umask 077
 : "${GARAGE_DISTRIBUTION_CERTIFICATE_P12_BASE64:?required}"
 : "${GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD:?required}"
 : "${GARAGE_APPSTORE_PROFILE_BASE64:?required}"
+: "${GARAGE_CONTROLS_APPSTORE_PROFILE_BASE64:?required}"
 : "${GARAGE_KEYCHAIN_PASSWORD:?required}"
 
 keychain="$RUNNER_TEMP/garage-release.keychain-db"
@@ -50,3 +51,25 @@ cloudkit=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.i
 mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 cp "$profile" "$HOME/Library/MobileDevice/Provisioning Profiles/$uuid.mobileprovision"
 echo "GARAGE_PROFILE_UUID=$uuid" >> "$GITHUB_ENV"
+
+# The embedded WidgetKit extension needs its own profile with the same certificate.
+controls_profile="$RUNNER_TEMP/garage-controls.mobileprovision"
+controls_plist="$RUNNER_TEMP/garage-controls-profile.plist"
+printf '%s' "$GARAGE_CONTROLS_APPSTORE_PROFILE_BASE64" | base64 --decode > "$controls_profile"
+security cms -D -i "$controls_profile" > "$controls_plist"
+python3 - "$controls_plist" "$certificate_der" <<'PYPROFILE'
+import plistlib
+import sys
+
+with open(sys.argv[1], 'rb') as source:
+    profile = plistlib.load(source)
+with open(sys.argv[2], 'rb') as source:
+    certificate = source.read()
+if profile.get('TeamIdentifier') != ['3SRDN9365G'] or profile.get('Entitlements', {}).get('application-identifier') != '3SRDN9365G.com.schoren.garage.controls':
+    raise SystemExit('The controls profile does not belong to NidoControls and team 3SRDN9365G.')
+if certificate not in profile.get('DeveloperCertificates', []):
+    raise SystemExit('The controls profile does not contain the supplied distribution certificate.')
+PYPROFILE
+controls_uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$controls_plist")
+cp "$controls_profile" "$HOME/Library/MobileDevice/Provisioning Profiles/$controls_uuid.mobileprovision"
+echo "GARAGE_CONTROLS_PROFILE_UUID=$controls_uuid" >> "$GITHUB_ENV"

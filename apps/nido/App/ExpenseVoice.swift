@@ -191,11 +191,3 @@ import Speech
         }
     }
 }
-
-struct ExpenseInterpretation: Decodable {
-    let amount: Decimal?
-    let category: String?
-    let paidBy: String?
-    let detail: String?
-    let date: String?
-}
