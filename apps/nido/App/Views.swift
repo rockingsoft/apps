@@ -9,6 +9,8 @@ private struct ShortcutExpenseRequest: Identifiable {
 struct CarsView: View {
     @EnvironmentObject private var store: CloudStore
     @AppStorage("garage.selectedCarID") private var selectedCarID = ""
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var capturingExpense = false
     @State private var selectedTab = 0
     @State private var shortcutExpenseRequest: ShortcutExpenseRequest?
 
@@ -39,7 +41,20 @@ struct CarsView: View {
             ExpenseEditorView(initialTranscript: request.transcript, startListeningWhenEmpty: true)
         }
         .onReceive(NotificationCenter.default.publisher(for: .garageOpenExpense)) { _ in openRequestedExpense() }
-        .onAppear { openRequestedExpense() }
+        .fullScreenCover(isPresented: $capturingExpense) { QuickExpenseVoiceView() }
+        .onReceive(NotificationCenter.default.publisher(for: .nidoCaptureExpense)) { _ in openRequestedCapture() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { openRequestedCapture() }
+        }
+        .onAppear { openRequestedExpense(); openRequestedCapture() }
+    }
+
+    private func openRequestedCapture() {
+        guard UserDefaults.standard.bool(forKey: "nido.captureExpenseRequested") else { return }
+        UserDefaults.standard.removeObject(forKey: "nido.captureExpenseRequested")
+        // Repeated taps reuse the current recording instead of creating a second save.
+        guard !capturingExpense else { return }
+        capturingExpense = true
     }
 
     private func openRequestedExpense() {

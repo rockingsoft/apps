@@ -7,171 +7,257 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		12845DDFDAD5FD22479A83E6 /* ExpenseShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */; };
-		2B45D280A2563DDAD807C42F /* CloudStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86C0E0B16F3A60DE6BC2392 /* CloudStore.swift */; };
-		46BE4281CD9DDA30ACC90D59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4AB93AAED63A929AA70E442 /* Assets.xcassets */; };
-		4D885BCFBC8BAD3580E17A8C /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF16921D6A547B291E46BD9F /* Sharing.swift */; };
-		4E4205F4B77DD91E8B8C8566 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8075ECD4F3A516753BE8E56F /* Views.swift */; };
-		5897232DAD2F72FB2DACE795 /* NotificationPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09FC0B33674B140655D7D0C /* NotificationPlanner.swift */; };
-		5FBF15171B590250B606D163 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F72B6123E2064A5E43F25789 /* Foundation.framework */; };
-		7581C4E110019A6155A70B2A /* ServiceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C06A8CF4EA789C6285A8FBF3 /* ServiceModels.swift */; };
-		7C5C5CD1B7D3905164181650 /* LocalSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B932856EC42AED7E30EA77D7 /* LocalSnapshot.swift */; };
-		7D8CB2AE9C18C987E1A4DBC8 /* GoogleSheetsAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBA75A6EE504E48ABBC52FA /* GoogleSheetsAccess.swift */; };
-		808FF0E7289AF3ED312C679A /* MaintenanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B306258542613F457949B4 /* MaintenanceCatalog.swift */; };
-		A22B3F29C512B81D98CC04D5 /* MaintenanceTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822719C391DFB421310551C5 /* MaintenanceTemplateView.swift */; };
-		A45AAA03B6B53081E7F405AD /* FuelLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C935C42DDC27DC98BCE6128B /* FuelLocation.swift */; };
-		ADC1B1353846BB8ACDD2A134 /* VehicleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B1CA545A41004BD1512864 /* VehicleCatalog.swift */; };
-		AFA3960D3EBB18EB3A4F13F4 /* FinanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F130BE228939DC19D491823C /* FinanceView.swift */; };
-		BADEB00A50EBE8A9FB973E13 /* FinanceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF313C0D7041E23A849E71A /* FinanceSheet.swift */; };
-		BE3004A1B91D198F898F9610 /* FinanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670273DFD9A74F841BE5C59C /* FinanceStore.swift */; };
-		D4D864CFA736F1FFAD1479CA /* FuelEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526781110ACC01A95E568A49 /* FuelEntryView.swift */; };
-		D6F029AFDF7A9D0B18899B2F /* ExpenseVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */; };
-		D6F029AFDF7A9D0B18899B30 /* ChatGPTExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F2B7A4A67A94B91AE7F80 /* ChatGPTExpense.swift */; };
-		ED399FC7357BC425EA79C632 /* ExpenseLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AFC47722568333C243C300 /* ExpenseLocation.swift */; };
-		EFD7575D73338525EC0620AE /* NidoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E235221586614BEFA0401672 /* NidoApp.swift */; };
+		015A89A95F891E1827EE6A7D /* LocalSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2198F3EA995C6B44C77ABCF /* LocalSnapshot.swift */; };
+		0432F8125B20099966434E1B /* NidoControls.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 0E91D06B54AAD3C19ED082D6 /* NidoControls.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		0559E9256FB9C088E3F40C74 /* NidoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C2B4C80B30CA50112D64D9 /* NidoApp.swift */; };
+		0F4903791F8BFDDDCB26F5D1 /* QuickExpenseVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B811E9240D05553F05880999 /* QuickExpenseVoiceView.swift */; };
+		12C059936241437DB3DC0F0D /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F52930CA6CF966A3CFE2366 /* Sharing.swift */; };
+		13300BAD850EC51C6C1F39A8 /* FuelLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8010D2C597E373FB71C8A89B /* FuelLocation.swift */; };
+		14155AD63815D00CBDED10D4 /* ExpenseShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0207362748D4EDF866F5DE80 /* ExpenseShortcut.swift */; };
+		299F52EA7BF47D752AEABDAC /* FinanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AF0CAB6A54C2B5A85FF5D5A /* FinanceView.swift */; };
+		2FAA71319224FCF0313358DE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FFA99602196A10CD782DB46 /* Foundation.framework */; };
+		34DDF18E7255BBB1DD7EFB00 /* FinanceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0B1DFAC6001E745455702B /* FinanceSheet.swift */; };
+		397F00AE5CF45FE30B68C503 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE832151DE0837AE4B38880 /* Views.swift */; };
+		507F1ACE8B74B82D6CDBA15C /* FuelEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A90CED3B4F2ABE85F31AA67 /* FuelEntryView.swift */; };
+		50A573D37BC2A9008574C41F /* GoogleSheetsAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC6060D22E14645AABAC286 /* GoogleSheetsAccess.swift */; };
+		637C8A725FB1FA7ADC530305 /* ExpenseControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49A1BB60E880F97C280E416 /* ExpenseControl.swift */; };
+		67932E7069FF2C17300D9DA1 /* MaintenanceCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C3903681B3F9931D3488A4E /* MaintenanceCatalog.swift */; };
+		6AC327D15738E92601513BB2 /* CloudStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 150F25EC6ABDD8DD8B86F0FE /* CloudStore.swift */; };
+		763046CA9F1DD1603946CFD8 /* ExpenseCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F37DEDF7D687EF2F923B128 /* ExpenseCapture.swift */; };
+		7B155D447A6893544D472FC0 /* VehicleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27B9451D274A76F1246A871 /* VehicleCatalog.swift */; };
+		86E4B8118E93328F99586881 /* ChatGPTExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7180CD90DA6C4962CD2D6A /* ChatGPTExpense.swift */; };
+		879067E8C570A7E7A39D924E /* FinanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670EE3C81B8F4F4A22B407EB /* FinanceStore.swift */; };
+		8A3CA67973552AA1A5A1B57B /* MaintenanceTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293457050F87219E391A2D7A /* MaintenanceTemplateView.swift */; };
+		ABB94CFD18000C2B419B4AA7 /* NotificationPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75531D83E07CE177AE8C9194 /* NotificationPlanner.swift */; };
+		B0A8C0E21421805DE34D907C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FFA99602196A10CD782DB46 /* Foundation.framework */; };
+		C7CC4086D3A4AD320171B575 /* ExpenseVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610E033D76145FDB4E8ECD07 /* ExpenseVoice.swift */; };
+		C870E612C037C2A5B4798A70 /* ExpenseLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFE3998A15355E65789E139F /* ExpenseLocation.swift */; };
+		D34B56FEFFBBDA4D7B29F80E /* CaptureExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9CEB2DEE8DC929411BE25B /* CaptureExpenseIntent.swift */; };
+		E0EBD2A33AE84D7D0E9500DE /* ServiceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00B64DFA4BD6222EFFF2E8FB /* ServiceModels.swift */; };
+		F71BA385ABAEE73F53BED45B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43968D7CDD92D59328C6576B /* Assets.xcassets */; };
+		F9785C3DDFF8B646CB4525D9 /* CaptureExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9CEB2DEE8DC929411BE25B /* CaptureExpenseIntent.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		75AFD7F788DB2F3B3DC69362 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0718ACACFF2FCBC84B83D02D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4BE87E0ED02CCD6054A3402E;
+			remoteInfo = NidoControls;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B781660F0FACD161C079FC55 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				0432F8125B20099966434E1B /* NidoControls.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		0FBA75A6EE504E48ABBC52FA /* GoogleSheetsAccess.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GoogleSheetsAccess.swift; sourceTree = "<group>"; };
-		23B1CA545A41004BD1512864 /* VehicleCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VehicleCatalog.swift; sourceTree = "<group>"; };
-		25B306258542613F457949B4 /* MaintenanceCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceCatalog.swift; sourceTree = "<group>"; };
-		346F3520C2A23CF1EEDAE8B2 /* Nido.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nido.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4EF313C0D7041E23A849E71A /* FinanceSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceSheet.swift; sourceTree = "<group>"; };
-		526781110ACC01A95E568A49 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
-		670273DFD9A74F841BE5C59C /* FinanceStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceStore.swift; sourceTree = "<group>"; };
-		730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseVoice.swift; sourceTree = "<group>"; };
-		730F2B7A4A67A94B91AE7F80 /* ChatGPTExpense.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatGPTExpense.swift; sourceTree = "<group>"; };
-		8075ECD4F3A516753BE8E56F /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
-		822719C391DFB421310551C5 /* MaintenanceTemplateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceTemplateView.swift; sourceTree = "<group>"; };
-		851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseShortcut.swift; sourceTree = "<group>"; };
-		B5AFC47722568333C243C300 /* ExpenseLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseLocation.swift; sourceTree = "<group>"; };
-		B932856EC42AED7E30EA77D7 /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
-		BF16921D6A547B291E46BD9F /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
-		C06A8CF4EA789C6285A8FBF3 /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
-		C935C42DDC27DC98BCE6128B /* FuelLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelLocation.swift; sourceTree = "<group>"; };
-		C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = GoogleConfig.xcconfig; path = App/GoogleConfig.xcconfig; sourceTree = "<group>"; };
-		D4AB93AAED63A929AA70E442 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = App/Assets.xcassets; sourceTree = "<group>"; };
-		E09FC0B33674B140655D7D0C /* NotificationPlanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPlanner.swift; sourceTree = "<group>"; };
-		E235221586614BEFA0401672 /* NidoApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NidoApp.swift; sourceTree = "<group>"; };
-		F130BE228939DC19D491823C /* FinanceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceView.swift; sourceTree = "<group>"; };
-		F72B6123E2064A5E43F25789 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		F86C0E0B16F3A60DE6BC2392 /* CloudStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudStore.swift; sourceTree = "<group>"; };
+		00B64DFA4BD6222EFFF2E8FB /* ServiceModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceModels.swift; sourceTree = "<group>"; };
+		0207362748D4EDF866F5DE80 /* ExpenseShortcut.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseShortcut.swift; sourceTree = "<group>"; };
+		0B68C63A5540B514D01BDADF /* GoogleConfig.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = GoogleConfig.xcconfig; path = App/GoogleConfig.xcconfig; sourceTree = "<group>"; };
+		0E91D06B54AAD3C19ED082D6 /* NidoControls.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NidoControls.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		150F25EC6ABDD8DD8B86F0FE /* CloudStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudStore.swift; sourceTree = "<group>"; };
+		1FFA99602196A10CD782DB46 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		293457050F87219E391A2D7A /* MaintenanceTemplateView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceTemplateView.swift; sourceTree = "<group>"; };
+		2F52930CA6CF966A3CFE2366 /* Sharing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
+		43968D7CDD92D59328C6576B /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = App/Assets.xcassets; sourceTree = "<group>"; };
+		5A90CED3B4F2ABE85F31AA67 /* FuelEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelEntryView.swift; sourceTree = "<group>"; };
+		610E033D76145FDB4E8ECD07 /* ExpenseVoice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseVoice.swift; sourceTree = "<group>"; };
+		670EE3C81B8F4F4A22B407EB /* FinanceStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceStore.swift; sourceTree = "<group>"; };
+		6AE832151DE0837AE4B38880 /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
+		6F37DEDF7D687EF2F923B128 /* ExpenseCapture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseCapture.swift; sourceTree = "<group>"; };
+		75531D83E07CE177AE8C9194 /* NotificationPlanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationPlanner.swift; sourceTree = "<group>"; };
+		7AF0CAB6A54C2B5A85FF5D5A /* FinanceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceView.swift; sourceTree = "<group>"; };
+		7F91ADDA8910BFF99A71E124 /* Nido.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nido.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8010D2C597E373FB71C8A89B /* FuelLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FuelLocation.swift; sourceTree = "<group>"; };
+		9C3903681B3F9931D3488A4E /* MaintenanceCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MaintenanceCatalog.swift; sourceTree = "<group>"; };
+		AB9CEB2DEE8DC929411BE25B /* CaptureExpenseIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaptureExpenseIntent.swift; sourceTree = "<group>"; };
+		B2198F3EA995C6B44C77ABCF /* LocalSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalSnapshot.swift; sourceTree = "<group>"; };
+		B811E9240D05553F05880999 /* QuickExpenseVoiceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickExpenseVoiceView.swift; sourceTree = "<group>"; };
+		BA7180CD90DA6C4962CD2D6A /* ChatGPTExpense.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatGPTExpense.swift; sourceTree = "<group>"; };
+		BBC6060D22E14645AABAC286 /* GoogleSheetsAccess.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GoogleSheetsAccess.swift; sourceTree = "<group>"; };
+		C27B9451D274A76F1246A871 /* VehicleCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VehicleCatalog.swift; sourceTree = "<group>"; };
+		C49A1BB60E880F97C280E416 /* ExpenseControl.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseControl.swift; sourceTree = "<group>"; };
+		D3C2B4C80B30CA50112D64D9 /* NidoApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NidoApp.swift; sourceTree = "<group>"; };
+		EC0B1DFAC6001E745455702B /* FinanceSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinanceSheet.swift; sourceTree = "<group>"; };
+		EFE3998A15355E65789E139F /* ExpenseLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExpenseLocation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		74E36196B858ADF2C1CAFDA1 /* Frameworks */ = {
+		31916B8FBC7472B5E59C9B49 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5FBF15171B590250B606D163 /* Foundation.framework in Frameworks */,
+				2FAA71319224FCF0313358DE /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C3B9F11DB082FC54562247C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0A8C0E21421805DE34D907C /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0F391382E6A01E36155A2DCA = {
+		069A36C16C32D253C4E192A3 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				3CBFDA3F9C3668C2929ECFA0 /* Products */,
-				3D50C65E2E8C0B42DEA54A11 /* Frameworks */,
-				C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */,
-				8F5D4DBE81A9E3A94A408CAE /* App */,
-				781186EC9823E71A819EB646 /* Shared */,
-				D4AB93AAED63A929AA70E442 /* Assets.xcassets */,
-			);
-			sourceTree = "<group>";
-		};
-		34616C25501F93FE788353EC /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				F72B6123E2064A5E43F25789 /* Foundation.framework */,
-			);
-			name = iOS;
-			sourceTree = "<group>";
-		};
-		3CBFDA3F9C3668C2929ECFA0 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				346F3520C2A23CF1EEDAE8B2 /* Nido.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		3D50C65E2E8C0B42DEA54A11 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				34616C25501F93FE788353EC /* iOS */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		781186EC9823E71A819EB646 /* Shared */ = {
-			isa = PBXGroup;
-			children = (
-				C06A8CF4EA789C6285A8FBF3 /* ServiceModels.swift */,
-				4EF313C0D7041E23A849E71A /* FinanceSheet.swift */,
-			);
-			name = Shared;
-			path = Shared;
-			sourceTree = "<group>";
-		};
-		8F5D4DBE81A9E3A94A408CAE /* App */ = {
-			isa = PBXGroup;
-			children = (
-				F86C0E0B16F3A60DE6BC2392 /* CloudStore.swift */,
-				B5AFC47722568333C243C300 /* ExpenseLocation.swift */,
-				851272F0E7C6D25D93D936BA /* ExpenseShortcut.swift */,
-				730F2B7A4A67A94B91AE7F7F /* ExpenseVoice.swift */,
-				730F2B7A4A67A94B91AE7F80 /* ChatGPTExpense.swift */,
-				670273DFD9A74F841BE5C59C /* FinanceStore.swift */,
-				F130BE228939DC19D491823C /* FinanceView.swift */,
-				526781110ACC01A95E568A49 /* FuelEntryView.swift */,
-				C935C42DDC27DC98BCE6128B /* FuelLocation.swift */,
-				E235221586614BEFA0401672 /* NidoApp.swift */,
-				0FBA75A6EE504E48ABBC52FA /* GoogleSheetsAccess.swift */,
-				B932856EC42AED7E30EA77D7 /* LocalSnapshot.swift */,
-				25B306258542613F457949B4 /* MaintenanceCatalog.swift */,
-				822719C391DFB421310551C5 /* MaintenanceTemplateView.swift */,
-				E09FC0B33674B140655D7D0C /* NotificationPlanner.swift */,
-				BF16921D6A547B291E46BD9F /* Sharing.swift */,
-				23B1CA545A41004BD1512864 /* VehicleCatalog.swift */,
-				8075ECD4F3A516753BE8E56F /* Views.swift */,
+				BA7180CD90DA6C4962CD2D6A /* ChatGPTExpense.swift */,
+				150F25EC6ABDD8DD8B86F0FE /* CloudStore.swift */,
+				EFE3998A15355E65789E139F /* ExpenseLocation.swift */,
+				0207362748D4EDF866F5DE80 /* ExpenseShortcut.swift */,
+				610E033D76145FDB4E8ECD07 /* ExpenseVoice.swift */,
+				670EE3C81B8F4F4A22B407EB /* FinanceStore.swift */,
+				7AF0CAB6A54C2B5A85FF5D5A /* FinanceView.swift */,
+				5A90CED3B4F2ABE85F31AA67 /* FuelEntryView.swift */,
+				8010D2C597E373FB71C8A89B /* FuelLocation.swift */,
+				BBC6060D22E14645AABAC286 /* GoogleSheetsAccess.swift */,
+				B2198F3EA995C6B44C77ABCF /* LocalSnapshot.swift */,
+				9C3903681B3F9931D3488A4E /* MaintenanceCatalog.swift */,
+				293457050F87219E391A2D7A /* MaintenanceTemplateView.swift */,
+				D3C2B4C80B30CA50112D64D9 /* NidoApp.swift */,
+				75531D83E07CE177AE8C9194 /* NotificationPlanner.swift */,
+				B811E9240D05553F05880999 /* QuickExpenseVoiceView.swift */,
+				2F52930CA6CF966A3CFE2366 /* Sharing.swift */,
+				C27B9451D274A76F1246A871 /* VehicleCatalog.swift */,
+				6AE832151DE0837AE4B38880 /* Views.swift */,
 			);
 			name = App;
 			path = App;
 			sourceTree = "<group>";
 		};
+		0B0ACB98C5F31BCD3415A182 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7F91ADDA8910BFF99A71E124 /* Nido.app */,
+				0E91D06B54AAD3C19ED082D6 /* NidoControls.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2ED2B031CDBC7DC23F6C9FC0 /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				C49A1BB60E880F97C280E416 /* ExpenseControl.swift */,
+			);
+			name = Controls;
+			path = Controls;
+			sourceTree = "<group>";
+		};
+		4A3C39662669FF7F0C3C1AB8 = {
+			isa = PBXGroup;
+			children = (
+				0B0ACB98C5F31BCD3415A182 /* Products */,
+				A59BBA6BA440A8CD628C4D8C /* Frameworks */,
+				0B68C63A5540B514D01BDADF /* GoogleConfig.xcconfig */,
+				069A36C16C32D253C4E192A3 /* App */,
+				772E2B9C19E6419458064762 /* Shared */,
+				72BF128A5010C1C0F6681227 /* ControlShared */,
+				43968D7CDD92D59328C6576B /* Assets.xcassets */,
+				2ED2B031CDBC7DC23F6C9FC0 /* Controls */,
+			);
+			sourceTree = "<group>";
+		};
+		72BF128A5010C1C0F6681227 /* ControlShared */ = {
+			isa = PBXGroup;
+			children = (
+				AB9CEB2DEE8DC929411BE25B /* CaptureExpenseIntent.swift */,
+			);
+			name = ControlShared;
+			path = ControlShared;
+			sourceTree = "<group>";
+		};
+		772E2B9C19E6419458064762 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				6F37DEDF7D687EF2F923B128 /* ExpenseCapture.swift */,
+				EC0B1DFAC6001E745455702B /* FinanceSheet.swift */,
+				00B64DFA4BD6222EFFF2E8FB /* ServiceModels.swift */,
+			);
+			name = Shared;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		A59BBA6BA440A8CD628C4D8C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E05BBA1E314E4B841B890BB3 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E05BBA1E314E4B841B890BB3 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				1FFA99602196A10CD782DB46 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7B1B5905AAE29DCD87CD49CB /* Nido */ = {
+		4BE87E0ED02CCD6054A3402E /* NidoControls */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B6D279EA0A951B64467C677D /* Build configuration list for PBXNativeTarget "Nido" */;
+			buildConfigurationList = B36165BB9DD915149915146B /* Build configuration list for PBXNativeTarget "NidoControls" */;
 			buildPhases = (
-				B50D75002C4745BA213D7EDA /* Sources */,
-				74E36196B858ADF2C1CAFDA1 /* Frameworks */,
-				34870295419FCBAA19E8D1B0 /* Resources */,
+				8FE19503C52E79F54B2E77E4 /* Sources */,
+				9C3B9F11DB082FC54562247C /* Frameworks */,
+				D60C3AF1736F5E996947AFB0 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
+			name = NidoControls;
+			productName = NidoControls;
+			productReference = 0E91D06B54AAD3C19ED082D6 /* NidoControls.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		AEECD9CBC836C282D5B1EE3A /* Nido */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9ED4FCBC4906913CBF810684 /* Build configuration list for PBXNativeTarget "Nido" */;
+			buildPhases = (
+				7930512D2B5880B7483B5698 /* Sources */,
+				31916B8FBC7472B5E59C9B49 /* Frameworks */,
+				78760014BD0670C9038DA387 /* Resources */,
+				B781660F0FACD161C079FC55 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B3397FAC8AC0E933807C6EF3 /* PBXTargetDependency */,
+			);
 			name = Nido;
 			productName = Nido;
-			productReference = 346F3520C2A23CF1EEDAE8B2 /* Nido.app */;
+			productReference = 7F91ADDA8910BFF99A71E124 /* Nido.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		24FFCE1942C8855861A83C4A /* Project object */ = {
+		0718ACACFF2FCBC84B83D02D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
-					7B1B5905AAE29DCD87CD49CB = {
+					AEECD9CBC836C282D5B1EE3A = {
 						DevelopmentTeam = 3SRDN9365G;
 						SystemCapabilities = {
 							com.apple.iCloud = {
@@ -181,7 +267,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D8DC867191F49B48C538A9D1 /* Build configuration list for PBXProject "Nido" */;
+			buildConfigurationList = E4ED57783081B6A3FE693374 /* Build configuration list for PBXProject "Nido" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -189,63 +275,169 @@
 				en,
 				Base,
 			);
-			mainGroup = 0F391382E6A01E36155A2DCA;
+			mainGroup = 4A3C39662669FF7F0C3C1AB8;
 			minimizedProjectReferenceProxies = 0;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 3CBFDA3F9C3668C2929ECFA0 /* Products */;
+			productRefGroup = 0B0ACB98C5F31BCD3415A182 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7B1B5905AAE29DCD87CD49CB /* Nido */,
+				AEECD9CBC836C282D5B1EE3A /* Nido */,
+				4BE87E0ED02CCD6054A3402E /* NidoControls */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		34870295419FCBAA19E8D1B0 /* Resources */ = {
+		78760014BD0670C9038DA387 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46BE4281CD9DDA30ACC90D59 /* Assets.xcassets in Resources */,
+				F71BA385ABAEE73F53BED45B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D60C3AF1736F5E996947AFB0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B50D75002C4745BA213D7EDA /* Sources */ = {
+		7930512D2B5880B7483B5698 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B45D280A2563DDAD807C42F /* CloudStore.swift in Sources */,
-				ED399FC7357BC425EA79C632 /* ExpenseLocation.swift in Sources */,
-				12845DDFDAD5FD22479A83E6 /* ExpenseShortcut.swift in Sources */,
-				D6F029AFDF7A9D0B18899B2F /* ExpenseVoice.swift in Sources */,
-				D6F029AFDF7A9D0B18899B30 /* ChatGPTExpense.swift in Sources */,
-				BE3004A1B91D198F898F9610 /* FinanceStore.swift in Sources */,
-				AFA3960D3EBB18EB3A4F13F4 /* FinanceView.swift in Sources */,
-				D4D864CFA736F1FFAD1479CA /* FuelEntryView.swift in Sources */,
-				A45AAA03B6B53081E7F405AD /* FuelLocation.swift in Sources */,
-				EFD7575D73338525EC0620AE /* NidoApp.swift in Sources */,
-				7D8CB2AE9C18C987E1A4DBC8 /* GoogleSheetsAccess.swift in Sources */,
-				7C5C5CD1B7D3905164181650 /* LocalSnapshot.swift in Sources */,
-				808FF0E7289AF3ED312C679A /* MaintenanceCatalog.swift in Sources */,
-				A22B3F29C512B81D98CC04D5 /* MaintenanceTemplateView.swift in Sources */,
-				5897232DAD2F72FB2DACE795 /* NotificationPlanner.swift in Sources */,
-				4D885BCFBC8BAD3580E17A8C /* Sharing.swift in Sources */,
-				ADC1B1353846BB8ACDD2A134 /* VehicleCatalog.swift in Sources */,
-				4E4205F4B77DD91E8B8C8566 /* Views.swift in Sources */,
-				7581C4E110019A6155A70B2A /* ServiceModels.swift in Sources */,
-				BADEB00A50EBE8A9FB973E13 /* FinanceSheet.swift in Sources */,
+				86E4B8118E93328F99586881 /* ChatGPTExpense.swift in Sources */,
+				6AC327D15738E92601513BB2 /* CloudStore.swift in Sources */,
+				C870E612C037C2A5B4798A70 /* ExpenseLocation.swift in Sources */,
+				14155AD63815D00CBDED10D4 /* ExpenseShortcut.swift in Sources */,
+				C7CC4086D3A4AD320171B575 /* ExpenseVoice.swift in Sources */,
+				879067E8C570A7E7A39D924E /* FinanceStore.swift in Sources */,
+				299F52EA7BF47D752AEABDAC /* FinanceView.swift in Sources */,
+				507F1ACE8B74B82D6CDBA15C /* FuelEntryView.swift in Sources */,
+				13300BAD850EC51C6C1F39A8 /* FuelLocation.swift in Sources */,
+				50A573D37BC2A9008574C41F /* GoogleSheetsAccess.swift in Sources */,
+				015A89A95F891E1827EE6A7D /* LocalSnapshot.swift in Sources */,
+				67932E7069FF2C17300D9DA1 /* MaintenanceCatalog.swift in Sources */,
+				8A3CA67973552AA1A5A1B57B /* MaintenanceTemplateView.swift in Sources */,
+				0559E9256FB9C088E3F40C74 /* NidoApp.swift in Sources */,
+				ABB94CFD18000C2B419B4AA7 /* NotificationPlanner.swift in Sources */,
+				0F4903791F8BFDDDCB26F5D1 /* QuickExpenseVoiceView.swift in Sources */,
+				12C059936241437DB3DC0F0D /* Sharing.swift in Sources */,
+				7B155D447A6893544D472FC0 /* VehicleCatalog.swift in Sources */,
+				397F00AE5CF45FE30B68C503 /* Views.swift in Sources */,
+				763046CA9F1DD1603946CFD8 /* ExpenseCapture.swift in Sources */,
+				34DDF18E7255BBB1DD7EFB00 /* FinanceSheet.swift in Sources */,
+				E0EBD2A33AE84D7D0E9500DE /* ServiceModels.swift in Sources */,
+				D34B56FEFFBBDA4D7B29F80E /* CaptureExpenseIntent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8FE19503C52E79F54B2E77E4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				637C8A725FB1FA7ADC530305 /* ExpenseControl.swift in Sources */,
+				F9785C3DDFF8B646CB4525D9 /* CaptureExpenseIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		B3397FAC8AC0E933807C6EF3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NidoControls;
+			target = 4BE87E0ED02CCD6054A3402E /* NidoControls */;
+			targetProxy = 75AFD7F788DB2F3B3DC69362 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
-		531B22E876330EA17B5165D8 /* Debug */ = {
+		213DC09612F999D95576DAF3 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3SRDN9365G;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Controls/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.garage.controls;
+				PROVISIONING_PROFILE_SPECIFIER = "$(NIDO_CONTROLS_PROFILE_UUID)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		512CACF56CA45B8E64E55B17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		56262FEB675A167FCA3F78A8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0B68C63A5540B514D01BDADF /* GoogleConfig.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -268,9 +460,28 @@
 			};
 			name = Debug;
 		};
-		56883A5F442F52363237EBD0 /* Release */ = {
+		5AACF3B605ED42F3384737EF /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C9DE887B949B8E528B4A0EB3 /* GoogleConfig.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3SRDN9365G;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Controls/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.garage.controls;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		BB864B66DE83A768447305FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0B68C63A5540B514D01BDADF /* GoogleConfig.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -286,6 +497,7 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.schoren.garage;
 				PRODUCT_NAME = Nido;
+				PROVISIONING_PROFILE_SPECIFIER = "$(NIDO_APP_PROFILE_UUID)";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -295,7 +507,7 @@
 			};
 			name = Release;
 		};
-		B810C660B06B8492175C947F /* Debug */ = {
+		E3905567BAF2941B57DD4982 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -357,83 +569,37 @@
 			};
 			name = Debug;
 		};
-		BA10A5E43927ADA2C609615C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B6D279EA0A951B64467C677D /* Build configuration list for PBXNativeTarget "Nido" */ = {
+		9ED4FCBC4906913CBF810684 /* Build configuration list for PBXNativeTarget "Nido" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				56883A5F442F52363237EBD0 /* Release */,
-				531B22E876330EA17B5165D8 /* Debug */,
+				BB864B66DE83A768447305FF /* Release */,
+				56262FEB675A167FCA3F78A8 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D8DC867191F49B48C538A9D1 /* Build configuration list for PBXProject "Nido" */ = {
+		B36165BB9DD915149915146B /* Build configuration list for PBXNativeTarget "NidoControls" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B810C660B06B8492175C947F /* Debug */,
-				BA10A5E43927ADA2C609615C /* Release */,
+				213DC09612F999D95576DAF3 /* Release */,
+				5AACF3B605ED42F3384737EF /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E4ED57783081B6A3FE693374 /* Build configuration list for PBXProject "Nido" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E3905567BAF2941B57DD4982 /* Debug */,
+				512CACF56CA45B8E64E55B17 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 24FFCE1942C8855861A83C4A /* Project object */;
+	rootObject = 0718ACACFF2FCBC84B83D02D /* Project object */;
 }

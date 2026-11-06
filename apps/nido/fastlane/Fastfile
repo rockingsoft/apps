@@ -5,7 +5,7 @@ default_platform(:ios)
 platform :ios do
   desc "Archive Nido and upload the processed build to TestFlight"
   lane :testflight do
-    %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID GARAGE_ASC_KEY_ID GARAGE_ASC_ISSUER_ID GARAGE_ASC_KEY_P8_BASE64].each do |name|
+    %w[GARAGE_VERSION GARAGE_BUILD_NUMBER GARAGE_PROFILE_UUID GARAGE_CONTROLS_PROFILE_UUID GARAGE_ASC_KEY_ID GARAGE_ASC_ISSUER_ID GARAGE_ASC_KEY_P8_BASE64].each do |name|
       UI.user_error!("#{name} is required") if ENV[name].to_s.empty?
     end
 
@@ -26,12 +26,16 @@ platform :ios do
       export_options: {
         signingStyle: "manual",
         signingCertificate: "Apple Distribution",
-        provisioningProfiles: { "com.schoren.garage" => ENV.fetch("GARAGE_PROFILE_UUID") }
+        provisioningProfiles: {
+          "com.schoren.garage" => ENV.fetch("GARAGE_PROFILE_UUID"),
+          "com.schoren.garage.controls" => ENV.fetch("GARAGE_CONTROLS_PROFILE_UUID")
+        }
       },
       xcargs: [
         "DEVELOPMENT_TEAM=3SRDN9365G",
         "CODE_SIGN_STYLE=Manual",
-        "PROVISIONING_PROFILE_SPECIFIER=#{ENV.fetch('GARAGE_PROFILE_UUID')}",
+        "NIDO_APP_PROFILE_UUID=#{ENV.fetch('GARAGE_PROFILE_UUID')}",
+        "NIDO_CONTROLS_PROFILE_UUID=#{ENV.fetch('GARAGE_CONTROLS_PROFILE_UUID')}",
         "MARKETING_VERSION=#{ENV.fetch('GARAGE_VERSION')}",
         "CURRENT_PROJECT_VERSION=#{ENV.fetch('GARAGE_BUILD_NUMBER')}"
       ].join(" "),

@@ -1,15 +1,5 @@
 import Foundation
 
-struct FamilyExpense: Identifiable, Hashable, Codable {
-    let id: String
-    var date: Date
-    var category: String
-    var paidBy: String
-    var detail: String
-    var amount: Decimal
-    var row: Int?
-}
-
 @MainActor final class FinanceStore: ObservableObject {
     @Published private(set) var expenses: [FamilyExpense] = []
     @Published private(set) var budgets: [String: Decimal] = [:]
@@ -24,6 +14,7 @@ struct FamilyExpense: Identifiable, Hashable, Codable {
     @Published private(set) var loading = false
     @Published var message: String?
     @Published var signedIn = false
+    @Published private(set) var restored = false
     @Published private(set) var pendingCount = 0
 
     private let google = GoogleSheetsAccess()
@@ -52,6 +43,7 @@ struct FamilyExpense: Identifiable, Hashable, Codable {
     }
 
     func restore() async {
+        defer { restored = true }
         signedIn = await google.restore()
         if signedIn { await reload() }
     }
@@ -127,6 +119,10 @@ struct FamilyExpense: Identifiable, Hashable, Codable {
         } catch {
             message = "El gasto quedó pendiente en este iPhone: \(error.localizedDescription)"
         }
+    }
+
+    func isPending(_ expense: FamilyExpense) -> Bool {
+        pending.contains { $0.id == expense.id }
     }
 
     func update(_ original: FamilyExpense, with edited: FamilyExpense) async throws {

@@ -24,6 +24,12 @@ Los gastos se leen de B:G de **Registro de Gastos**. La columna G contiene el ID
 
 La pantalla de gastos tiene un botón **Hablar** que abre una pantalla de escucha. Al detectar silencio, Nido termina el dictado, espera la interpretación y vuelve al formulario con los campos completos para revisarlos antes de guardar. Apple Speech convierte voz a texto **en el iPhone** si el dispositivo admite el reconocimiento local en español. Nido envía solo el texto transcrito a OpenAI y recibe un JSON con importe, categoría, pagador, detalle y fecha. La clasificación usa el significado de todas las categorías del presupuesto, sin reglas para frases puntuales. Al decirle a Siri **Registra en Nido**, Siri pregunta qué gasto querés registrar y Nido abre el formulario después de interpretar la respuesta. Siri no permite pasar una descripción libre del gasto dentro de la misma frase que activa un App Shortcut.
 
+### Centro de control (iOS 18 o posterior)
+
+En el Centro de control, mantené presionado, tocá **Agregar un control**, buscá **Nido** y elegí **Dictar gasto**. Al tocarlo, iOS abre Nido directamente en la pantalla de escucha. Al terminar de hablar, interpreta el gasto y lo guarda automáticamente, sin abrir el formulario ni pedir que toques Guardar. Muestra el importe, categoría, pagador, detalle y fecha registrados. Si la escritura falla, informa que quedó guardado en el iPhone pendiente de sincronizar.
+
+Requiere haber conectado Google Sheets y ChatGPT desde Inicio. Usa tu nombre configurado si no mencionás quién pagó. Si faltan importe, categoría, pagador o detalle, o la fecha es inválida, pide volver a dictar el gasto. Podés cancelar antes del guardado. Las categorías y pagadores se validan contra el presupuesto de la planilla. El botón Hablar del formulario y el atajo de Siri conservan la revisión manual.
+
 Cada integrante conecta o desconecta su cuenta de ChatGPT desde el menú **⋯** de Inicio, junto a los controles de Google. Nido usa el flujo de Sign in with ChatGPT para proyectos locales: OAuth con PKCE y retorno a un servidor temporal en `127.0.0.1` dentro del iPhone. El token se verifica y se guarda en el llavero local del dispositivo; no se agrega a Infisical ni al repositorio. La app renueva el token, consulta los modelos disponibles de esa cuenta y llama a Responses API con `store: false` y `stream: true`. Este flujo consume el plan y sus límites de uso de cada cuenta. Requiere conexión a Internet y una cuenta elegible.
 
 ## Funciones
@@ -72,8 +78,11 @@ Las credenciales **exclusivas de Nido** se guardan en Infisical, proyecto `CLI G
 | `GARAGE_ASC_KEY_P8_BASE64` | Archivo `.p8` de esa API key codificado en base64, sin saltos de línea. |
 | `GARAGE_DISTRIBUTION_CERTIFICATE_P12_BASE64` | Certificado Apple Distribution y clave privada exclusivos, exportados como `.p12` y codificados en base64. |
 | `GARAGE_DISTRIBUTION_CERTIFICATE_PASSWORD` | Contraseña del `.p12`. |
+| `GARAGE_CONTROLS_APPSTORE_PROFILE_BASE64` | Perfil iOS App Store para `com.schoren.garage.controls`, asociado al mismo certificado de distribución. |
 | `GARAGE_APPSTORE_PROFILE_BASE64` | Perfil iOS App Store para `com.schoren.garage`, asociado a ese certificado, codificado en base64. |
 | `GARAGE_KEYCHAIN_PASSWORD` | Contraseña aleatoria para el llavero temporal del runner. |
+
+Para distribuir el control, registrar también el Bundle ID `com.schoren.garage.controls` en Apple Developer y agregar su perfil a Infisical como `GARAGE_CONTROLS_APPSTORE_PROFILE_BASE64`. El workflow instala y valida ambos perfiles y firma cada target con el suyo. La validación del control, el lanzamiento con la app cerrada/abierta, los permisos de micrófono y una escritura real requieren un iPhone firmado.
 
 El registro `Nido` en App Store Connect debe usar `com.schoren.garage`. El upload deja el build procesado en TestFlight y seleccionado en la versión de App Store; completar la ficha y enviarlo a Apple para revisión pública requiere los datos y capturas de la ficha.
 
